@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Akiron.Api/Akiron.Api.csproj" />
+    <Project Path="src/Akiron.Application/Akiron.Application.csproj" />
+    <Project Path="src/Akiron.Domain/Akiron.Domain.csproj" />
+    <Project Path="src/Akiron.Infrastructure/Akiron.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Akiron.Tests/Akiron.Tests.csproj" />
+  </Folder>
+</Solution>
