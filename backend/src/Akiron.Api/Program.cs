@@ -7,7 +7,9 @@ using Akiron.BuildingBlocks.Persistence;
 using Akiron.BuildingBlocks.Tenancy;
 using Akiron.BuildingBlocks.Web;
 using Akiron.Contracts.Identity;
+using Akiron.Modules.Files;
 using Akiron.Modules.Identity;
+using Akiron.Modules.Notifications;
 using Akiron.Modules.Reference;
 using Akiron.Modules.Timeline;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -29,9 +31,9 @@ builder.Services.AddSerilog((services, logger) => logger
         formatProvider: System.Globalization.CultureInfo.InvariantCulture));
 
 // The explicit module list is the product's composition: adding a module is one line here (ADR-0001).
-IModule[] modules = [new IdentityModule(), new TimelineModule(), new ReferenceModule()];
+IModule[] modules = [new IdentityModule(), new TimelineModule(), new ReferenceModule(), new FilesModule(), new NotificationsModule()];
 
-builder.Services.AddBuildingBlocks(modules);
+builder.Services.AddBuildingBlocks(modules, builder.Configuration);
 builder.Services.AddOutbox(builder.Configuration, typeof(WorkspaceCreated).Assembly);
 foreach (var module in modules)
 {

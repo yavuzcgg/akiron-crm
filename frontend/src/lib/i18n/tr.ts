@@ -134,6 +134,33 @@ export const tr = {
   "error.identity.password.too_short": "Parola en az {minLength} karakter olmalı.",
   "error.timeline.subject.unknown": "Bu kayıt için akış bulunamadı.",
   "error.timeline.cursor.invalid": "Liste yenilendi, baştan yükleyin.",
+
+  "notifications.title": "Bildirimler",
+  "notifications.empty": "Yeni bildirim yok.",
+  "notifications.markAllRead": "Tümünü okundu işaretle",
+  "notifications.open": "Bildirimleri aç",
+  "notifications.invitationAccepted": "{member} davetinizi kabul etti ve ekibe {role} olarak katıldı.",
+  "notifications.unknown": "Yeni bir bildiriminiz var.",
+
+  "files.title": "Dosyalar",
+  "files.description": "Çalışma alanına eklenen dosyalar. En fazla 25 MB.",
+  "files.upload": "Dosya yükle",
+  "files.uploading": "Yükleniyor…",
+  "files.empty": "Henüz dosya yok.",
+  "files.delete": "Kaldır",
+  "files.deleted": "Dosya kaldırıldı.",
+  "files.uploaded": "{name} yüklendi.",
+
+  "timeline.entry.fileUploaded": "{actor}, {fileName} dosyasını yükledi",
+
+  "error.files.subject.unknown": "Dosya bu kayda eklenemez.",
+  "error.files.file.missing": "Bir dosya seçin.",
+  "error.files.file.empty": "Dosya boş.",
+  "error.files.file.too_large": "Dosya çok büyük (en fazla 25 MB).",
+  "error.files.file.type_refused": "Çalıştırılabilir dosyalar ve betikler kabul edilmiyor.",
+  "error.files.file.not_found": "Dosya bulunamadı.",
+  "error.notifications.notification.not_found": "Bildirim bulunamadı.",
+  "error.reference.exchange_rates.not_found": "Bu tarih için kur bulunamadı.",
 } as const;
 
 export type TranslationKey = keyof typeof tr;

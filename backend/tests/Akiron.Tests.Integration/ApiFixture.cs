@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Testcontainers.Minio;
 using Testcontainers.PostgreSql;
 
 [assembly: AssemblyFixture(typeof(Akiron.Tests.Integration.ApiFixture))]
@@ -23,6 +24,7 @@ public sealed partial class ApiFixture : IAsyncLifetime
     private readonly CapturingEmailSender _emails = new();
 
     private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgres:17").Build();
+    private readonly MinioContainer _minio = new MinioBuilder("cgr.dev/chainguard/minio:latest").Build();
     private WebApplicationFactory<Program>? _factory;
 
     public IServiceProvider Services => Factory.Services;
@@ -36,9 +38,12 @@ public sealed partial class ApiFixture : IAsyncLifetime
 
     public AsyncServiceScope CreateScope() => Services.CreateAsyncScope();
 
+    /// <summary>The in-memory server, for clients that are not HttpClient (SignalR).</summary>
+    public Microsoft.AspNetCore.TestHost.TestServer Server => Factory.Server;
+
     public async ValueTask InitializeAsync()
     {
-        await _postgres.StartAsync();
+        await Task.WhenAll(_postgres.StartAsync(), _minio.StartAsync());
 
         _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
@@ -55,6 +60,10 @@ public sealed partial class ApiFixture : IAsyncLifetime
             // Tests deliver the outbox themselves (DeliverOutboxAsync) so they never race a timer.
             builder.UseSetting("Outbox:Enabled", "false");
             builder.UseSetting("ExchangeRates:SyncEnabled", "false");
+            builder.UseSetting("Storage:S3:ServiceUrl", _minio.GetConnectionString());
+            builder.UseSetting("Storage:S3:AccessKey", _minio.GetAccessKey());
+            builder.UseSetting("Storage:S3:SecretKey", _minio.GetSecretKey());
+            builder.UseSetting("Storage:S3:Bucket", "akiron-test");
 
             builder.ConfigureServices(services =>
             {
@@ -109,6 +118,7 @@ public sealed partial class ApiFixture : IAsyncLifetime
         }
 
         await _postgres.DisposeAsync();
+        await _minio.DisposeAsync();
     }
 }
 

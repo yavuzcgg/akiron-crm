@@ -6,7 +6,7 @@ Ajanslar için iş yönetimi ve ön muhasebe platformu — Türkiye'ye göre.
 
 **Stack:** ASP.NET Core 10 (modüler monolit) · Next.js · PostgreSQL
 
-> Durum: Faz 1 / Sprint 1 tamamlandı — modüler iskelet, çok kiracılı veri katmanı, kimlik doğrulama (kayıt, giriş, oturum yenileme, izinler) ve uygulama kabuğu. Üretime hazır değildir.
+> Durum: Faz 1 / Sprint 1–2 tamamlandı — modüler iskelet, çok kiracılı veri katmanı, kimlik doğrulama ve davet, activity timeline, denetim izi, dosya deposu, bildirimler (anlık), e-posta, TCMB kurları. Üretime hazır değildir.
 
 ## Belgeler
 
@@ -31,8 +31,8 @@ docs/       Plan, modül kataloğu, entegrasyonlar, ADR'ler
 Gereksinimler: .NET SDK 10, Node.js 22+, Docker
 
 ```bash
-# Veritabanı (127.0.0.1:5434)
-docker compose up -d postgres
+# Postgres (5434), MinIO dosya deposu (9010, konsol 9011), Mailpit e-posta kutusu (http://localhost:8026)
+docker compose up -d
 
 # Backend (http://localhost:5080 — API belgesi /scalar); ilk açılışta migration'lar uygulanır
 dotnet run --project backend/src/Akiron.Api

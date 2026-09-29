@@ -102,7 +102,15 @@ Domain event + outbox + Hangfire (timeline bunun üstüne kurulur), activity tim
 - Belge numaralama: kiracı × seri × yıl sayacı, rollback boşluk bırakmaz (`TKL-2026-0001`).
 - 45 backend testi (mimari + entegrasyon), gerçek akış Next üzerinden elle doğrulandı.
 
-**İkinci yarı (kalan):** onay motoru iskeleti, özel alanlar, dosya deposu (MinIO/S3), denetim `changes` tablosu, bildirim merkezi (SignalR + gerçek e-posta sağlayıcısı), para birimi + TCMB kur işi (Hangfire ile ilk zamanlanmış iş).
+**İkinci yarı (29 Eyl 2026): tamamlandı.**
+
+- Denetim izi: `IAuditable` varlıklarda alan bazında eski/yeni değer, aktör ve zaman; modül şemasında `audit_changes`; `[AuditIgnore]` ile sır/gürültü hariç.
+- Para ve kur: `Money`/`Currency`; Reference modülü (ortak veri), TCMB bülteni ayrıştırıcı (birim normalizasyonu), saatlik idempotent senkron, `IExchangeRates` sözleşmesi. Hangfire'a gerek kalmadı: hosted service yeterli.
+- Dosya deposu: Files modülü, S3 API (yerelde MinIO — Docker Hub imajı kalktığı için Chainguard imajı), 25 MB sınırı, çalıştırılabilir dosya reddi, her zaman `attachment` indirme, timeline olayı.
+- Bildirim merkezi: Notifications modülü, kişiye özel bildirim, SignalR ile anlık iletim (kiracı × kullanıcı grubu), zil menüsü; SMTP e-posta (MailKit, yerelde Mailpit).
+- İlk birim test projesi; toplam 71 backend testi. Tüm akış (dosya, gerçek e-posta, bildirim, gerçek TCMB kuru) Next üzerinden elle doğrulandı.
+
+**Faz 2'ye kaydırılanlar (ilk kullanıcılarıyla birlikte yapılacak):** onay motoru (izin talebi), özel alanlar (Cari kartı). Kullanıcısı olmadan tasarlanırsa yanlış soyutlanır.
 
 ### Sprint 3
 `Entitlement` + modül bayrakları + `RequireModule()`, ayarlar sayfası, docker-compose prod profili (api, web, postgres, minio), yedek/geri yükleme scripti, Playwright kritik akış, güvenlik temelleri (rate limit, CORS, secrets doğrulama), Faz 2 veri modeli ADR'leri.

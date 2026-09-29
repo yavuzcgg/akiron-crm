@@ -1,4 +1,4 @@
-import { Building2, CircleDot, MailPlus, StickyNote, UserPlus, type LucideIcon } from "lucide-react";
+import { Building2, CircleDot, FileUp, MailPlus, StickyNote, UserPlus, type LucideIcon } from "lucide-react";
 import { roleLabel } from "@/features/identity/role-name";
 import type { TranslationKey } from "@/lib/i18n";
 import type { TranslationParams } from "@/lib/i18n/translate";
@@ -38,6 +38,11 @@ const entryTypes: Record<string, EntryType> = {
     tone: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
     headline: (payload, actor, t) =>
       t("timeline.entry.invitationSent", { actor, email: text(payload.email), role: roleLabel(text(payload.role), t) }),
+  },
+  "files.file.uploaded": {
+    icon: FileUp,
+    tone: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
+    headline: (payload, actor, t) => t("timeline.entry.fileUploaded", { actor, fileName: text(payload.fileName) }),
   },
   "timeline.note": {
     icon: StickyNote,

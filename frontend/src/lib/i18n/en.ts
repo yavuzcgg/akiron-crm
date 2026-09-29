@@ -130,4 +130,31 @@ export const en: Dictionary = {
   "error.identity.password.too_short": "The password must be at least {minLength} characters.",
   "error.timeline.subject.unknown": "No activity stream for this record.",
   "error.timeline.cursor.invalid": "The list changed; load it again from the top.",
+
+  "notifications.title": "Notifications",
+  "notifications.empty": "No new notifications.",
+  "notifications.markAllRead": "Mark all as read",
+  "notifications.open": "Open notifications",
+  "notifications.invitationAccepted": "{member} accepted your invitation and joined as {role}.",
+  "notifications.unknown": "You have a new notification.",
+
+  "files.title": "Files",
+  "files.description": "Files added to the workspace. Up to 25 MB each.",
+  "files.upload": "Upload file",
+  "files.uploading": "Uploading…",
+  "files.empty": "No files yet.",
+  "files.delete": "Remove",
+  "files.deleted": "File removed.",
+  "files.uploaded": "{name} uploaded.",
+
+  "timeline.entry.fileUploaded": "{actor} uploaded {fileName}",
+
+  "error.files.subject.unknown": "Files cannot be attached to this record.",
+  "error.files.file.missing": "Choose a file.",
+  "error.files.file.empty": "The file is empty.",
+  "error.files.file.too_large": "The file is too large (25 MB at most).",
+  "error.files.file.type_refused": "Executables and scripts are not accepted.",
+  "error.files.file.not_found": "File not found.",
+  "error.notifications.notification.not_found": "Notification not found.",
+  "error.reference.exchange_rates.not_found": "No exchange rate for that date.",
 };

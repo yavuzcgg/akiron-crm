@@ -8,6 +8,10 @@ export const permissions = {
     membersRead: "identity.members.read",
     membersManage: "identity.members.manage",
   },
+  files: {
+    read: "files.read",
+    write: "files.write",
+  },
   timeline: {
     read: "timeline.read",
     notesWrite: "timeline.notes.write",

@@ -1,0 +1,139 @@
+using System.Text.Json;
+using Akiron.BuildingBlocks.Domain;
+using Akiron.BuildingBlocks.Events;
+using Akiron.BuildingBlocks.Security;
+using Akiron.BuildingBlocks.Web;
+using Akiron.Contracts.Identity;
+using Akiron.Modules.Notifications.Domain;
+using Akiron.Modules.Notifications.Persistence;
+using Akiron.Modules.Notifications.Realtime;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
+
+namespace Akiron.Modules.Notifications.Features;
+
+internal sealed record NotificationResponse(Guid Id, string Type, JsonElement Payload, DateTimeOffset CreatedAt, DateTimeOffset? ReadAt);
+
+internal sealed record NotificationListResponse(IReadOnlyList<NotificationResponse> Items, int UnreadCount);
+
+/// <summary>Stores a notification once and pushes it to the recipient's open tabs.</summary>
+internal sealed class NotificationSender(NotificationsDbContext db, IHubContext<NotificationHub> hub)
+{
+    public async Task SendAsync(Notification notification, CancellationToken cancellationToken)
+    {
+        if (await db.Notifications.AnyAsync(existing => existing.IdempotencyKey == notification.IdempotencyKey, cancellationToken))
+        {
+            return;
+        }
+
+        db.Notifications.Add(notification);
+        try
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException
+        {
+            SqlState: PostgresErrorCodes.UniqueViolation,
+            ConstraintName: NotificationConfiguration.IdempotencyUnique,
+        })
+        {
+            db.ChangeTracker.Clear();
+            return;
+        }
+
+        // Best effort: the row is the truth, the push only saves a refresh.
+        await hub.Clients.Group(NotificationHub.GroupOf(notification.TenantId, notification.RecipientUserId))
+            .SendAsync(NotificationHub.NotificationMethod, NotificationEndpoints.ToResponse(notification), cancellationToken);
+    }
+}
+
+/// <summary>Tells the person who sent an invitation that it was accepted.</summary>
+internal sealed class MemberJoinedNotification(NotificationSender sender) : IIntegrationEventConsumer<MemberJoined>
+{
+    public const string Type = "identity.invitation.accepted";
+
+    public Task HandleAsync(MemberJoined integrationEvent, CancellationToken cancellationToken)
+    {
+        if (integrationEvent.InvitedByUserId is not { } inviter || inviter == integrationEvent.UserId)
+        {
+            return Task.CompletedTask;
+        }
+
+        var payload = JsonSerializer.Serialize(new { memberName = integrationEvent.FullName, role = integrationEvent.Role }, JsonSerializerOptions.Web);
+        return sender.SendAsync(
+            Notification.Create(integrationEvent.TenantId, inviter, Type, payload, integrationEvent.EventId, integrationEvent.OccurredAt),
+            cancellationToken);
+    }
+}
+
+internal static class NotificationEndpoints
+{
+    private const int MaxItems = 50;
+
+    public static void Map(IEndpointRouteBuilder endpoints)
+    {
+        // A person's own inbox: every signed-in member has one, so no extra permission is needed.
+        endpoints.MapGet("/", async (bool? unreadOnly, NotificationsDbContext db, ICurrentUser currentUser, CancellationToken cancellationToken) =>
+            {
+                var me = RecipientOf(currentUser);
+                var mine = db.Notifications.Where(notification => notification.RecipientUserId == me);
+                var items = await mine
+                    .Where(notification => unreadOnly != true || notification.ReadAt == null)
+                    .OrderByDescending(notification => notification.CreatedAt)
+                    .Take(MaxItems)
+                    .ToListAsync(cancellationToken);
+                var unread = await mine.CountAsync(notification => notification.ReadAt == null, cancellationToken);
+
+                return Results.Ok(new NotificationListResponse(items.Select(ToResponse).ToList(), unread));
+            })
+            .RequireAuthorization()
+            .Produces<NotificationListResponse>()
+            .WithSummary("The signed-in person's newest notifications and unread count");
+
+        endpoints.MapPost("/{id:guid}/read", async (Guid id, NotificationsDbContext db, ICurrentUser currentUser, TimeProvider timeProvider, CancellationToken cancellationToken) =>
+            {
+                var me = RecipientOf(currentUser);
+                var notificationId = NotificationId.From(id);
+                var notification = await db.Notifications
+                    .FirstOrDefaultAsync(candidate => candidate.Id == notificationId && candidate.RecipientUserId == me, cancellationToken);
+                if (notification is null)
+                {
+                    return Error.NotFound("notifications.notification.not_found", "No such notification for you.").ToProblem();
+                }
+
+                notification.MarkRead(timeProvider.GetUtcNow());
+                await db.SaveChangesAsync(cancellationToken);
+                return Results.NoContent();
+            })
+            .RequireAuthorization()
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithSummary("Mark one notification read");
+
+        endpoints.MapPost("/read-all", async (NotificationsDbContext db, ICurrentUser currentUser, TimeProvider timeProvider, CancellationToken cancellationToken) =>
+            {
+                var me = RecipientOf(currentUser);
+                var now = timeProvider.GetUtcNow();
+                await db.Notifications
+                    .Where(notification => notification.RecipientUserId == me && notification.ReadAt == null)
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(notification => notification.ReadAt, now), cancellationToken);
+                return Results.NoContent();
+            })
+            .RequireAuthorization()
+            .Produces(StatusCodes.Status204NoContent)
+            .WithSummary("Mark all of the signed-in person's notifications read");
+    }
+
+    internal static NotificationResponse ToResponse(Notification notification)
+    {
+        using var payload = JsonDocument.Parse(notification.Payload);
+        return new NotificationResponse(notification.Id.Value, notification.Type, payload.RootElement.Clone(), notification.CreatedAt, notification.ReadAt);
+    }
+
+    private static Guid RecipientOf(ICurrentUser currentUser) =>
+        currentUser.UserId?.Value ?? throw new InvalidOperationException("Notifications need a signed-in user.");
+}

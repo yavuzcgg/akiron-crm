@@ -1,0 +1,155 @@
+"use client";
+
+import { HubConnectionBuilder, HubConnectionState, LogLevel } from "@microsoft/signalr";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Bell, UserPlus, type LucideIcon } from "lucide-react";
+import { useEffect } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { roleLabel } from "@/features/identity/role-name";
+import { api, type Schemas } from "@/lib/api/client";
+import { unwrap } from "@/lib/api/errors";
+import { formatDateTime } from "@/lib/format";
+import { useI18n, type TranslationKey } from "@/lib/i18n";
+import type { TranslationParams } from "@/lib/i18n/translate";
+import { cn } from "@/lib/utils";
+
+type NotificationItem = Schemas["NotificationResponse"];
+type Translate = (key: TranslationKey, params?: TranslationParams) => string;
+
+const notificationsKey = ["notifications"] as const;
+
+const text = (value: unknown) => (typeof value === "string" ? value : "");
+
+/** How each notification type reads; unknown types (a newer server) fall back to a generic line. */
+const notificationTypes: Record<string, { icon: LucideIcon; message: (payload: Record<string, unknown>, t: Translate) => string }> = {
+  "identity.invitation.accepted": {
+    icon: UserPlus,
+    message: (payload, t) =>
+      t("notifications.invitationAccepted", { member: text(payload.memberName), role: roleLabel(text(payload.role), t) }),
+  },
+};
+
+function describe(item: NotificationItem, t: Translate) {
+  const type = notificationTypes[item.type];
+  return {
+    icon: type?.icon ?? Bell,
+    message: type ? type.message((item.payload ?? {}) as Record<string, unknown>, t) : t("notifications.unknown"),
+  };
+}
+
+export function useNotifications() {
+  return useQuery({
+    queryKey: notificationsKey,
+    queryFn: async () => unwrap(await api.GET("/api/v1/notifications")),
+    // SignalR pushes new ones; this only catches up after a lost connection.
+    refetchInterval: 120_000,
+  });
+}
+
+/**
+ * Keeps one SignalR connection open while the app shell is mounted. New notifications refresh the
+ * bell and show a toast; if the connection cannot be made, polling above still works.
+ */
+export function useRealtimeNotifications(enabled: boolean) {
+  const queryClient = useQueryClient();
+  const { t } = useI18n();
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const connection = new HubConnectionBuilder()
+      .withUrl("/api/v1/notifications/hub", { withCredentials: true })
+      .withAutomaticReconnect()
+      .configureLogging(LogLevel.Warning)
+      .build();
+
+    connection.on("notification", (item: NotificationItem) => {
+      void queryClient.invalidateQueries({ queryKey: notificationsKey });
+      void queryClient.invalidateQueries({ queryKey: ["timeline"] });
+      toast.info(describe(item, t).message);
+    });
+
+    connection.start().catch(() => {
+      // Offline or blocked (proxies that drop long polling); the bell keeps polling.
+    });
+
+    return () => {
+      if (connection.state !== HubConnectionState.Disconnected) void connection.stop();
+    };
+    // The translator only formats the toast; reconnecting when the language changes is not needed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, queryClient]);
+}
+
+export function NotificationBell() {
+  const { t } = useI18n();
+  const queryClient = useQueryClient();
+  const notifications = useNotifications();
+  const unread = notifications.data?.unreadCount ?? 0;
+
+  const markAllRead = useMutation({
+    mutationFn: async () => {
+      unwrap(await api.POST("/api/v1/notifications/read-all"));
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: notificationsKey }),
+  });
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button variant="ghost" size="icon" className="relative" aria-label={t("notifications.open")}>
+            <Bell />
+            {unread > 0 ? (
+              <span className="bg-destructive absolute -top-0.5 -right-0.5 flex min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold text-white">
+                {unread > 9 ? "9+" : unread}
+              </span>
+            ) : null}
+          </Button>
+        }
+      />
+      <DropdownMenuContent align="end" className="w-80">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="flex items-center justify-between">
+            <span className="text-foreground font-medium">{t("notifications.title")}</span>
+            {unread > 0 ? (
+              <Button variant="link" size="xs" onClick={() => markAllRead.mutate()} disabled={markAllRead.isPending}>
+                {t("notifications.markAllRead")}
+              </Button>
+            ) : null}
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        {notifications.data?.items.length ? (
+          <ul className="max-h-96 overflow-y-auto">
+            {notifications.data.items.map((item) => {
+              const { icon: Icon, message } = describe(item, t);
+              return (
+                <li key={item.id} className={cn("flex gap-3 px-2 py-2.5 text-sm", !item.readAt && "bg-primary/5")}>
+                  <Icon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+                  <div className="grid gap-0.5">
+                    <p>{message}</p>
+                    <time className="text-muted-foreground text-xs" dateTime={item.createdAt}>
+                      {formatDateTime(item.createdAt)}
+                    </time>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="text-muted-foreground px-2 py-6 text-center text-sm">{t("notifications.empty")}</p>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}

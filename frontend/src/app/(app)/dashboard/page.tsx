@@ -3,6 +3,7 @@
 import { BriefcaseBusiness, FileText, UsersRound, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileList } from "@/features/files/file-list";
 import { useSession } from "@/features/identity/session";
 import { TimelineFeed } from "@/features/timeline/timeline-feed";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
@@ -49,6 +50,21 @@ export default function DashboardPage() {
         )}
 
         <section className="grid content-start gap-3">
+          {hasPermission(session.permissions, permissions.files.read) ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">{t("files.title")}</CardTitle>
+                <CardDescription>{t("files.description")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FileList
+                  subjectType="workspace"
+                  subjectId={session.tenantId}
+                  canWrite={hasPermission(session.permissions, permissions.files.write)}
+                />
+              </CardContent>
+            </Card>
+          ) : null}
           <h2 className="text-muted-foreground text-sm font-medium">{t("dashboard.next.title")}</h2>
           {upcoming.map((item) => (
             <Card key={item.label} className="border-dashed">

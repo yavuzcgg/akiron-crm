@@ -31,7 +31,7 @@ Talk to the owner in Turkish. Write code, database columns, commits and ADRs in 
 - A module is not done until its business events are projected onto the activity timeline with a typed entry and TR/EN templates (ADR-0009).
 - `docs/vendor/` holds licensed reference material (Logo data dictionary) and is git-ignored; never commit or quote it at length.
 - Dates: UTC in the database; `DateOnly` for calendar dates (invoice date, due date).
-- Every endpoint declares `.RequirePermission(…)` unless it is in the `Public` group, or serves global reference data (exchange rates, code lists) to any signed-in user with `.RequireAuthorization()`.
+- Every endpoint declares `.RequirePermission(…)` unless it is in the `Public` group, serves global reference data (exchange rates, code lists), or returns the caller's own data (their notifications); those use `.RequireAuthorization()`.
 - Auditable entities (`IAuditable`) get a field-level trail in their module's `audit_changes` automatically; mark secrets and per-request noise with `[AuditIgnore]`.
 - Money is `Money`/`Currency` from BuildingBlocks; rates come from `IExchangeRates` (Contracts), never from a module's own HTTP call.
 - Migrations: `dotnet ef migrations add <Name> --project src/Modules/<Module> --startup-project src/Akiron.Api --context <Module>DbContext`. Never `EnsureCreated`.
@@ -49,10 +49,10 @@ Talk to the owner in Turkish. Write code, database columns, commits and ADRs in 
 
 ## Commands
 
-Local ports avoid the other Akiron projects on this machine: Postgres 5434, API 5080, web 3100.
+Local ports avoid the other Akiron projects on this machine: Postgres 5434, API 5080, web 3100, MinIO 9010 (console 9011, akiron / akiron_dev_minio), Mailpit SMTP 1026 (inbox at http://localhost:8026).
 
 ```bash
-docker compose up -d postgres                          # Postgres 17 on 127.0.0.1:5434
+docker compose up -d                                   # Postgres 17, MinIO, Mailpit
 dotnet build backend/Akiron.slnx                       # warnings are errors
 dotnet test --solution backend/Akiron.slnx             # needs Docker for Testcontainers
 dotnet format backend/Akiron.slnx --verify-no-changes

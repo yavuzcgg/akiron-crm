@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { UserMenu } from "@/components/user-menu";
 import { useSession } from "@/features/identity/session";
+import { NotificationBell, useRealtimeNotifications } from "@/features/notifications/notifications";
 import { sessionExpiredEvent } from "@/lib/api/client";
 import { useI18n } from "@/lib/i18n";
 
@@ -23,6 +24,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const queryClient = useQueryClient();
   const session = useSession();
+  useRealtimeNotifications(!!session.data);
 
   useEffect(() => {
     const onExpired = () => {
@@ -61,6 +63,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <div className="flex-1" />
+          <NotificationBell />
           <UserMenu session={session.data} />
         </header>
         <main className="flex-1 p-4 md:p-6">{children}</main>

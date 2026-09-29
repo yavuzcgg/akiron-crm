@@ -9,6 +9,8 @@
     <ProjectReference Include="..\Modules\Identity\Akiron.Modules.Identity.csproj" />
     <ProjectReference Include="..\Modules\Timeline\Akiron.Modules.Timeline.csproj" />
     <ProjectReference Include="..\Modules\Reference\Akiron.Modules.Reference.csproj" />
+    <ProjectReference Include="..\Modules\Files\Akiron.Modules.Files.csproj" />
+    <ProjectReference Include="..\Modules\Notifications\Akiron.Modules.Notifications.csproj" />
   </ItemGroup>
 
   <ItemGroup>

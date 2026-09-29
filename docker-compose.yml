@@ -20,5 +20,28 @@ services:
       timeout: 5s
       retries: 10
 
+  minio:
+    # Docker Hub minio/minio is no longer published; Chainguard ships the same server.
+    image: cgr.dev/chainguard/minio:latest
+    container_name: akiron-crm-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: akiron
+      MINIO_ROOT_PASSWORD: akiron_dev_minio
+    ports:
+      - "127.0.0.1:9010:9000"
+      - "127.0.0.1:9011:9001"
+    volumes:
+      - miniodata:/data
+
+  mailpit:
+    # Catches every e-mail the API sends; read them at http://localhost:8026.
+    image: axllent/mailpit:latest
+    container_name: akiron-crm-mailpit
+    ports:
+      - "127.0.0.1:1026:1025"
+      - "127.0.0.1:8026:8025"
+
 volumes:
   pgdata:
+  miniodata:

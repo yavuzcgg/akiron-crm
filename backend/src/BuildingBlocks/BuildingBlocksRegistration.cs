@@ -15,7 +15,7 @@ namespace Akiron.BuildingBlocks;
 public static class BuildingBlocksRegistration
 {
     /// <summary>Cross-cutting services every module relies on. Modules add their own afterwards.</summary>
-    public static IServiceCollection AddBuildingBlocks(this IServiceCollection services, IReadOnlyCollection<IModule> modules)
+    public static IServiceCollection AddBuildingBlocks(this IServiceCollection services, IReadOnlyCollection<IModule> modules, Microsoft.Extensions.Configuration.IConfiguration configuration)
     {
         services.AddSingleton(TimeProvider.System);
         services.AddHttpContextAccessor();
@@ -23,7 +23,18 @@ public static class BuildingBlocksRegistration
         services.AddScoped<ITenantContext, TenantContext>();
         services.AddScoped<ICurrentUser, HttpCurrentUser>();
         services.AddScoped<TenantAuditInterceptor>();
-        services.AddSingleton<Email.IEmailSender, Email.LoggingEmailSender>();
+
+        // A configured SMTP relay sends for real; without one, e-mails are written to the log.
+        var smtp = configuration.GetSection(Email.SmtpOptions.SectionName);
+        services.Configure<Email.SmtpOptions>(smtp);
+        if (string.IsNullOrWhiteSpace(smtp["Host"]))
+        {
+            services.AddSingleton<Email.IEmailSender, Email.LoggingEmailSender>();
+        }
+        else
+        {
+            services.AddSingleton<Email.IEmailSender, Email.SmtpEmailSender>();
+        }
 
         foreach (var module in modules)
         {
