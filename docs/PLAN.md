@@ -5,49 +5,61 @@
 
 ## Ne yapıyoruz
 
-Bir ajans, müşteriyi kazandığı andan parayı tahsil ettiği ana kadar her şeyi tek yerden yürütür:
+**Müşteriden işe, işten tahsilata kadar şirket operasyonlarını tek yerde yöneten platform.**
 
-**Müşteri → Teklif → İş Emri → Zaman/Revizyon → Fatura → Tahsilat**
-
-Üstüne WhatsApp/e-posta iletişimi, müşteri portalı ve içerik takvimi. Klasik CRM değil; Türkiye'ye göre tasarlanmış **ajans odaklı iş yönetimi + ön muhasebe** platformu (Paraşüt + Bitrix24 + Trello kesişimi). Ajanslardan sonra genel KOBİ'ye açılır (stok, satın alma, araç/demirbaş, Logo/Bay.t).
+Müşteri → Teklif → Sözleşme → İş Emri → Zaman/Revizyon → Tahsilat → Fatura. Üstüne WhatsApp/e-posta iletişimi, müşteri portalı ve içerik takvimi. Klasik CRM değil; Türkiye'ye göre tasarlanmış, **modül modül satılan** bir iş yönetimi platformu. Önce ajanslar, sonra aynı çekirdek üzerine sektör paketleri.
 
 ## Hedef kitle ve dağıtım
 
 | Konu | Karar |
 | --- | --- |
 | İlk müşteri | Dijital/reklam ajansları (kendi ajansımız dahil — dogfooding) |
-| Sonraki | Hizmet KOBİ'leri, ardından ürün satan firmalar |
+| Sonraki | Yazılım/danışmanlık, teknik servis, ticaret firmaları (sektör paketleriyle) |
 | Dağıtım | SaaS (multi-tenant). Tek firma kurulumu (on-prem, `docker compose up`) mimaride açık |
+| Satış birimi | Modül. Tenant hangi modülleri aldıysa o menüler ve uçlar açılır |
 | Dil | Arayüz TR (EN sözlük baştan), kod ve commit İngilizce |
 | Ekip | Tek geliştirici + Claude; 2 haftalık sprint |
 
+## Sektör paketleri
+
+Aynı çekirdek, farklı modül setleri. Paket = önceden tanımlı modül listesi; tenant sonradan modül ekleyebilir.
+
+| Paket | Modüller |
+| --- | --- |
+| Ajans | Core + CRM + Satış + İş + Portal + SMM |
+| Yazılım / danışmanlık | Core + CRM + Satış + İş + Portal + Destek |
+| Teknik servis | Core + CRM + İş Emri + Stok + Araç |
+| Ticaret | Core + CRM + Satış + Stok + Finans + Muhasebe entegrasyonu |
+
+Mekanizma: `Entitlement` (tenant × modül × koltuk × bitiş) + `RequireModule("smm")` endpoint filtresi + menü görünürlüğü. SaaS'ta bu abonelik kaydıdır, şifreleme gerekmez. On-prem için imzalı lisans dosyası (modüller, koltuk, bitiş; Ed25519 imza, günlük kontrol, tolerans süresi) ilk gerçek on-prem müşteride yazılır; şimdi yalnızca `Entitlement` soyutlaması doğru kurulur.
+
 ## Tasarım ilkeleri
 
-1. **Cari hesap omurgadır.** Müşteri ve tedarikçi tek "Cari" kavramıdır; her fatura, tahsilat, çek, gider bir cariye bağlanır.
-2. **Belge zinciri kopyalanmaz, türetilir.** Ajans zinciri: Teklif → İş Emri → Fatura → Tahsilat. Ürün zinciri (Faz 7): Teklif → Sipariş → İrsaliye → Fatura. Her belge kaynağını bilir.
-3. **Modüler monolit.** Her modül kendi Postgres şemasında; modüller arası iletişim olaylarla; tenant başına modül aç/kapa. Ayrıntı: [ADR-0001](adr/0001-modular-monolith.md).
-4. **Her dış servis bir arayüzün arkasında.** Ödeme, mesajlaşma, e-Fatura, muhasebe aktarımı, sosyal yayın — sağlayıcı değişir, modül değişmez. [ADR-0005](adr/0005-integrations-behind-providers.md).
-5. **Yasal sınırlar baştan.** Türkiye'de fatura e-Fatura/e-Arşiv'dir ve yalnızca GİB entegratörü üzerinden kesilir; biz taslak üretir, entegratöre göndeririz. Finansal kayıt silinmez (iptal/ters kayıt + denetim izi). KVKK: rıza, dışa aktarma, silme.
-6. **TR-first ama i18n baştan.** Metinler sözlükten; çoklu para birimi baştan (TCMB kuru belge anında sabitlenir).
-7. **Önce elle, sonra otomatik.** Onay bekleyen entegrasyonlar (WhatsApp gelen kutusu, sosyal yayın, banka eşleştirme) önce manuel akışla çalışır; entegrasyon gelince arayüz değişmez.
+1. **Cari hesap omurgadır.** Müşteri ve tedarikçi tek "Cari" kavramıdır; her tahsilat, fatura, çek, gider bir cariye bağlanır.
+2. **Belge zinciri kopyalanmaz, türetilir.** Ajans zinciri: Teklif → Sözleşme/İş Emri → Tahsilat → Fatura. Ürün zinciri (Faz 7): Teklif → Sipariş → İrsaliye → Fatura. Her belge kaynağını bilir.
+3. **Her şey tek zaman çizelgesine düşer.** Activity timeline çekirdek altyapıdır; her modül ona yazar ("teklif gönderildi → müşteri görüntüledi → ödendi → iş açıldı"), müşteri kartı onu okur.
+4. **Modüler monolit, modül = satılabilir birim.** Her modül kendi Postgres şemasında; modüller arası iletişim olaylarla; tenant başına modül aç/kapa. [ADR-0001](adr/0001-modular-monolith.md).
+5. **Her dış servis bir arayüzün arkasında.** Ödeme, mesajlaşma, e-Fatura, ERP, sosyal yayın — sağlayıcı değişir, modül değişmez. [ADR-0005](adr/0005-integrations-behind-providers.md).
+6. **Yasal sınırlar baştan.** Fatura yalnızca GİB entegratörü üzerinden; finansal kayıt silinmez; KVKK (rıza, dışa aktarma, silme). [ADR-0004](adr/0004-document-chain-money-tax.md).
+7. **TR-first ama i18n baştan.** Metinler sözlükten; çoklu para birimi baştan (TCMB kuru belge anında sabitlenir).
+8. **Önce elle, sonra otomatik.** Onay bekleyen entegrasyonlar (WhatsApp gelen kutusu, sosyal yayın, e-posta senkronu, banka eşleştirme) önce manuel akışla çalışır; entegrasyon gelince arayüz değişmez.
 
 ## Yol haritası
 
-Sprint = 2 hafta. Her faz "kullanılabilir bir şey" ile kapanır; sonraki faz gerçek kullanımdan beslenir. Bir faz bitmeden sonrakinin modülü açılmaz.
+Sprint = 2 hafta. Her faz "kullanılabilir bir şey" ile kapanır. Bir faz bitmeden sonrakinin modülü açılmaz.
 
-| Faz | Ad | Sprint | Sonunda ne olur |
-| --- | --- | --- | --- |
-| 0 | İskelet ✅ | – | Repo, CI, boş API/Next.js |
-| 1 | Platform çekirdeği | 3 | Giriş, tenant/rol/izin, dosya yükleme, bildirim, e-posta, arka plan işleri. Henüz "iş" yok. |
-| 2 | Müşteri & İş Takibi | 3 | **Kendi ajansımız kullanmaya başlar:** cari kartlar, iş emirleri (Kanban), personel, zaman takibi, iş maliyeti. |
-| 3 | Satış | 2–3 | Lead hunisi, katalog (KDV dahil/hariç, tevkifat kodları), teklif PDF + proforma + public onay linki, tekliften iş emri, WhatsApp şablon bildirimi (hesap hazırsa). |
-| 4 | Finans I | 4 | **Satılabilir v1.0:** fatura (taslak → e-Fatura/e-Arşiv), tahsilat, kasa/banka, çek/senet, gider ve freelancer belgeleri, PayTR ödeme linki, retainer faturası, ekstre/yaşlandırma, açılış bakiyeleri, muhasebeci Excel paketi. |
-| 5 | İletişim & Portal | 3 | WhatsApp ortak gelen kutusu, SMS, müşteri portalı (onay, revizyon, ödeme), destek talebi, otomasyon kuralları v1, sözleşme. |
-| 6 | Ajans modülleri | 3 | İçerik takvimi + müşteri onayı, Meta yayınlama, sosyal/reklam raporları, aylık müşteri raporu, kreatif kütüphane/proofing. |
-| 7 | Stok & Varlıklar | 3 | Sipariş, irsaliye, stok, satın alma, demirbaş & araç. Genel KOBİ'ye satılabilir. |
-| 8 | Entegrasyon & Ölçek | sürekli | Logo, Bay.t, banka eşleştirme, public API/webhook, PWA, KVKK araçları, SaaS faturalama, kargo. |
+| Sürüm | Faz | Ad | Sprint | Sonunda ne olur |
+| --- | --- | --- | --- | --- |
+| **V1 Ajans** | 1 | Platform çekirdeği | 3 | Giriş, tenant/rol/izin, modül bayrakları, activity timeline, onay iskeleti, dosya, bildirim, e-posta, arka plan işleri. Henüz "iş" yok. |
+| | 2 | Müşteri & İş Takibi | 3 | **Kendi ajansımız kullanmaya başlar:** cari + zaman çizelgesi, iş emri/görev/checklist (Kanban), personel, zaman takibi + maliyet, dosya/revizyon, özel alanlar. |
+| | 3 | Satış & Para | 3–4 | Lead hunisi, katalog (KDV dahil/hariç, tevkifat kodları), teklif PDF + public onay linki, **sözleşme/abonelik (retainer)**, **Finance Lite** (tahsilat kaydı, ödeme planı, cari bakiye), **PayTR ödeme linki**, WhatsApp şablon bildirimi. |
+| | 4 | Portal, İletişim & SMM onayı | 3 | **Müşteri portalı** (iş durumu, teklif onayı, revizyon, ödeme), **içerik takvimi + onay akışı** (yayın manuel), WhatsApp gelen kutusu, SMS, e-posta gönderim + BCC eşleme, destek talebi, otomasyon v1. **V1 satışa çıkar.** |
+| **V2 Finans** | 5 | Fatura & Finans | 4 | e-Fatura/e-Arşiv entegratörü, gelen belgeler (alış faturası, e-SMM, gider pusulası), gider, kasa/banka, açılış bakiyeleri + dönem kilidi, ekstre/yaşlandırma, mutabakat, retainer otomatik fatura, muhasebeci Excel paketi. |
+| | 6 | Ajans raporlama | 3 | Meta yayınlama, sosyal/reklam raporları, aylık müşteri raporu, gelişmiş proofing, kreatif kütüphane. |
+| **V3 KOBİ** | 7 | Ticaret paketi | 3 | Sipariş, irsaliye, stok, satın alma, çek/senet, demirbaş & araç. |
+| | 8 | Entegrasyon & AI | sürekli | Logo/Bay.t/Paraşüt adaptörleri, banka eşleştirme, Gmail/Outlook senkron, AI asistan, public API/webhook, PWA, KVKK araçları, SaaS faturalama, kargo. |
 
-**Kilometre taşları:** Faz 2 sonu = dogfooding · Faz 4 sonu = ilk dış müşteri · Faz 6 sonu = ajanslara pazarlanabilir · Faz 7 sonu = genel KOBİ.
+**Kilometre taşları:** Faz 2 sonu = dogfooding · Faz 4 sonu = **V1, ilk dış müşteri** · Faz 5 sonu = muhasebe tarafı tamam · Faz 7 sonu = genel KOBİ.
 
 Modül bazında kapsam ve bağımlılıklar: [MODULES.md](MODULES.md).
 
@@ -69,14 +81,22 @@ Modül bazında kapsam ve bağımlılıklar: [MODULES.md](MODULES.md).
 | 10 | CI: backend build/test/trx, frontend tsc/lint/vitest/build, `dotnet format` doğrulaması, docker buildx | akiron-seo ci.yml | İlk PR yeşil |
 
 ### Sprint 2
-Dosya deposu (MinIO/S3), denetim `changes` tablosu, domain event + outbox + Hangfire, bildirim merkezi (SignalR + e-posta), belge numaralama, para birimi + TCMB kur işi, kullanıcı davet akışı, ayarlar sayfası.
+Activity timeline (BuildingBlocks: her modül yazar, cari/iş kartı okur), onay motoru iskeleti (`ApprovalRequest`: adımlar, onaylayan rolü, durum), özel alan altyapısı (entity başına tipli tanım + `jsonb` değer + filtre), dosya deposu (MinIO/S3), denetim `changes` tablosu, domain event + outbox + Hangfire, bildirim merkezi (SignalR + e-posta), belge numaralama, para birimi + TCMB kur işi, kullanıcı davet akışı.
 
 ### Sprint 3
-Tenant modül bayrakları + lisans, docker-compose prod profili (api, web, postgres, minio), yedek/geri yükleme scripti, Playwright kritik akış, güvenlik temelleri (rate limit, CORS, secrets doğrulama), Faz 2 veri modeli ADR'leri.
+`Entitlement` + modül bayrakları + `RequireModule()`, ayarlar sayfası, docker-compose prod profili (api, web, postgres, minio), yedek/geri yükleme scripti, Playwright kritik akış, güvenlik temelleri (rate limit, CORS, secrets doğrulama), Faz 2 veri modeli ADR'leri.
 
 ## Paralel idari işler
 
 Kod değil ama bekleme süreleri uzun; Faz 1'de başlatılır. Liste ve takip: [INTEGRATIONS.md](INTEGRATIONS.md#idari-checklist).
+
+## Açık kararlar
+
+| # | Karar | Neden şimdi | Öneri |
+| --- | --- | --- | --- |
+| 1 | **Repo lisansı.** Repo public ve MIT; MIT'te herkes tüm modülleri bedava kurar, bayrakları siler. Modül satışıyla çelişir. | MIT ile yayımlanan her commit MIT kalır; kod gelmeden karar verilmeli. | Tek repo + source-available lisans (BSL 1.1 veya FSL): kaynak görünür, rakip olarak üretimde kullanılamaz, süre sonunda açık kaynak olur. Alternatif: AGPL-3.0 + ticari lisans (dual). Open-core (çekirdek MIT, premium modüller private repo) tek geliştirici için fazla yük. |
+| 2 | **Ortak platform paketi** (`akiron-platform`: BuildingBlocks + auth + test kiti + frontend istemci/i18n/token). | Üç üründe aynı altyapı üç kez yazılıyor. | Faz 1 sonunda BuildingBlocks stabilleşince NuGet/npm paketi olarak çıkar; önce CRM tüketir, sonra Commerce'in henüz yazılmamış Identity servisi, en son Seo. Faz 1'den önce çıkarma: ihtiyaç daha netleşmedi. |
+| 3 | **B2B projesi kodu** (USD bayi hesapları, Logo terimleri). | akiron-commerce devlog'u kur/cari tasarımının oradan geleceğini yazıyor. | Varsa Faz 5'te cari/Logo için kullanılır. |
 
 ## Riskler ve önlemler
 
@@ -84,6 +104,7 @@ Kod değil ama bekleme süreleri uzun; Faz 1'de başlatılır. Liste ve takip: [
 | --- | --- |
 | Kapsam patlaması | Faz kapıları; her faz kullanılabilir çıktıyla kapanır |
 | Meta onay süreleri (WhatsApp, Instagram yayın) | Manuel akışlar önce; entegrasyon gelince arayüz aynı |
-| e-Fatura yasal karmaşası | Kendi GİB entegrasyonu yazılmaz; entegratör API'si. Fatura modülü entegratörsüz de taslak seviyesinde çalışır |
+| Gmail okuma izinleri (restricted scope → yıllık CASA denetimi) | V1'de BCC/forward ile e-posta eşleme; gerçek senkron Faz 8 |
+| e-Fatura yasal karmaşası | Kendi GİB entegrasyonu yazılmaz; entegratör API'si; V1'de fatura yok, "fatura kesilecekler" listesi muhasebeciye |
 | Tek geliştirici | Her modül aynı kalıp; BuildingBlocks'ta test ve CI disiplini |
-| KVKK | Kişisel veri alanları işaretlenir; dışa aktarma/silme API'si Faz 1'den planlanır |
+| KVKK (özellikle AI'ya veri gönderimi) | Kişisel veri alanları işaretlenir; dışa aktarma/silme API'si Faz 1'den; AI için rıza + anonimleştirme |
