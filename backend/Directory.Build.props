@@ -1,0 +1,21 @@
+<Project>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(MSBuildProjectName.StartsWith('Akiron.Tests'))">
+    <!-- Test names are sentences (Register_WithExistingEmail_ReturnsConflict); there is no public API surface to police. -->
+    <NoWarn>$(NoWarn);CA1707;CA1515</NoWarn>
+    <!-- xUnit v3 runs on Microsoft.Testing.Platform; the .NET 10 SDK needs the new runner protocol. -->
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+</Project>

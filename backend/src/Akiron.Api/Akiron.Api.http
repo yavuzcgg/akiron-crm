@@ -1,6 +1,33 @@
-@Akiron.Api_HostAddress = http://localhost:5202
+@api = http://localhost:5080
 
-GET {{Akiron.Api_HostAddress}}/health
-Accept: application/json
+GET {{api}}/health/ready
 
 ###
+
+POST {{api}}/api/v1/identity/auth/register
+Content-Type: application/json
+
+{
+  "organizationName": "Deneme Ajans",
+  "fullName": "Yavuz Çelik",
+  "email": "yavuz@example.com",
+  "password": "Guclu-Parola-2026"
+}
+
+###
+
+POST {{api}}/api/v1/identity/auth/login
+Content-Type: application/json
+
+{
+  "email": "yavuz@example.com",
+  "password": "Guclu-Parola-2026"
+}
+
+###
+
+GET {{api}}/api/v1/identity/auth/session
+
+###
+
+GET {{api}}/api/v1/identity/members?page=1&pageSize=20

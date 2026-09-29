@@ -1,13 +1,17 @@
+# Local development infrastructure. Ports are chosen not to collide with the other Akiron
+# projects on the same machine (akiron-seo: 5432/3000, akiron-commerce: 5433).
+name: akiron-crm
+
 services:
   postgres:
     image: postgres:17
-    container_name: akiron-postgres
+    container_name: akiron-crm-postgres
     environment:
       POSTGRES_DB: akiron
       POSTGRES_USER: akiron
       POSTGRES_PASSWORD: akiron_dev
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5434:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
