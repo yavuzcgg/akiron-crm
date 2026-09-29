@@ -1,0 +1,54 @@
+# Akiron CRM — working rules
+
+Agency-first business management and pre-accounting platform for the Turkish market (work orders, quotes, invoices, collections, messaging, client portal, content calendar; later inventory, assets, accounting sync). Read [docs/PLAN.md](docs/PLAN.md) for scope, [docs/MODULES.md](docs/MODULES.md) for the module catalog and [docs/adr/](docs/adr/README.md) for decisions before changing architecture.
+
+Talk to the owner in Turkish. Write code, database columns, commits and ADRs in English.
+
+## Non-negotiables
+
+- **No AI attribution anywhere.** No `Co-Authored-By`, no "Generated with" lines in commits, PRs or files.
+- **Conventional Commits with a module scope:** `feat(finance): …`, `fix(identity): …`, `docs: …`, `test(crm): …`, `chore(ci): …`.
+- **Warnings are errors** (`Directory.Build.props`). Package versions live only in `Directory.Packages.props`.
+- **Never** add `TenantId` filters or assignments in handlers; the DbContext interceptor does it (ADR-0002).
+- **Never** delete financial records; cancel or reverse (ADR-0004).
+- **Never** commit secrets; `.env.example` lists names only.
+
+## Backend (`backend/`)
+
+- .NET 10, Minimal APIs, EF Core + Npgsql, one schema per module (ADR-0001).
+- Layout: `src/BuildingBlocks`, `src/Contracts`, `src/Modules/<Module>`, `src/Akiron.Api` (host), `tests/{Architecture,Integration,Unit}`.
+- A use case is a folder `Features/<UseCase>/` holding the command/query record, its validator, a `sealed` handler with `HandleAsync` returning `Result<T>`, and its endpoint mapping. No mediator (ADR-0003).
+- Forbidden folder and type names: `Services`, `Repositories`, `Managers`, `Helpers`, `Utils`, `Dtos`. Name things after what they do.
+- Entities: private setters, `Create`/`Update` factories, typed GUIDv7 ids (`CustomerId`), domain rules inside the entity.
+- Routes: `/api/v1/<module>/<kebab-case>`; paging `page`/`pageSize` capped at 100, invalid values rejected.
+- Errors: ProblemDetails with a stable code `module.resource.reason` (ADR-0006). Do not put Turkish text in the API.
+- Money: `Money` value object, `numeric(18,2)` totals, `numeric(18,4)` unit prices, rate snapshot per document (ADR-0004).
+- Dates: UTC in the database; `DateOnly` for calendar dates (invoice date, due date).
+- Every endpoint declares `.RequirePermission(…)` unless it is in the `Public` group.
+- Migrations: `dotnet ef migrations add <Name> --project src/Modules/<Module> --startup-project src/Akiron.Api --context <Module>DbContext`. Never `EnsureCreated`.
+- Tests run against real PostgreSQL (Testcontainers). Names: `Method_WithCondition_DoesThing`. Every module has the tenant isolation and scoped-write tests.
+
+## Frontend (`frontend/`)
+
+- Next.js App Router, TypeScript strict, Tailwind v4, shadcn/ui, TanStack Query + Table, react-hook-form + zod.
+- API types are generated (`npm run api:gen`) from the backend OpenAPI document; never hand-write response interfaces.
+- All user-facing text goes through the typed dictionary (`src/lib/i18n`); `tr` is the default, missing `en` keys are a type error. Error codes map to text there.
+- Route groups: `(auth)`, `(app)/<module>`, `(portal)`. Feature code lives in `src/features/<module>/`.
+- Money and dates are formatted with `src/lib/format.ts` (`tr-TR`), never inline.
+
+## Commands
+
+```bash
+docker compose up -d postgres                 # local database
+dotnet build backend/Akiron.slnx              # warnings are errors
+dotnet test backend/Akiron.slnx               # needs Docker for Testcontainers
+dotnet run --project backend/src/Akiron.Api   # http://localhost:5xxx/health
+cd frontend && npm run dev                    # http://localhost:3000
+cd frontend && npm run api:gen && npm run lint && npm run build
+```
+
+## Process
+
+- Phases and sprints are in `docs/PLAN.md`; do not start a later phase's module early.
+- Decisions that are hard to reverse get an ADR in `docs/adr/` (Context, Decision, Alternatives, Consequences, Exit strategy).
+- Keep `docs/INTEGRATIONS.md` checklist current when a vendor account changes state.

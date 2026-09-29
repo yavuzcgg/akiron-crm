@@ -1,16 +1,29 @@
 # Akiron CRM
 
-Küçük ve orta ölçekli ekipler için modern, açık kaynak CRM.
+Ajanslar için iş yönetimi ve ön muhasebe platformu — Türkiye'ye göre.
 
-**Stack:** ASP.NET Core 10 · Next.js · PostgreSQL
+**Müşteri → Teklif → İş Emri → Zaman/Revizyon → Fatura → Tahsilat**, üstüne WhatsApp/e-posta iletişimi, müşteri portalı ve içerik takvimi. Önce dijital/reklam ajansları, sonra genel KOBİ (stok, satın alma, araç/demirbaş, Logo/Bay.t entegrasyonu).
 
-> Proje erken aşamada. Mimari ve yol haritası için: [docs/PLAN.md](docs/PLAN.md)
+**Stack:** ASP.NET Core 10 (modüler monolit) · Next.js · PostgreSQL
+
+> Durum: Faz 0 (iskelet) tamamlandı, Faz 1 (platform çekirdeği) başlıyor. Üretime hazır değildir.
+
+## Belgeler
+
+| Belge | İçerik |
+| --- | --- |
+| [docs/PLAN.md](docs/PLAN.md) | Ürün tezi, ilkeler, 8 fazlık yol haritası, Sprint 1 görevleri |
+| [docs/MODULES.md](docs/MODULES.md) | Modül kataloğu: kapsam, bağımlılık, faz |
+| [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) | Sağlayıcı planı (PayTR, WhatsApp, e-Fatura, Meta, Logo…) ve idari checklist |
+| [docs/adr/](docs/adr/README.md) | Mimari kararlar |
+| [AGENTS.md](AGENTS.md) | Geliştirme kuralları (insan ve ajan için) |
 
 ## Yapı
-```
-backend/    ASP.NET Core Web API (Clean Architecture)
-frontend/   Next.js (App Router, TypeScript, Tailwind)
-docs/       Plan ve dokümantasyon
+
+```text
+backend/    ASP.NET Core Web API — modüler monolit (BuildingBlocks, Contracts, Modules/*, Akiron.Api)
+frontend/   Next.js (App Router, TypeScript, Tailwind, shadcn/ui)
+docs/       Plan, modül kataloğu, entegrasyonlar, ADR'ler
 ```
 
 ## Başlangıç
@@ -31,4 +44,5 @@ npm run dev
 ```
 
 ## Lisans
+
 [MIT](LICENSE)
