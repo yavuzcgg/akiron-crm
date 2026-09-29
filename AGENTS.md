@@ -31,7 +31,9 @@ Talk to the owner in Turkish. Write code, database columns, commits and ADRs in 
 - A module is not done until its business events are projected onto the activity timeline with a typed entry and TR/EN templates (ADR-0009).
 - `docs/vendor/` holds licensed reference material (Logo data dictionary) and is git-ignored; never commit or quote it at length.
 - Dates: UTC in the database; `DateOnly` for calendar dates (invoice date, due date).
-- Every endpoint declares `.RequirePermission(…)` unless it is in the `Public` group.
+- Every endpoint declares `.RequirePermission(…)` unless it is in the `Public` group, or serves global reference data (exchange rates, code lists) to any signed-in user with `.RequireAuthorization()`.
+- Auditable entities (`IAuditable`) get a field-level trail in their module's `audit_changes` automatically; mark secrets and per-request noise with `[AuditIgnore]`.
+- Money is `Money`/`Currency` from BuildingBlocks; rates come from `IExchangeRates` (Contracts), never from a module's own HTTP call.
 - Migrations: `dotnet ef migrations add <Name> --project src/Modules/<Module> --startup-project src/Akiron.Api --context <Module>DbContext`. Never `EnsureCreated`.
 - Tests run against real PostgreSQL (Testcontainers). Names: `Method_WithCondition_DoesThing`. Every module has the tenant isolation and scoped-write tests.
 

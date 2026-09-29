@@ -22,10 +22,12 @@ public sealed class User : Entity<UserId>, IAuditable
 
     public string FullName { get; private set; }
 
+    [AuditIgnore]
     public string PasswordHash { get; private set; }
 
     public bool IsActive { get; private set; }
 
+    [AuditIgnore]
     public DateTimeOffset? LastLoginAt { get; private set; }
 
     public DateTimeOffset CreatedAt { get; private set; }

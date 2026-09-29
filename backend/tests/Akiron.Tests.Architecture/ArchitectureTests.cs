@@ -2,6 +2,7 @@ using System.Reflection;
 using Akiron.BuildingBlocks.Modules;
 using Akiron.Contracts.Identity;
 using Akiron.Modules.Identity;
+using Akiron.Modules.Reference;
 using Akiron.Modules.Timeline;
 using NetArchTest.Rules;
 
@@ -17,7 +18,7 @@ public sealed class ArchitectureTests
     private static readonly Assembly BuildingBlocks = typeof(IModule).Assembly;
 
     /// <summary>Every module assembly. Add each new module here when it is created.</summary>
-    private static readonly Assembly[] Modules = [typeof(IdentityModule).Assembly, typeof(TimelineModule).Assembly];
+    private static readonly Assembly[] Modules = [typeof(IdentityModule).Assembly, typeof(TimelineModule).Assembly, typeof(ReferenceModule).Assembly];
 
     private static readonly Assembly Contracts = typeof(WorkspaceCreated).Assembly;
 

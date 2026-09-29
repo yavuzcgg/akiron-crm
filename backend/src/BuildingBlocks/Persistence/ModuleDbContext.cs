@@ -75,6 +75,8 @@ public abstract class ModuleDbContext(DbContextOptions options, ITenantContext t
 
     private static void ConfigureInfrastructureTables(ModelBuilder modelBuilder)
     {
+        AuditChange.Configure(modelBuilder);
+
         modelBuilder.Entity<OutboxMessage>(outbox =>
         {
             outbox.ToTable("outbox_messages");

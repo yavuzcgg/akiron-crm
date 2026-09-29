@@ -49,6 +49,10 @@ public sealed class TenantAuditInterceptor(
 
         var now = timeProvider.GetUtcNow();
         var userId = currentUser.UserId;
+        var audit = new List<AuditChange>();
+
+        // Interceptors run before EF's own change detection; property IsModified must be current here.
+        context.ChangeTracker.DetectChanges();
 
         foreach (var entry in context.ChangeTracker.Entries().ToList())
         {
@@ -62,6 +66,14 @@ public sealed class TenantAuditInterceptor(
                 GuardTenant(entry);
             }
 
+            // Decided before soft delete turns a Deleted entry into a Modified one.
+            var action = entry.State switch
+            {
+                EntityState.Added => "created",
+                EntityState.Deleted => "deleted",
+                _ => "updated",
+            };
+
             if (entry is { State: EntityState.Deleted, Entity: ISoftDeletable })
             {
                 entry.State = EntityState.Modified;
@@ -72,8 +84,16 @@ public sealed class TenantAuditInterceptor(
             if (entry.Entity is IAuditable)
             {
                 Stamp(entry, now, userId);
+
+                var tenant = entry.Entity is ITenantScoped scoped ? scoped.TenantId : TenantId.Empty;
+                if (AuditChange.From(entry, action, tenant, userId, now) is { } change)
+                {
+                    audit.Add(change);
+                }
             }
         }
+
+        context.Set<AuditChange>().AddRange(audit);
     }
 
     private void GuardTenant(EntityEntry entry)

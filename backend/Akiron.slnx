@@ -4,10 +4,12 @@
     <Project Path="src/BuildingBlocks/Akiron.BuildingBlocks.csproj" />
     <Project Path="src/Contracts/Akiron.Contracts.csproj" />
     <Project Path="src/Modules/Identity/Akiron.Modules.Identity.csproj" />
+    <Project Path="src/Modules/Reference/Akiron.Modules.Reference.csproj" />
     <Project Path="src/Modules/Timeline/Akiron.Modules.Timeline.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Akiron.Tests.Architecture/Akiron.Tests.Architecture.csproj" />
     <Project Path="tests/Akiron.Tests.Integration/Akiron.Tests.Integration.csproj" />
+    <Project Path="tests/Akiron.Tests.Unit/Akiron.Tests.Unit.csproj" />
   </Folder>
 </Solution>

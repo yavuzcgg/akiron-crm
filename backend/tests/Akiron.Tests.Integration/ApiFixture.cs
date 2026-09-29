@@ -54,8 +54,16 @@ public sealed partial class ApiFixture : IAsyncLifetime
 
             // Tests deliver the outbox themselves (DeliverOutboxAsync) so they never race a timer.
             builder.UseSetting("Outbox:Enabled", "false");
+            builder.UseSetting("ExchangeRates:SyncEnabled", "false");
 
-            builder.ConfigureServices(services => services.Replace(ServiceDescriptor.Singleton<IEmailSender>(_emails)));
+            builder.ConfigureServices(services =>
+            {
+                services.Replace(ServiceDescriptor.Singleton<IEmailSender>(_emails));
+
+                // TCMB is never called from tests; this serves a fixed bulletin for any weekday.
+                services.AddHttpClient<Akiron.Modules.Reference.Tcmb.TcmbClient>()
+                    .ConfigurePrimaryHttpMessageHandler(() => new FakeTcmbHandler());
+            });
         });
 
         // Forces the host to start, which runs the migrations once for all tests.

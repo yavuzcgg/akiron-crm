@@ -48,6 +48,7 @@ public sealed class Invitation : Entity<InvitationId>, ITenantScoped, IAuditable
 
     public RoleId RoleId { get; private set; }
 
+    [AuditIgnore]
     public string TokenHash { get; private set; }
 
     public UserId InvitedBy { get; private set; }

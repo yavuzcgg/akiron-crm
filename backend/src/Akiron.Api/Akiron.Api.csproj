@@ -8,6 +8,7 @@
     <ProjectReference Include="..\BuildingBlocks\Akiron.BuildingBlocks.csproj" />
     <ProjectReference Include="..\Modules\Identity\Akiron.Modules.Identity.csproj" />
     <ProjectReference Include="..\Modules\Timeline\Akiron.Modules.Timeline.csproj" />
+    <ProjectReference Include="..\Modules\Reference\Akiron.Modules.Reference.csproj" />
   </ItemGroup>
 
   <ItemGroup>
