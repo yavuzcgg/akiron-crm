@@ -22,3 +22,10 @@ public readonly record struct RefreshTokenId(Guid Value) : ITypedId<RefreshToken
 
     public static RefreshTokenId From(Guid value) => new(value);
 }
+
+public readonly record struct InvitationId(Guid Value) : ITypedId<InvitationId>
+{
+    public static InvitationId New() => new(Guid.CreateVersion7());
+
+    public static InvitationId From(Guid value) => new(value);
+}

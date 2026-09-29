@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\BuildingBlocks\Akiron.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\..\Contracts\Akiron.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

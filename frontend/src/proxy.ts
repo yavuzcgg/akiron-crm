@@ -5,12 +5,17 @@ const sessionHintCookie = "akiron_session";
 
 const authPages = ["/login", "/register"];
 
+/** Reachable signed in or not: an invitation link may be opened by anyone holding it. */
+const openPages = ["/invite"];
+
 /**
  * Optimistic routing only (Next.js guidance): the API still checks every request, and the app shell
  * sends the user to sign in if the session turns out to be invalid.
  */
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+  if (openPages.includes(pathname)) return NextResponse.next();
+
   const hasSession = request.cookies.has(sessionHintCookie);
   const onAuthPage = authPages.includes(pathname);
 

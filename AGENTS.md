@@ -16,8 +16,9 @@ Talk to the owner in Turkish. Write code, database columns, commits and ADRs in 
 ## Backend (`backend/`)
 
 - .NET 10, Minimal APIs, EF Core + Npgsql, one schema per module (ADR-0001).
-- Layout: `src/BuildingBlocks`, `src/Modules/<Module>`, `src/Akiron.Api` (host), `tests/{Architecture,Integration}`. `src/Contracts` is added with the first integration event; a unit-test project with the first logic that needs no database.
-- New module: project under `src/Modules/<Name>` referencing only BuildingBlocks, an `IModule` class, a line in the host's module list (`Program.cs`) and one in `ArchitectureTests.Modules`.
+- Layout: `src/BuildingBlocks`, `src/Contracts` (integration events, no logic), `src/Modules/<Module>`, `src/Akiron.Api` (host), `tests/{Architecture,Integration}`. A unit-test project arrives with the first logic that needs no database.
+- New module: project under `src/Modules/<Name>` referencing only BuildingBlocks and Contracts, an `IModule` class, a line in the host's module list (`Program.cs`) and one in `ArchitectureTests.Modules`.
+- Cross-module effects: `db.Publish(new SomethingHappened(...))` before `SaveChanges`; the event record lives in `src/Contracts/<Module>` with an `[IntegrationEventName("module.thing.happened")]`. Consumers implement `IIntegrationEventConsumer<T>` and must be idempotent. Tests call `ApiFixture.DeliverOutboxAsync()` instead of waiting.
 - Use `TimeProvider` for the clock, `ITenantContext` for the tenant, `ICurrentUser` for the actor; never `DateTime.Now` or claims directly.
 - A use case is a folder `Features/<UseCase>/` holding the command/query record, its validator, a `sealed` handler with `HandleAsync` returning `Result<T>`, and its endpoint mapping. No mediator (ADR-0003).
 - Forbidden folder and type names: `Services`, `Repositories`, `Managers`, `Helpers`, `Utils`, `Dtos`. Name things after what they do.

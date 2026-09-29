@@ -6,4 +6,7 @@ namespace Akiron.BuildingBlocks.Security;
 public interface ICurrentUser
 {
     UserId? UserId { get; }
+
+    /// <summary>Display name from the access token, for snapshots such as timeline actors.</summary>
+    string? DisplayName { get; }
 }

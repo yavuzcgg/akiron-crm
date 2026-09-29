@@ -38,3 +38,14 @@ export function initials(name: string): string {
     .map((part) => part[0]!.toLocaleUpperCase(locale))
     .join("");
 }
+
+export function formatTime(value: string | Date): string {
+  const date = typeof value === "string" ? new Date(value) : value;
+  return new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }).format(date);
+}
+
+/** Local calendar day as YYYY-MM-DD, for grouping timeline entries by day. */
+export function dayKey(value: string | Date): string {
+  const date = typeof value === "string" ? new Date(value) : value;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}

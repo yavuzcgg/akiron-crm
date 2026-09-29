@@ -94,6 +94,16 @@ Plandan bilinçli sapmalar:
 ### Sprint 2
 Domain event + outbox + Hangfire (timeline bunun üstüne kurulur), activity timeline (ADR-0009: `timeline` şeması, projektörler, notlar, keyset sayfalama; her modülün "bitti" tanımına timeline projektörü eklenir), onay motoru iskeleti (`ApprovalRequest`: adımlar, onaylayan rolü, durum), özel alan altyapısı (entity başına tipli tanım + `jsonb` değer + filtre), dosya deposu (MinIO/S3), denetim `changes` tablosu, bildirim merkezi (SignalR + e-posta), belge numaralama, para birimi + TCMB kur işi, kullanıcı davet akışı.
 
+**Durum (29 Eyl 2026): ilk yarı tamamlandı.**
+
+- Olay altyapısı: modül başına `outbox_messages`, `Publish()`, `SKIP LOCKED` ile çoklu instance'a güvenli dağıtıcı, geri çekilmeli yeniden deneme; `Akiron.Contracts` projesi.
+- Activity timeline modülü (ADR-0009): tipli kayıtlar, çoklu akış bağlantıları, idempotent projeksiyonlar, notlar, keyset sayfalama, izin filtresi; panelde çalışma alanı akışı (gün gruplu, TR/EN şablonlar).
+- Davet akışı: davet et / listele / iptal, e-posta linki, yeni ya da mevcut hesapla kabul, yeniden davette eski link geçersiz; ekip sayfası ve `/invite` sayfası.
+- Belge numaralama: kiracı × seri × yıl sayacı, rollback boşluk bırakmaz (`TKL-2026-0001`).
+- 45 backend testi (mimari + entegrasyon), gerçek akış Next üzerinden elle doğrulandı.
+
+**İkinci yarı (kalan):** onay motoru iskeleti, özel alanlar, dosya deposu (MinIO/S3), denetim `changes` tablosu, bildirim merkezi (SignalR + gerçek e-posta sağlayıcısı), para birimi + TCMB kur işi (Hangfire ile ilk zamanlanmış iş).
+
 ### Sprint 3
 `Entitlement` + modül bayrakları + `RequireModule()`, ayarlar sayfası, docker-compose prod profili (api, web, postgres, minio), yedek/geri yükleme scripti, Playwright kritik akış, güvenlik temelleri (rate limit, CORS, secrets doğrulama), Faz 2 veri modeli ADR'leri.
 

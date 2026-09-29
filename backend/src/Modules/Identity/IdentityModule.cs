@@ -3,6 +3,7 @@ using Akiron.BuildingBlocks.Persistence;
 using Akiron.BuildingBlocks.Security;
 using Akiron.BuildingBlocks.Web;
 using Akiron.Modules.Identity.Features.GetSession;
+using Akiron.Modules.Identity.Features.Invitations;
 using Akiron.Modules.Identity.Features.ListMembers;
 using Akiron.Modules.Identity.Features.Login;
 using Akiron.Modules.Identity.Features.Logout;
@@ -42,6 +43,7 @@ public sealed class IdentityModule : IModule
         services.AddSingleton<AccessTokenIssuer>();
         services.AddSingleton<AuthCookies>();
         services.AddScoped<SessionIssuer>();
+        services.AddScoped<InvitationLookup>();
 
         services.Configure<ConstraintErrorMap>(map => map.Add(IdentityConstraints.UserEmailUnique, IdentityErrors.EmailTaken));
 
@@ -85,5 +87,10 @@ public sealed class IdentityModule : IModule
         GetSessionEndpoint.Map(auth);
 
         ListMembersEndpoint.Map(endpoints);
+
+        var invitations = endpoints.MapGroup("/invitations");
+        CreateInvitationEndpoint.Map(invitations);
+        ManageInvitationsEndpoints.Map(invitations);
+        AcceptInvitationEndpoints.Map(invitations);
     }
 }

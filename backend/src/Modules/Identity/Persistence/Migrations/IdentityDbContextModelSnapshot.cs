@@ -23,6 +23,166 @@ namespace Akiron.Modules.Identity.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Akiron.BuildingBlocks.Events.OutboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempts");
+
+                    b.Property<DateTimeOffset?>("FailedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("failed_at");
+
+                    b.Property<string>("LastError")
+                        .HasColumnType("text")
+                        .HasColumnName("last_error");
+
+                    b.Property<DateTimeOffset>("NextAttemptAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_attempt_at");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload");
+
+                    b.Property<DateTimeOffset?>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_at");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_outbox_messages");
+
+                    b.HasIndex("NextAttemptAt", "OccurredAt")
+                        .HasDatabaseName("ix_outbox_messages_pending")
+                        .HasFilter("processed_at IS NULL AND failed_at IS NULL");
+
+                    b.ToTable("outbox_messages", "identity");
+                });
+
+            modelBuilder.Entity("Akiron.BuildingBlocks.Persistence.DocumentCounter", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Series")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("series");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer")
+                        .HasColumnName("year");
+
+                    b.Property<long>("LastValue")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_value");
+
+                    b.HasKey("TenantId", "Series", "Year")
+                        .HasName("pk_document_counters");
+
+                    b.ToTable("document_counters", "identity");
+                });
+
+            modelBuilder.Entity("Akiron.Modules.Identity.Domain.Invitation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("AcceptedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("accepted_at");
+
+                    b.Property<Guid?>("AcceptedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("accepted_by");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)")
+                        .HasColumnName("email");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<Guid>("InvitedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("invited_by");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("token_hash");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_invitations");
+
+                    b.HasIndex("RoleId")
+                        .HasDatabaseName("ix_invitations_role_id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_invitations_token_hash");
+
+                    b.HasIndex("TenantId", "Email")
+                        .IsUnique()
+                        .HasDatabaseName("ix_invitations_tenant_id_email_open")
+                        .HasFilter("accepted_at IS NULL AND revoked_at IS NULL");
+
+                    b.ToTable("invitations", "identity");
+                });
+
             modelBuilder.Entity("Akiron.Modules.Identity.Domain.Membership", b =>
                 {
                     b.Property<Guid>("Id")
@@ -285,6 +445,23 @@ namespace Akiron.Modules.Identity.Persistence.Migrations
                         .HasDatabaseName("ix_users_email");
 
                     b.ToTable("users", "identity");
+                });
+
+            modelBuilder.Entity("Akiron.Modules.Identity.Domain.Invitation", b =>
+                {
+                    b.HasOne("Akiron.Modules.Identity.Domain.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_invitations_roles_role_id");
+
+                    b.HasOne("Akiron.Modules.Identity.Domain.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_invitations_tenants_tenant_id");
                 });
 
             modelBuilder.Entity("Akiron.Modules.Identity.Domain.Membership", b =>

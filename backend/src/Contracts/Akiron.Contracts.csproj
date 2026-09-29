@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Akiron.Contracts</RootNamespace>
+  </PropertyGroup>
+
+  <!-- Integration events and read interfaces shared between modules (ADR-0001). No logic, no persistence. -->
+  <ItemGroup>
+    <ProjectReference Include="..\BuildingBlocks\Akiron.BuildingBlocks.csproj" />
+  </ItemGroup>
+
+</Project>

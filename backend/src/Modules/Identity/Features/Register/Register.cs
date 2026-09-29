@@ -2,6 +2,7 @@ using Akiron.BuildingBlocks.Domain;
 using Akiron.BuildingBlocks.Modules;
 using Akiron.BuildingBlocks.Tenancy;
 using Akiron.BuildingBlocks.Web;
+using Akiron.Contracts.Identity;
 using Akiron.Modules.Identity.Domain;
 using Akiron.Modules.Identity.Features.Sessions;
 using Akiron.Modules.Identity.Persistence;
@@ -36,7 +37,8 @@ internal sealed class RegisterHandler(
     IPasswordHasher passwordHasher,
     SessionIssuer sessionIssuer,
     ITenantContext tenantContext,
-    PermissionCatalog permissionCatalog)
+    PermissionCatalog permissionCatalog,
+    TimeProvider timeProvider)
 {
     public async Task<Result<IssuedSession>> HandleAsync(RegisterCommand command, CancellationToken cancellationToken)
     {
@@ -62,6 +64,7 @@ internal sealed class RegisterHandler(
         db.Users.Add(user);
         db.Roles.AddRange(roles);
         db.Memberships.Add(Membership.Create(tenant.Id, user.Id, owner.Id));
+        db.Publish(new WorkspaceCreated(tenant.Id, timeProvider.GetUtcNow(), tenant.Name, user.Id.Value, user.FullName));
 
         var session = sessionIssuer.Issue(user, tenant, owner);
         await db.SaveChangesAsync(cancellationToken);

@@ -1,6 +1,8 @@
 using System.Reflection;
 using Akiron.BuildingBlocks.Modules;
+using Akiron.Contracts.Identity;
 using Akiron.Modules.Identity;
+using Akiron.Modules.Timeline;
 using NetArchTest.Rules;
 
 namespace Akiron.Tests.Architecture;
@@ -15,9 +17,11 @@ public sealed class ArchitectureTests
     private static readonly Assembly BuildingBlocks = typeof(IModule).Assembly;
 
     /// <summary>Every module assembly. Add each new module here when it is created.</summary>
-    private static readonly Assembly[] Modules = [typeof(IdentityModule).Assembly];
+    private static readonly Assembly[] Modules = [typeof(IdentityModule).Assembly, typeof(TimelineModule).Assembly];
 
-    private static readonly Assembly[] All = [BuildingBlocks, .. Modules, typeof(Program).Assembly];
+    private static readonly Assembly Contracts = typeof(WorkspaceCreated).Assembly;
+
+    private static readonly Assembly[] All = [BuildingBlocks, Contracts, .. Modules, typeof(Program).Assembly];
 
     public static TheoryData<string> ForbiddenNames => ["Services", "Repositories", "Managers", "Helpers", "Utils", "Dtos"];
 
@@ -40,6 +44,17 @@ public sealed class ArchitectureTests
         var result = Types.InAssembly(BuildingBlocks)
             .ShouldNot()
             .HaveDependencyOnAny("Akiron.Modules", "Akiron.Api")
+            .GetResult();
+
+        Assert.True(result.IsSuccessful, Failing(result));
+    }
+
+    [Fact]
+    public void Contracts_DependOnNoModule()
+    {
+        var result = Types.InAssembly(Contracts)
+            .ShouldNot()
+            .HaveDependencyOnAny("Akiron.Modules", "Akiron.Api", "Microsoft.EntityFrameworkCore", "Microsoft.AspNetCore")
             .GetResult();
 
         Assert.True(result.IsSuccessful, Failing(result));
@@ -97,12 +112,16 @@ public sealed class ArchitectureTests
             .SelectMany(module => module.GetTypes())
             .Where(type => type.Namespace?.EndsWith(".Domain", StringComparison.Ordinal) == true && type.IsClass)
             .SelectMany(type => type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly))
-            .Where(property => property.SetMethod?.IsPublic == true)
+            .Where(property => property.SetMethod?.IsPublic == true && !IsInitOnly(property))
             .Select(property => $"{property.DeclaringType!.Name}.{property.Name}")
             .ToList();
 
         Assert.True(offenders.Count == 0, $"Change state through methods, not public setters: {string.Join(", ", offenders)}");
     }
+
+    /// <summary><c>init</c> setters (records used as value objects) cannot change state after construction.</summary>
+    private static bool IsInitOnly(PropertyInfo property) =>
+        property.SetMethod!.ReturnParameter.GetRequiredCustomModifiers().Contains(typeof(System.Runtime.CompilerServices.IsExternalInit));
 
     private static string Failing(NetArchTest.Rules.TestResult result) =>
         "Violations: " + string.Join(", ", result.FailingTypeNames ?? []);

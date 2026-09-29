@@ -2,7 +2,9 @@
   <Folder Name="/src/">
     <Project Path="src/Akiron.Api/Akiron.Api.csproj" />
     <Project Path="src/BuildingBlocks/Akiron.BuildingBlocks.csproj" />
+    <Project Path="src/Contracts/Akiron.Contracts.csproj" />
     <Project Path="src/Modules/Identity/Akiron.Modules.Identity.csproj" />
+    <Project Path="src/Modules/Timeline/Akiron.Modules.Timeline.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Akiron.Tests.Architecture/Akiron.Tests.Architecture.csproj" />

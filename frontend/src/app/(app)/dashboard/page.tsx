@@ -2,9 +2,11 @@
 
 import { BriefcaseBusiness, FileText, UsersRound, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSession } from "@/features/identity/session";
+import { TimelineFeed } from "@/features/timeline/timeline-feed";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
+import { hasPermission, permissions } from "@/lib/permissions";
 
 const upcoming: { icon: LucideIcon; label: TranslationKey; phase: string }[] = [
   { icon: UsersRound, label: "dashboard.next.customers", phase: "Faz 2" },
@@ -18,6 +20,7 @@ export default function DashboardPage() {
   if (!session) return null;
 
   const firstName = session.fullName.split(" ")[0] ?? session.fullName;
+  const canReadTimeline = hasPermission(session.permissions, permissions.timeline.read);
 
   return (
     <div className="mx-auto grid max-w-5xl gap-6">
@@ -26,9 +29,27 @@ export default function DashboardPage() {
         <p className="text-muted-foreground">{t("dashboard.intro", { tenant: session.tenantName })}</p>
       </div>
 
-      <section className="grid gap-3">
-        <h2 className="text-muted-foreground text-sm font-medium">{t("dashboard.next.title")}</h2>
-        <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
+        {canReadTimeline ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("timeline.title")}</CardTitle>
+              <CardDescription>{t("timeline.description")}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TimelineFeed
+                subjectType="workspace"
+                subjectId={session.tenantId}
+                canWriteNotes={hasPermission(session.permissions, permissions.timeline.notesWrite)}
+              />
+            </CardContent>
+          </Card>
+        ) : (
+          <div />
+        )}
+
+        <section className="grid content-start gap-3">
+          <h2 className="text-muted-foreground text-sm font-medium">{t("dashboard.next.title")}</h2>
           {upcoming.map((item) => (
             <Card key={item.label} className="border-dashed">
               <CardHeader>
@@ -41,8 +62,8 @@ export default function DashboardPage() {
               </CardHeader>
             </Card>
           ))}
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   );
 }

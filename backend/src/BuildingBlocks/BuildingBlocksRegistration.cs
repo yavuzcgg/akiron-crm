@@ -23,6 +23,7 @@ public static class BuildingBlocksRegistration
         services.AddScoped<ITenantContext, TenantContext>();
         services.AddScoped<ICurrentUser, HttpCurrentUser>();
         services.AddScoped<TenantAuditInterceptor>();
+        services.AddSingleton<Email.IEmailSender, Email.LoggingEmailSender>();
 
         foreach (var module in modules)
         {

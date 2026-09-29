@@ -21,4 +21,6 @@ internal sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> opti
     public DbSet<Membership> Memberships => Set<Membership>();
 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
+    public DbSet<Invitation> Invitations => Set<Invitation>();
 }

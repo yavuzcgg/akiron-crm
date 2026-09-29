@@ -72,10 +72,32 @@ internal sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<Refre
     }
 }
 
+internal sealed class InvitationConfiguration : IEntityTypeConfiguration<Invitation>
+{
+    public void Configure(EntityTypeBuilder<Invitation> builder)
+    {
+        builder.HasKey(invitation => invitation.Id);
+        builder.Property(invitation => invitation.Id).ValueGeneratedNever();
+        builder.Property(invitation => invitation.Email).HasMaxLength(User.EmailMaxLength);
+        builder.Property(invitation => invitation.TokenHash).HasMaxLength(64);
+        builder.HasIndex(invitation => invitation.TokenHash).IsUnique();
+
+        // One open invitation per address and tenant; a new one replaces (revokes) the old.
+        builder.HasIndex(invitation => new { invitation.TenantId, invitation.Email })
+            .IsUnique()
+            .HasFilter("accepted_at IS NULL AND revoked_at IS NULL")
+            .HasDatabaseName(IdentityConstraints.InvitationOpenUnique);
+
+        builder.HasOne<Tenant>().WithMany().HasForeignKey(invitation => invitation.TenantId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Role>().WithMany().HasForeignKey(invitation => invitation.RoleId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
 internal static class IdentityConstraints
 {
     public const string TenantSlugUnique = "ix_tenants_slug";
     public const string UserEmailUnique = "ix_users_email";
     public const string RoleNameUnique = "ix_roles_tenant_id_name";
     public const string MembershipUnique = "ix_memberships_tenant_id_user_id";
+    public const string InvitationOpenUnique = "ix_invitations_tenant_id_email_open";
 }

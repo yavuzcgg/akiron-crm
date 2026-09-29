@@ -22,6 +22,7 @@ internal sealed class AccessTokenIssuer(IOptions<JwtOptions> options, TimeProvid
         {
             new(AkironClaimTypes.Subject, user.Id.ToString()),
             new(AkironClaimTypes.Email, user.Email),
+            new(AkironClaimTypes.Name, user.FullName),
             new(AkironClaimTypes.TenantId, tenant.Id.ToString()),
             new(AkironClaimTypes.Role, role.Name),
             new(JwtRegisteredClaimNames.Jti, Guid.CreateVersion7().ToString()),

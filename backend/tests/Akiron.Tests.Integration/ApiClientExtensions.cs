@@ -29,6 +29,12 @@ internal static class ApiClientExtensions
     public static Task<HttpResponseMessage> RefreshAsync(this HttpClient client) =>
         client.PostAsync(new Uri("/api/v1/identity/auth/refresh", UriKind.Relative), content: null);
 
+    public static Task<HttpResponseMessage> InviteAsync(this HttpClient client, string email, string role = "member") =>
+        client.PostAsJsonAsync("/api/v1/identity/invitations", new { email, role });
+
+    public static Task<HttpResponseMessage> AcceptInvitationAsync(this HttpClient client, string token, string password = Password, string? fullName = "Ayşe Yılmaz") =>
+        client.PostAsJsonAsync("/api/v1/identity/invitations/accept", new { token, password, fullName });
+
     /// <summary>The <c>code</c> of a ProblemDetails body (ADR-0006).</summary>
     public static async Task<string?> ReadErrorCodeAsync(this HttpResponseMessage response)
     {
