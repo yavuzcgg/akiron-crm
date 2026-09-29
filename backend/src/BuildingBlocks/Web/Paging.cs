@@ -1,10 +1,13 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Akiron.BuildingBlocks.Web;
 
 /// <summary>Bound from the query string with <c>[AsParameters]</c>. Out-of-range values are rejected, not clamped.</summary>
-public sealed record PageRequest(int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+public sealed record PageRequest(
+    [FromQuery(Name = "page")] int Page = 1,
+    [FromQuery(Name = "pageSize")] int PageSize = PageRequest.DefaultPageSize)
 {
     public const int DefaultPageSize = 20;
     public const int MaxPageSize = 100;

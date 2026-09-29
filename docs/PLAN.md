@@ -80,6 +80,17 @@ Modül bazında kapsam ve bağımlılıklar: [MODULES.md](MODULES.md).
 | 9 | Frontend kabuk: shadcn/ui, sidebar/topbar, login/register (RHF + zod), `useSession`, korumalı route, tipli TR/EN sözlük, tema token'ları | akiron-seo, lastik-depo | Login → dashboard → logout çalışır |
 | 10 | CI: backend build/test/trx, frontend tsc/lint/vitest/build, `dotnet format` doğrulaması, docker buildx | akiron-seo ci.yml | İlk PR yeşil |
 
+**Durum (29 Eyl 2026): tamamlandı.** 28 backend testi (mimari + Testcontainers üzerinde entegrasyon) ve 9 frontend testi yeşil; kayıt → oturum → ekip listesi → çıkış akışı gerçek API'ye karşı elle de doğrulandı.
+
+Plandan bilinçli sapmalar:
+
+- `Contracts` projesi ve birim test projesi açılmadı; ilk integration event'te / ilk veritabansız mantıkta eklenecek.
+- `IClock` yerine .NET'in yerleşik `TimeProvider`'ı kullanıldı.
+- Respawn alınmadı: testler her seferinde yeni tenant ve e-posta ile izole, paralel koşuyor.
+- Türkçe collation, ilk Türkçe ad sıralaması gereken tabloda (Faz 2, Cari) eklenecek.
+- TRX raporu ve docker buildx Sprint 3'e (prod compose ile birlikte) kaydı.
+- Yerel portlar diğer Akiron projeleriyle çakışmasın diye: Postgres 5434, API 5080, web 3100.
+
 ### Sprint 2
 Activity timeline (BuildingBlocks: her modül yazar, cari/iş kartı okur), onay motoru iskeleti (`ApprovalRequest`: adımlar, onaylayan rolü, durum), özel alan altyapısı (entity başına tipli tanım + `jsonb` değer + filtre), dosya deposu (MinIO/S3), denetim `changes` tablosu, domain event + outbox + Hangfire, bildirim merkezi (SignalR + e-posta), belge numaralama, para birimi + TCMB kur işi, kullanıcı davet akışı.
 

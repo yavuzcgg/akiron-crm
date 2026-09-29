@@ -6,7 +6,7 @@ Ajanslar için iş yönetimi ve ön muhasebe platformu — Türkiye'ye göre.
 
 **Stack:** ASP.NET Core 10 (modüler monolit) · Next.js · PostgreSQL
 
-> Durum: Faz 0 (iskelet) tamamlandı, Faz 1 (platform çekirdeği) başlıyor. Üretime hazır değildir.
+> Durum: Faz 1 / Sprint 1 tamamlandı — modüler iskelet, çok kiracılı veri katmanı, kimlik doğrulama (kayıt, giriş, oturum yenileme, izinler) ve uygulama kabuğu. Üretime hazır değildir.
 
 ## Belgeler
 
@@ -21,7 +21,7 @@ Ajanslar için iş yönetimi ve ön muhasebe platformu — Türkiye'ye göre.
 ## Yapı
 
 ```text
-backend/    ASP.NET Core Web API — modüler monolit (BuildingBlocks, Contracts, Modules/*, Akiron.Api)
+backend/    ASP.NET Core Web API — modüler monolit (BuildingBlocks, Modules/*, Akiron.Api)
 frontend/   Next.js (App Router, TypeScript, Tailwind, shadcn/ui)
 docs/       Plan, modül kataloğu, entegrasyonlar, ADR'ler
 ```
@@ -31,18 +31,20 @@ docs/       Plan, modül kataloğu, entegrasyonlar, ADR'ler
 Gereksinimler: .NET SDK 10, Node.js 22+, Docker
 
 ```bash
-# Veritabanı
+# Veritabanı (127.0.0.1:5434)
 docker compose up -d postgres
 
-# Backend  (http://localhost:5xxx/health)
+# Backend (http://localhost:5080 — API belgesi /scalar); ilk açılışta migration'lar uygulanır
 dotnet run --project backend/src/Akiron.Api
 
-# Frontend (http://localhost:3000)
+# Frontend (http://localhost:3100)
 cd frontend
 npm install
 npm run dev
 ```
 
+`http://localhost:3100/register` adresinden bir ajans oluşturup giriş yapabilirsiniz.
+
 ## Lisans
 
-[MIT](LICENSE)
+[Business Source License 1.1](LICENSE). Kaynak kod görünürdür; kişisel, eğitim ve değerlendirme amaçlı kullanım serbesttir. Barındırılan hizmet olarak sunmak veya ticari olarak dağıtmak için lisans gerekir. Her sürüm 4 yıl sonra Apache 2.0 lisansına geçer.

@@ -16,7 +16,9 @@ Talk to the owner in Turkish. Write code, database columns, commits and ADRs in 
 ## Backend (`backend/`)
 
 - .NET 10, Minimal APIs, EF Core + Npgsql, one schema per module (ADR-0001).
-- Layout: `src/BuildingBlocks`, `src/Contracts`, `src/Modules/<Module>`, `src/Akiron.Api` (host), `tests/{Architecture,Integration,Unit}`.
+- Layout: `src/BuildingBlocks`, `src/Modules/<Module>`, `src/Akiron.Api` (host), `tests/{Architecture,Integration}`. `src/Contracts` is added with the first integration event; a unit-test project with the first logic that needs no database.
+- New module: project under `src/Modules/<Name>` referencing only BuildingBlocks, an `IModule` class, a line in the host's module list (`Program.cs`) and one in `ArchitectureTests.Modules`.
+- Use `TimeProvider` for the clock, `ITenantContext` for the tenant, `ICurrentUser` for the actor; never `DateTime.Now` or claims directly.
 - A use case is a folder `Features/<UseCase>/` holding the command/query record, its validator, a `sealed` handler with `HandleAsync` returning `Result<T>`, and its endpoint mapping. No mediator (ADR-0003).
 - Forbidden folder and type names: `Services`, `Repositories`, `Managers`, `Helpers`, `Utils`, `Dtos`. Name things after what they do.
 - Entities: private setters, `Create`/`Update` factories, typed GUIDv7 ids (`CustomerId`), domain rules inside the entity.
@@ -31,20 +33,26 @@ Talk to the owner in Turkish. Write code, database columns, commits and ADRs in 
 ## Frontend (`frontend/`)
 
 - Next.js App Router, TypeScript strict, Tailwind v4, shadcn/ui, TanStack Query + Table, react-hook-form + zod.
-- API types are generated (`npm run api:gen`) from the backend OpenAPI document; never hand-write response interfaces.
+- API types are generated (`npm run api:gen`, with the API running) into `src/lib/api/schema.d.ts` and committed; never hand-write response interfaces. Call the API through `api` from `src/lib/api/client.ts` and `unwrap()` results.
+- The browser only talks to the Next.js origin; `next.config.ts` rewrites `/api/*` to the backend, so session cookies stay first-party. Never put tokens in JavaScript.
+- shadcn/ui here is the Base UI flavour (`base-nova`): compose with `render={<Link … />}`, not `asChild`.
 - All user-facing text goes through the typed dictionary (`src/lib/i18n`); `tr` is the default, missing `en` keys are a type error. Error codes map to text there.
 - Route groups: `(auth)`, `(app)/<module>`, `(portal)`. Feature code lives in `src/features/<module>/`.
 - Money and dates are formatted with `src/lib/format.ts` (`tr-TR`), never inline.
 
 ## Commands
 
+Local ports avoid the other Akiron projects on this machine: Postgres 5434, API 5080, web 3100.
+
 ```bash
-docker compose up -d postgres                 # local database
-dotnet build backend/Akiron.slnx              # warnings are errors
-dotnet test backend/Akiron.slnx               # needs Docker for Testcontainers
-dotnet run --project backend/src/Akiron.Api   # http://localhost:5xxx/health
-cd frontend && npm run dev                    # http://localhost:3000
-cd frontend && npm run api:gen && npm run lint && npm run build
+docker compose up -d postgres                          # Postgres 17 on 127.0.0.1:5434
+dotnet build backend/Akiron.slnx                       # warnings are errors
+dotnet test --solution backend/Akiron.slnx             # needs Docker for Testcontainers
+dotnet format backend/Akiron.slnx --verify-no-changes
+dotnet run --project backend/src/Akiron.Api            # http://localhost:5080 (Scalar at /scalar, health at /health/ready)
+cd frontend && npm run dev                             # http://localhost:3100
+cd frontend && npm run api:gen                         # regenerate API types (API must be running)
+cd frontend && npm run typecheck && npm run lint && npm test && npm run build
 ```
 
 ## Process

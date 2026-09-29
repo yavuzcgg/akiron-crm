@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Akiron.BuildingBlocks.Modules;
 using Akiron.BuildingBlocks.Persistence;
 using Akiron.BuildingBlocks.Security;
@@ -29,6 +30,10 @@ public static class BuildingBlocksRegistration
         }
 
         services.AddSingleton<PermissionCatalog>();
+
+        // Numbers are numbers: the web default also accepts "12" for 12, which makes the OpenAPI
+        // document type every integer as "number | string" in the generated client.
+        services.ConfigureHttpJsonOptions(options => options.SerializerOptions.NumberHandling = JsonNumberHandling.Strict);
 
         services.AddProblemDetails(options => options.CustomizeProblemDetails = context =>
             context.ProblemDetails.Extensions["correlationId"] = context.HttpContext.TraceIdentifier);
