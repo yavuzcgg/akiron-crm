@@ -8,9 +8,22 @@ Turkish bookkeeping has hard rules: invoices are legal e-documents issued throug
 
 ## Decision
 
-**Document chain**
-- Agency chain: Quote → Work order → Invoice → Collection. Product chain (phase 7): Quote → Sales order → Delivery note → Invoice. Each document stores its source document id; nothing is copied without a link.
-- Status flow for every document: `Draft → Sent → Approved | Rejected → Converted`. A finalized document (sent invoice, approved quote) is immutable; changes create a new revision or a reversing document (return invoice, cancellation).
+**Document chain (canonical; PLAN.md and MODULES.md follow this)**
+
+Commercial documents form a chain; money does not. Collections and payments are a separate axis, linked to documents by allocations.
+
+```text
+Commercial axis                  Money axis
+Quote ──► Contract? ──► WorkOrder ──► Invoice
+  │           │             │            │
+  └───────────┴─────────────┴────────────┴──◄ Allocation ──► Collection / Payment
+```
+
+- Commercial chain, agency: Quote → Contract (optional; retainers and larger jobs) → Work order → Invoice. Product chain (phase 7): Quote → Sales order → Delivery note → Invoice. Each document stores its source document id; nothing is copied without a link. One contract can produce many work orders and many invoices (monthly retainer).
+- **A collection is never a step in the chain.** It is recorded against the party (cari) and then allocated, in part or in full, to any open item: a quote or contract (advance/deposit), a payment-plan instalment, or an invoice. One collection can be split across several items; one invoice can be settled by several collections.
+- An unallocated collection is a **credit on the party's account** (advance). When the invoice is issued later, the advance is matched to it: automatically by the order agreed on the payment plan, or by hand. This mirrors Logo's model: every module posts debit/credit lines to one account ledger (`LG_CLFLINE`), and open items with their paid amount and the item that closed them are tracked separately (`LG_PAYTRANS`).
+- Therefore the finance core is three things: the **party ledger** (append-only debit/credit lines from invoices, collections, payments, checks, openings), **open items** (what is due and when: invoice lines, instalments, deposits requested), and **allocations** (which money closed which item, with the exchange rate used). Balances and aging are computed from these, never stored on the party.
+- Status flow for every commercial document: `Draft → Sent → Approved | Rejected → Converted`. A finalized document (sent invoice, approved quote) is immutable; changes create a new revision or a reversing document (return invoice, cancellation). Reversing a collection reverses its allocations with it.
 - Financial records are never deleted; they are cancelled or reversed. Other entities soft-delete.
 - A tenant-level **lock date** blocks edits to documents dated before it.
 
@@ -34,6 +47,8 @@ Turkish bookkeeping has hard rules: invoices are legal e-documents issued throug
 
 - Database sequences for numbering (lastik-depo) — skip numbers on rollback and do not reset yearly; fine internally, unacceptable for invoices.
 - Storing amounts only in TRY — loses the original currency needed for exchange-difference invoices later.
+- Collection as the step after the invoice (Invoice → Collection) — cannot represent deposits taken when the quote is approved, instalments paid before invoicing, or one transfer that pays three invoices; all three are everyday cases for agencies.
+- A running balance column on the party — fast to read, but it drifts from the ledger the first time a bug or a concurrent write slips through; computed balances (with an index, later a snapshot) stay correct by construction.
 
 ## Consequences
 

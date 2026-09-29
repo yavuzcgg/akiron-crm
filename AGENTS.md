@@ -25,6 +25,10 @@ Talk to the owner in Turkish. Write code, database columns, commits and ADRs in 
 - Routes: `/api/v1/<module>/<kebab-case>`; paging `page`/`pageSize` capped at 100, invalid values rejected.
 - Errors: ProblemDetails with a stable code `module.resource.reason` (ADR-0006). Do not put Turkish text in the API.
 - Money: `Money` value object, `numeric(18,2)` totals, `numeric(18,4)` unit prices, rate snapshot per document (ADR-0004).
+- Counterparties are one `Party` (Cari) with customer/supplier flags; never create `Customer` or `Supplier` entities (ADR-0008).
+- Collections and payments are allocated to open items, never chained after the invoice; balances are computed from the party ledger (ADR-0004).
+- A module is not done until its business events are projected onto the activity timeline with a typed entry and TR/EN templates (ADR-0009).
+- `docs/vendor/` holds licensed reference material (Logo data dictionary) and is git-ignored; never commit or quote it at length.
 - Dates: UTC in the database; `DateOnly` for calendar dates (invoice date, due date).
 - Every endpoint declares `.RequirePermission(…)` unless it is in the `Public` group.
 - Migrations: `dotnet ef migrations add <Name> --project src/Modules/<Module> --startup-project src/Akiron.Api --context <Module>DbContext`. Never `EnsureCreated`.

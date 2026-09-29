@@ -2,7 +2,7 @@
 
 Ajanslar için iş yönetimi ve ön muhasebe platformu — Türkiye'ye göre.
 
-**Müşteri → Teklif → İş Emri → Zaman/Revizyon → Fatura → Tahsilat**, üstüne WhatsApp/e-posta iletişimi, müşteri portalı ve içerik takvimi. Önce dijital/reklam ajansları, sonra genel KOBİ (stok, satın alma, araç/demirbaş, Logo/Bay.t entegrasyonu).
+**Müşteri → Teklif → Sözleşme → İş Emri → Fatura**, her aşamada tahsilat (kapora, taksit, fatura ödemesi) ve hepsini tek akışta gösteren müşteri zaman çizelgesi; üstüne WhatsApp/e-posta iletişimi, müşteri portalı ve içerik takvimi. Önce dijital/reklam ajansları, sonra genel KOBİ (stok, satın alma, araç/demirbaş, Logo/Bay.t entegrasyonu).
 
 **Stack:** ASP.NET Core 10 (modüler monolit) · Next.js · PostgreSQL
 

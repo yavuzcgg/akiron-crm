@@ -7,7 +7,7 @@
 
 **Müşteriden işe, işten tahsilata kadar şirket operasyonlarını tek yerde yöneten platform.**
 
-Müşteri → Teklif → Sözleşme → İş Emri → Zaman/Revizyon → Tahsilat → Fatura. Üstüne WhatsApp/e-posta iletişimi, müşteri portalı ve içerik takvimi. Klasik CRM değil; Türkiye'ye göre tasarlanmış, **modül modül satılan** bir iş yönetimi platformu. Önce ajanslar, sonra aynı çekirdek üzerine sektör paketleri.
+Müşteri → Teklif → Sözleşme → İş Emri → Zaman/Revizyon → Fatura; tahsilat bu zincirin bir adımı değil, her aşamada (kapora, taksit, fatura ödemesi) alınıp belgelere eşleştirilir. Üstüne WhatsApp/e-posta iletişimi, müşteri portalı ve içerik takvimi. Klasik CRM değil; Türkiye'ye göre tasarlanmış, **modül modül satılan** bir iş yönetimi platformu. Önce ajanslar, sonra aynı çekirdek üzerine sektör paketleri.
 
 ## Hedef kitle ve dağıtım
 
@@ -35,9 +35,9 @@ Mekanizma: `Entitlement` (tenant × modül × koltuk × bitiş) + `RequireModule
 
 ## Tasarım ilkeleri
 
-1. **Cari hesap omurgadır.** Müşteri ve tedarikçi tek "Cari" kavramıdır; her tahsilat, fatura, çek, gider bir cariye bağlanır.
-2. **Belge zinciri kopyalanmaz, türetilir.** Ajans zinciri: Teklif → Sözleşme/İş Emri → Tahsilat → Fatura. Ürün zinciri (Faz 7): Teklif → Sipariş → İrsaliye → Fatura. Her belge kaynağını bilir.
-3. **Her şey tek zaman çizelgesine düşer.** Activity timeline çekirdek altyapıdır; her modül ona yazar ("teklif gönderildi → müşteri görüntüledi → ödendi → iş açıldı"), müşteri kartı onu okur.
+1. **Cari hesap omurgadır.** Müşteri ve tedarikçi tek "Cari" kavramıdır (alıcı/satıcı bayrakları, ikisi birden olabilir); ayrı Customer/Supplier nesnesi yok. Her tahsilat, fatura, çek, gider bir cariye bağlanır. [ADR-0008](adr/0008-single-party-cari.md).
+2. **Belge zinciri kopyalanmaz, türetilir; para zincirde değil.** Ticari zincir: Teklif → Sözleşme (opsiyonel) → İş Emri → Fatura; ürün zinciri (Faz 7): Teklif → Sipariş → İrsaliye → Fatura. Tahsilat/ödeme cariye kaydedilir ve herhangi bir açık kaleme (kapora, taksit, fatura) kısmen veya tamamen eşleştirilir; eşleşmeyen tahsilat carinin alacak (avans) bakiyesidir. Logo'nun cari hareket + borç kapama modeliyle aynı. [ADR-0004](adr/0004-document-chain-money-tax.md).
+3. **Her şey tek zaman çizelgesine düşer.** Activity timeline ürünün merkezi ekranıdır, log değildir ([ADR-0009](adr/0009-activity-timeline.md)); her modül ona yazar ("teklif gönderildi → müşteri görüntüledi → ödendi → iş açıldı"), müşteri kartı onu okur.
 4. **Modüler monolit, modül = satılabilir birim.** Her modül kendi Postgres şemasında; modüller arası iletişim olaylarla; tenant başına modül aç/kapa. [ADR-0001](adr/0001-modular-monolith.md).
 5. **Her dış servis bir arayüzün arkasında.** Ödeme, mesajlaşma, e-Fatura, ERP, sosyal yayın — sağlayıcı değişir, modül değişmez. [ADR-0005](adr/0005-integrations-behind-providers.md).
 6. **Yasal sınırlar baştan.** Fatura yalnızca GİB entegratörü üzerinden; finansal kayıt silinmez; KVKK (rıza, dışa aktarma, silme). [ADR-0004](adr/0004-document-chain-money-tax.md).
@@ -92,7 +92,7 @@ Plandan bilinçli sapmalar:
 - Yerel portlar diğer Akiron projeleriyle çakışmasın diye: Postgres 5434, API 5080, web 3100.
 
 ### Sprint 2
-Activity timeline (BuildingBlocks: her modül yazar, cari/iş kartı okur), onay motoru iskeleti (`ApprovalRequest`: adımlar, onaylayan rolü, durum), özel alan altyapısı (entity başına tipli tanım + `jsonb` değer + filtre), dosya deposu (MinIO/S3), denetim `changes` tablosu, domain event + outbox + Hangfire, bildirim merkezi (SignalR + e-posta), belge numaralama, para birimi + TCMB kur işi, kullanıcı davet akışı.
+Domain event + outbox + Hangfire (timeline bunun üstüne kurulur), activity timeline (ADR-0009: `timeline` şeması, projektörler, notlar, keyset sayfalama; her modülün "bitti" tanımına timeline projektörü eklenir), onay motoru iskeleti (`ApprovalRequest`: adımlar, onaylayan rolü, durum), özel alan altyapısı (entity başına tipli tanım + `jsonb` değer + filtre), dosya deposu (MinIO/S3), denetim `changes` tablosu, bildirim merkezi (SignalR + e-posta), belge numaralama, para birimi + TCMB kur işi, kullanıcı davet akışı.
 
 ### Sprint 3
 `Entitlement` + modül bayrakları + `RequireModule()`, ayarlar sayfası, docker-compose prod profili (api, web, postgres, minio), yedek/geri yükleme scripti, Playwright kritik akış, güvenlik temelleri (rate limit, CORS, secrets doğrulama), Faz 2 veri modeli ADR'leri.

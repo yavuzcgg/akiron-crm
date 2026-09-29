@@ -487,3 +487,6 @@ node_modules/
 out/
 *.tsbuildinfo
 .env*.local
+
+# Vendor reference material (licensed, never published): Logo data dictionaries etc.
+docs/vendor/

@@ -9,7 +9,7 @@
 | --- | --- | --- | --- |
 | Kiracı & Entitlement | Tenant, şube (opsiyonel), **modül bayrakları** (`Entitlement`: modül × koltuk × bitiş), `RequireModule()`, ayarlar; on-prem imzalı lisans dosyası ilk on-prem müşteride | – | 1 |
 | Kimlik & Yetki | Kayıt/giriş, JWT + refresh (httpOnly cookie), 2FA (sonra), **izin tabanlı** roller (Owner/Admin/Personel/özel), müşteri-portal kullanıcısı ayrı tip | Kiracı | 1 |
-| **Activity timeline** | Çekirdek olay akışı: her modül yazar ("teklif gönderildi", "ödeme alındı", "iş açıldı"); cari, iş ve kullanıcı kartları okur | Kimlik | 1 |
+| **Activity timeline** | Ürünün merkezi ekranı ([ADR-0009](adr/0009-activity-timeline.md)): tipli kayıtlar (tip anahtarı, aktör, payload, görünürlük iç/portal), bir kayıt birden çok akışta (cari + fatura + iş); modüller olay yayınlar, timeline projekte eder; notlar/aramalar doğrudan yazılır | Kimlik, Outbox | 1 |
 | Denetim izi | Kim, neyi, ne zaman (alan bazlı eski/yeni); finans kayıtlarında zorunlu | Kimlik | 1 |
 | Dosya deposu | S3 uyumlu (MinIO lokal, R2/S3 prod), her kayda dosya ekleme, sürüm | Kiracı | 1 |
 | Bildirim merkezi | Uygulama içi (SignalR) + e-posta; kanal soyutlaması (WhatsApp/SMS sonra takılır); kullanıcı tercihleri | Kimlik | 1 |
@@ -46,7 +46,7 @@
 
 | Modül | Kapsam | Bağımlı | Faz |
 | --- | --- | --- | --- |
-| **Finance Lite** | Tahsilat kaydı (nakit, havale/EFT, kart, çek/senet notu), ödeme planı (taksit/vade), cari bakiye ve basit ekstre, vade hatırlatması; **fatura kesilecekler listesi** (muhasebeciye) | Cari, Sözleşme | 3 |
+| **Finance Lite** | Cari hareket defteri (borç/alacak satırları), açık kalemler ve **eşleştirme** (bir tahsilat birden çok kaleme, bir kalem birden çok tahsilata; eşleşmeyen tahsilat = avans, ADR-0004); tahsilat kaydı (nakit, havale/EFT, kart, çek/senet notu), ödeme planı (taksit/vade), cari bakiye ve basit ekstre, vade hatırlatması; **fatura kesilecekler listesi** (muhasebeciye) | Cari, Sözleşme | 3 |
 | **Sanal POS (PayTR)** | Link API ile ödeme linki (teklif kaporası, ödeme planı taksiti), portaldan kartla ödeme, taksit, callback → tahsilat otomatik + timeline; ikinci sağlayıcı iyzico | Finance Lite | 3 |
 | **Fatura** | Satış faturası (iş/sözleşme/tekliften; Faz 7'de siparişten); türler: satış / iade / tevkifatlı / istisna; **gelen belgeler:** alış faturası, **e-SMM**, **gider pusulası**; vergi motoru (KDV, tevkifat kodları, stopaj, istisna), döviz + kur, PDF; **e-Fatura/e-Arşiv entegratörü:** alıcı mükellef sorgusu, gönderim, durum, iptal/itiraz; **GİB numarası entegratörden** | Finance Lite, Katalog | 5 |
 | Tahsilat eşleme | Tahsilatın faturalara dağıtımı (kısmi, çoklu), açık kalem takibi | Fatura | 5 |
