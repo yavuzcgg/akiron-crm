@@ -1,4 +1,5 @@
 using Akiron.BuildingBlocks.Domain;
+using Akiron.BuildingBlocks.Modules;
 using Akiron.BuildingBlocks.Tenancy;
 using Akiron.Modules.Identity.Domain;
 using Akiron.Modules.Identity.Persistence;
@@ -81,7 +82,7 @@ public sealed class TenantAuditInterceptorTests(ApiFixture api)
         var db = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
 
         db.Tenants.Add(tenant);
-        db.Roles.AddRange(SystemRoles.CreateFor(tenant.Id, []));
+        db.Roles.AddRange(SystemRoles.CreateFor(tenant.Id, new PermissionCatalog([])));
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         return tenant.Id;

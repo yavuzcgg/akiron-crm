@@ -122,9 +122,12 @@ public sealed class TimelineTests(ApiFixture api)
         var session = await RegisterAsync(owner);
         var memberEmail = ApiClientExtensions.UniqueEmail();
         using var _ = await owner.InviteAsync(memberEmail);
-        using var member = api.CreateClient();
-        using var __ = await member.AcceptInvitationAsync(api.InvitationTokenFor(memberEmail));
+        using var accepted = await api.CreateClient().AcceptInvitationAsync(api.InvitationTokenFor(memberEmail));
 
+        // Members read the timeline by default; take it away to see the check.
+        await api.SetRolePermissionsAsync(session.TenantId, "member");
+        using var member = api.CreateClient();
+        using var __ = await member.LoginAsync(memberEmail);
         using var response = await member.GetAsync(StreamUri(session.TenantId), TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);

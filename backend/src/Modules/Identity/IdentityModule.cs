@@ -11,6 +11,7 @@ using Akiron.Modules.Identity.Features.Logout;
 using Akiron.Modules.Identity.Features.RefreshSession;
 using Akiron.Modules.Identity.Features.Register;
 using Akiron.Modules.Identity.Features.Sessions;
+using Akiron.Modules.Identity.Features.SystemRoleSync;
 using Akiron.Modules.Identity.Persistence;
 using Akiron.Modules.Identity.Security;
 using FluentValidation;
@@ -45,6 +46,8 @@ public sealed class IdentityModule : IModule
         services.AddSingleton<AuthCookies>();
         services.AddScoped<SessionIssuer>();
         services.AddScoped<InvitationLookup>();
+        services.AddScoped<SystemRoleSync>();
+        services.AddHostedService<SystemRoleSyncService>();
 
         services.Configure<ConstraintErrorMap>(map => map.Add(IdentityConstraints.UserEmailUnique, IdentityErrors.EmailTaken));
 

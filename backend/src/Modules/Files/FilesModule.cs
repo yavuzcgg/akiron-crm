@@ -24,6 +24,8 @@ public sealed class FilesModule : IModule
 
     public IReadOnlyCollection<string> Permissions => FilesPermissions.All;
 
+    public IReadOnlyCollection<string> MemberPermissions => FilesPermissions.All;
+
     public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
         services.AddModuleDbContext<FilesDbContext>(configuration, FilesDbContext.SchemaName);

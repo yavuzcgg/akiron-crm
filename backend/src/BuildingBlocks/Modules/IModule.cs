@@ -16,6 +16,12 @@ public interface IModule
     /// <summary>Every permission the module's endpoints can demand.</summary>
     IReadOnlyCollection<string> Permissions { get; }
 
+    /// <summary>
+    /// What the built-in Member role gets from this module: the day-to-day work every staff
+    /// member does. Finance, clients and team management stay with owners and admins.
+    /// </summary>
+    IReadOnlyCollection<string> MemberPermissions => [];
+
     void AddServices(IServiceCollection services, IConfiguration configuration);
 
     /// <summary>Maps endpoints on a group already rooted at <c>/api/v1/{name}</c>.</summary>

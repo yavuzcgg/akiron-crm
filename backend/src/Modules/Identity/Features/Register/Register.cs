@@ -57,7 +57,7 @@ internal sealed class RegisterHandler(
         tenantContext.Bind(tenant.Id);
 
         var user = User.Create(email, command.FullName, passwordHasher.Hash(command.Password));
-        var roles = SystemRoles.CreateFor(tenant.Id, permissionCatalog.All);
+        var roles = SystemRoles.CreateFor(tenant.Id, permissionCatalog);
         var owner = roles.Single(role => role.Name == SystemRoles.Owner);
 
         db.Tenants.Add(tenant);

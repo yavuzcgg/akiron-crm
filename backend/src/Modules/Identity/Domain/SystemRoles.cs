@@ -1,4 +1,5 @@
 using Akiron.BuildingBlocks.Domain;
+using Akiron.BuildingBlocks.Modules;
 using Akiron.BuildingBlocks.Security;
 
 namespace Akiron.Modules.Identity.Domain;
@@ -16,13 +17,18 @@ public static class SystemRoles
         IdentityPermissions.TenantManage,
     };
 
-    /// <param name="allPermissions">Every permission of every loaded module.</param>
-    public static IReadOnlyList<Role> CreateFor(TenantId tenantId, IEnumerable<string> allPermissions) =>
-    [
-        Role.CreateSystem(tenantId, Owner, [PermissionNames.All]),
-        Role.CreateSystem(tenantId, Admin, allPermissions.Where(permission => !OwnerOnly.Contains(permission))),
+    /// <summary>
+    /// What each system role holds with the modules loaded now. Recomputed at every start
+    /// (SystemRoleSync), so a module added later reaches tenants created before it.
+    /// </summary>
+    public static IReadOnlyDictionary<string, IReadOnlyList<string>> Templates(PermissionCatalog catalog) =>
+        new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
+        {
+            [Owner] = [PermissionNames.All],
+            [Admin] = catalog.All.Where(permission => !OwnerOnly.Contains(permission)).ToList(),
+            [Member] = catalog.MemberDefaults,
+        };
 
-        // Deliberately empty: each tenant decides what staff may see (finance, for instance).
-        Role.CreateSystem(tenantId, Member, []),
-    ];
+    public static IReadOnlyList<Role> CreateFor(TenantId tenantId, PermissionCatalog catalog) =>
+        Templates(catalog).Select(template => Role.CreateSystem(tenantId, template.Key, template.Value)).ToList();
 }

@@ -32,6 +32,19 @@ public sealed class Role : Entity<RoleId>, ITenantScoped, IAuditable
 
     public UserId? UpdatedBy { get; private set; }
 
+    /// <summary>Sets the permission list; returns false when it already held exactly these.</summary>
+    public bool ReplacePermissions(IEnumerable<string> permissions)
+    {
+        var next = permissions.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToList();
+        if (Permissions.Order(StringComparer.Ordinal).SequenceEqual(next, StringComparer.Ordinal))
+        {
+            return false;
+        }
+
+        Permissions = next;
+        return true;
+    }
+
     public static Role CreateSystem(TenantId tenantId, string name, IEnumerable<string> permissions) =>
         new(RoleId.New(), tenantId, name, permissions.Distinct(StringComparer.Ordinal).ToList(), isSystem: true);
 }

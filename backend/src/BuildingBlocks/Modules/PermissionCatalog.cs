@@ -8,4 +8,11 @@ public sealed class PermissionCatalog(IEnumerable<IModule> modules)
         .Distinct(StringComparer.Ordinal)
         .Order(StringComparer.Ordinal)
         .ToList();
+
+    /// <summary>The built-in Member role's permissions (<see cref="IModule.MemberPermissions"/>).</summary>
+    public IReadOnlyList<string> MemberDefaults { get; } = modules
+        .SelectMany(module => module.MemberPermissions)
+        .Distinct(StringComparer.Ordinal)
+        .Order(StringComparer.Ordinal)
+        .ToList();
 }

@@ -2,8 +2,11 @@ using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 using Akiron.BuildingBlocks.Email;
 using Akiron.BuildingBlocks.Events;
+using Akiron.Modules.Identity.Features.SystemRoleSync;
+using Akiron.Modules.Identity.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Testcontainers.Minio;
@@ -119,6 +122,25 @@ public sealed partial class ApiFixture : IAsyncLifetime
 
     [GeneratedRegex(@"/reset-password\?token=(?<token>[0-9A-F]+)")]
     private static partial Regex ResetLink();
+
+    /// <summary>Overwrites a system role's permissions, e.g. to look like a tenant from before a module existed.</summary>
+    public async Task SetRolePermissionsAsync(Guid tenantId, string roleName, params string[] permissions)
+    {
+        await using var scope = CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+        await db.Roles
+            .IgnoreQueryFilters()
+            .Where(role => role.TenantId == Akiron.BuildingBlocks.Domain.TenantId.From(tenantId) && role.Name == roleName)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(role => role.Permissions, permissions.ToList()));
+    }
+
+    /// <summary>What the host does at start-up: brings system roles up to the current templates.</summary>
+    public async Task<int> SyncSystemRolesAsync(Guid tenantId)
+    {
+        await using var scope = CreateScope();
+        return await scope.ServiceProvider.GetRequiredService<SystemRoleSync>()
+            .SyncAsync(CancellationToken.None, Akiron.BuildingBlocks.Domain.TenantId.From(tenantId));
+    }
 
     public async ValueTask DisposeAsync()
     {

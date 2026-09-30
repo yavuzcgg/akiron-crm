@@ -25,6 +25,8 @@ public sealed class TimelineModule : IModule
 
     public IReadOnlyCollection<string> Permissions => TimelinePermissions.All;
 
+    public IReadOnlyCollection<string> MemberPermissions => TimelinePermissions.All;
+
     public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
         services.AddModuleDbContext<TimelineDbContext>(configuration, TimelineDbContext.SchemaName);
