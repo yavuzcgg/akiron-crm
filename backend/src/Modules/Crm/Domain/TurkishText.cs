@@ -10,7 +10,14 @@ namespace Akiron.Modules.Crm.Domain;
 /// </summary>
 public static class TurkishText
 {
+    /// <summary>Escape character for <see cref="ContainsPattern"/> in <c>LIKE … ESCAPE</c>.</summary>
+    public const string LikeEscape = "\\";
+
     private static readonly CultureInfo Turkish = CultureInfo.GetCultureInfo("tr-TR");
+
+    /// <summary>A LIKE pattern matching <paramref name="text"/> anywhere, with its wildcards taken literally.</summary>
+    public static string ContainsPattern(string text) =>
+        "%" + text.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("%", "\\%", StringComparison.Ordinal).Replace("_", "\\_", StringComparison.Ordinal) + "%";
 
     /// <summary>Lower-case with Turkish rules, then fold ı ş ğ ü ö ç (and other accents) to plain ASCII.</summary>
     public static string Fold(string? value)

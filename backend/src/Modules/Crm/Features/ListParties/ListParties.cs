@@ -45,8 +45,8 @@ internal sealed class ListPartiesHandler(CrmDbContext db)
         var search = TurkishText.Fold(filter.Search);
         if (search.Length > 0)
         {
-            var pattern = "%" + search.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_") + "%";
-            query = query.Where(party => EF.Functions.Like(party.SearchText, pattern, "\\"));
+            var pattern = TurkishText.ContainsPattern(search);
+            query = query.Where(party => EF.Functions.Like(party.SearchText, pattern, TurkishText.LikeEscape));
         }
 
         query = filter.Role switch

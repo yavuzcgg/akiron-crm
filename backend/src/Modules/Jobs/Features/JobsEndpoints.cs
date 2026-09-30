@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Akiron.BuildingBlocks.Domain;
 using Akiron.BuildingBlocks.Security;
 using Akiron.BuildingBlocks.Web;
+using Akiron.Contracts.Crm;
 using Akiron.Contracts.Identity;
 using Akiron.Modules.Jobs.Features.ArchiveWorkOrder;
 using Akiron.Modules.Jobs.Features.CreateWorkOrder;
@@ -32,6 +33,15 @@ internal static class JobsEndpoints
             .RequirePermission(JobsPermissions.WorkOrdersRead)
             .Produces<IReadOnlyList<MemberSummary>>()
             .WithSummary("People who can be assigned to work orders");
+
+        // The client picker: people who run work orders need client names even without CRM access.
+        endpoints.MapGet("/clients", async (string? search, IPartyDirectory parties, CancellationToken cancellationToken) =>
+                search is { Length: > 100 }
+                    ? (IResult)Error.Validation("common.validation.failed", "Search at most 100 characters.").ToProblem()
+                    : TypedResults.Ok(await parties.SearchCustomersAsync(search, 20, cancellationToken)))
+            .RequirePermission(JobsPermissions.WorkOrdersWrite)
+            .Produces<IReadOnlyList<PartySummary>>()
+            .WithSummary("Customers to link a work order to (name and code only)");
     }
 
     private static void MapStages(RouteGroupBuilder stages)

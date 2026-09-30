@@ -279,13 +279,17 @@ public sealed class WorkOrderTests(ApiFixture api)
     {
         var (owner, _) = await OwnerAsync();
         var (member, memberId) = await MemberOfAsync(owner);
+        using var client = await owner.PostAsJsonAsync("/api/v1/crm/parties", new { kind = "company", name = "IŞIK Tekstil", isCustomer = true, isSupplier = false }, Cancel);
+        using var supplier = await owner.PostAsJsonAsync("/api/v1/crm/parties", new { kind = "company", name = "Işık Kâğıt", isCustomer = false, isSupplier = true }, Cancel);
 
-        var workOrder = await CreateAsync(member, new { title = "Üyenin işi", assigneeIds = new[] { memberId } });
+        var picker = await member.GetFromJsonAsync<JsonElement>("/api/v1/jobs/clients?search=isik", Cancel);
+        var clientId = picker.EnumerateArray().Single().GetProperty("partyId").GetGuid();
+        var workOrder = await CreateAsync(member, new { title = "Üyenin işi", partyId = clientId, assigneeIds = new[] { memberId } });
         using var stage = await member.PostAsJsonAsync("/api/v1/jobs/stages", new { name = "Yeni", category = "active" }, Cancel);
         using var people = await member.GetAsync("/api/v1/jobs/assignable-members", Cancel);
         using var mine = await member.GetAsync($"{WorkOrders}/board?mine=true", Cancel);
 
-        Assert.Equal("Üyenin işi", workOrder.Title);
+        Assert.Equal("IŞIK Tekstil", workOrder.PartyName);
         Assert.Equal(HttpStatusCode.Forbidden, stage.StatusCode);
         Assert.Equal(2, (await people.Content.ReadFromJsonAsync<JsonElement>(Cancel)).GetArrayLength());
         Assert.Single((await mine.Content.ReadFromJsonAsync<BoardResponse>(Cancel))!.WorkOrders);

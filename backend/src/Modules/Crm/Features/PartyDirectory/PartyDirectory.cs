@@ -16,4 +16,21 @@ internal sealed class PartyDirectory(CrmDbContext db) : IPartyDirectory
             .Select(party => new PartySummary(party.Id.Value, party.Code, party.Name))
             .FirstOrDefaultAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyList<PartySummary>> SearchCustomersAsync(string? search, int limit, CancellationToken cancellationToken)
+    {
+        var query = db.Parties.Where(party => party.IsCustomer);
+        var folded = TurkishText.Fold(search);
+        if (folded.Length > 0)
+        {
+            var pattern = TurkishText.ContainsPattern(folded);
+            query = query.Where(party => EF.Functions.Like(party.SearchText, pattern, TurkishText.LikeEscape));
+        }
+
+        return await query
+            .OrderBy(party => party.Name)
+            .Take(limit)
+            .Select(party => new PartySummary(party.Id.Value, party.Code, party.Name))
+            .ToListAsync(cancellationToken);
+    }
 }
