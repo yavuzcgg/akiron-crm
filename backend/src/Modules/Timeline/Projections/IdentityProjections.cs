@@ -25,6 +25,21 @@ internal sealed class WorkspaceCreatedProjection(TimelineWriter writer) : IInteg
             cancellationToken);
 }
 
+internal sealed class WorkspaceRenamedProjection(TimelineWriter writer) : IIntegrationEventConsumer<WorkspaceRenamed>
+{
+    public Task HandleAsync(WorkspaceRenamed integrationEvent, CancellationToken cancellationToken) =>
+        writer.WriteAsync(
+            TimelineEntry.Create(
+                integrationEvent.TenantId,
+                TimelineEntryTypes.WorkspaceRenamed,
+                integrationEvent.OccurredAt,
+                TimelineActor.User(integrationEvent.RenamedByUserId, integrationEvent.RenamedByName),
+                Payload.Of(new { oldName = integrationEvent.OldName, newName = integrationEvent.NewName }),
+                integrationEvent.EventId.ToString(),
+                [new TimelineSubject(TimelineSubjects.Workspace, integrationEvent.TenantId.Value)]),
+            cancellationToken);
+}
+
 internal sealed class MemberJoinedProjection(TimelineWriter writer) : IIntegrationEventConsumer<MemberJoined>
 {
     public Task HandleAsync(MemberJoined integrationEvent, CancellationToken cancellationToken) =>

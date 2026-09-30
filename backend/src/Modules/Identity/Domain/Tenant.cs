@@ -30,6 +30,13 @@ public sealed partial class Tenant : Entity<TenantId>, IAuditable
 
     public UserId? UpdatedBy { get; private set; }
 
+    /// <summary>The slug keeps its id suffix and is rebuilt from the new name, so old links stay unique.</summary>
+    public void Rename(string name)
+    {
+        Name = name.Trim();
+        Slug = CreateSlug(Name, Id);
+    }
+
     public static Tenant Create(string name)
     {
         var id = TenantId.New();

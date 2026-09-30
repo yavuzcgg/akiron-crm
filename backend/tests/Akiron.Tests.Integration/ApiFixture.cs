@@ -110,6 +110,16 @@ public sealed partial class ApiFixture : IAsyncLifetime
     [GeneratedRegex(@"/invite\?token=(?<token>[0-9A-F]+)")]
     private static partial Regex InviteLink();
 
+    /// <summary>The password reset token from the last e-mail sent to <paramref name="email"/>, or null if none was sent.</summary>
+    public string? ResetTokenFor(string email)
+    {
+        var body = _emails.Sent.LastOrDefault(message => message.To == email && message.TextBody.Contains("/reset-password?token=", StringComparison.Ordinal))?.TextBody;
+        return body is null ? null : ResetLink().Match(body).Groups["token"].Value;
+    }
+
+    [GeneratedRegex(@"/reset-password\?token=(?<token>[0-9A-F]+)")]
+    private static partial Regex ResetLink();
+
     public async ValueTask DisposeAsync()
     {
         if (_factory is not null)

@@ -32,6 +32,12 @@ public static class IdentityErrors
     public static readonly Error FullNameRequired =
         Error.Validation("identity.invitation.full_name_required", "A full name is needed to create the new account.");
 
+    public static readonly Error CurrentPasswordWrong =
+        Error.Validation("identity.password.current_wrong", "The current password is not correct.");
+
+    public static readonly Error ResetLinkInvalid =
+        Error.NotFound("identity.password.reset_invalid", "The reset link is invalid, expired or already used.");
+
     public static Error PasswordTooShort(int minLength) =>
         new("identity.password.too_short", $"The password must be at least {minLength} characters.", ErrorKind.Validation)
         {

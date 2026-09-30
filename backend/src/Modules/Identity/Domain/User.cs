@@ -43,6 +43,10 @@ public sealed class User : Entity<UserId>, IAuditable
 
     public void RecordLogin(DateTimeOffset at) => LastLoginAt = at;
 
+    public void Rename(string fullName) => FullName = fullName.Trim();
+
+    public void ChangePassword(string passwordHash) => PasswordHash = passwordHash;
+
     /// <summary>
     /// Invariant lower-casing on purpose: the Turkish culture would turn "I" into dotless "ı" and
     /// make INFO@FIRMA.COM a different address from info@firma.com.

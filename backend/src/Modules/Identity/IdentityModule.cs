@@ -2,6 +2,7 @@ using Akiron.BuildingBlocks.Modules;
 using Akiron.BuildingBlocks.Persistence;
 using Akiron.BuildingBlocks.Security;
 using Akiron.BuildingBlocks.Web;
+using Akiron.Modules.Identity.Features.Account;
 using Akiron.Modules.Identity.Features.GetSession;
 using Akiron.Modules.Identity.Features.Invitations;
 using Akiron.Modules.Identity.Features.ListMembers;
@@ -85,6 +86,7 @@ public sealed class IdentityModule : IModule
         RefreshSessionEndpoint.Map(auth);
         LogoutEndpoint.Map(auth);
         GetSessionEndpoint.Map(auth);
+        AccountEndpoints.Map(endpoints, auth);
 
         ListMembersEndpoint.Map(endpoints);
 

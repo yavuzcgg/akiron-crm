@@ -20,6 +20,7 @@ public static class TimelineEntryTypes
 {
     public const string Note = "timeline.note";
     public const string WorkspaceCreated = "identity.workspace.created";
+    public const string WorkspaceRenamed = "identity.workspace.renamed";
     public const string MemberJoined = "identity.member.joined";
     public const string InvitationSent = "identity.invitation.sent";
     public const string FileUploaded = "files.file.uploaded";
