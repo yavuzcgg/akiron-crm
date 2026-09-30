@@ -17,7 +17,10 @@ public static class CrmPermissions
     public const string PartiesRead = "crm.parties.read";
     public const string PartiesWrite = "crm.parties.write";
 
-    public static IReadOnlyCollection<string> All { get; } = [PartiesRead, PartiesWrite];
+    /// <summary>Defining the custom fields every party card shows.</summary>
+    public const string CustomFieldsManage = "crm.custom_fields.manage";
+
+    public static IReadOnlyCollection<string> All { get; } = [PartiesRead, PartiesWrite, CustomFieldsManage];
 }
 
 /// <summary>Counterparties (cari: customers and suppliers, ADR-0008) and their contacts.</summary>
@@ -33,8 +36,13 @@ public sealed class CrmModule : IModule
         services.AddHandlersFromAssembly(typeof(CrmModule).Assembly);
         services.AddValidatorsFromAssemblyContaining<CrmModule>(includeInternalTypes: true);
         services.AddScoped<IPartyDirectory, PartyDirectory>();
+        services.AddScoped<Features.CustomFields.CustomValuesCheck>();
         services.Configure<ConstraintErrorMap>(map => map.Add(CrmConstraints.PartyCodeUnique, CrmErrors.CodeTaken));
     }
 
-    public void MapEndpoints(IEndpointRouteBuilder endpoints) => PartyEndpoints.Map(endpoints);
+    public void MapEndpoints(IEndpointRouteBuilder endpoints)
+    {
+        PartyEndpoints.Map(endpoints);
+        Features.CustomFields.CustomFieldEndpoints.Map(endpoints);
+    }
 }

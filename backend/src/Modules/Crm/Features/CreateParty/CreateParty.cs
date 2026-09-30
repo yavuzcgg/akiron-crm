@@ -23,7 +23,8 @@ internal sealed record CreatePartyCommand(
     string? Website = null,
     string? City = null,
     string? District = null,
-    string? AddressLine = null) : IPartyInput;
+    string? AddressLine = null,
+    IReadOnlyDictionary<string, string?>? CustomFields = null) : IPartyInput;
 
 internal sealed class CreatePartyValidator : AbstractValidator<CreatePartyCommand>
 {
@@ -38,7 +39,7 @@ internal sealed class CreatePartyValidator : AbstractValidator<CreatePartyComman
 /// Adds a party. Without a code the next one in the tenant's C00001 series is used; a code typed by
 /// hand is kept as is, since accountants often bring their Logo codes.
 /// </summary>
-internal sealed class CreatePartyHandler(CrmDbContext db, ITenantContext tenantContext, ICurrentUser currentUser, TimeProvider timeProvider)
+internal sealed class CreatePartyHandler(CrmDbContext db, Features.CustomFields.CustomValuesCheck customValues, ITenantContext tenantContext, ICurrentUser currentUser, TimeProvider timeProvider)
 {
     private const string CodeSeries = "party";
 
@@ -52,7 +53,14 @@ internal sealed class CreatePartyHandler(CrmDbContext db, ITenantContext tenantC
             return CrmErrors.CodeTaken;
         }
 
+        var values = await customValues.CheckAsync(command.CustomFields, new Dictionary<string, string>(), cancellationToken);
+        if (!values.IsSuccess)
+        {
+            return values.Error;
+        }
+
         var party = Party.Create(code, PartyInputRules.ToDetails(command));
+        party.SetCustomValues(values.Value);
         var userId = currentUser.UserId ?? throw new InvalidOperationException("A signed-in user is required.");
 
         db.Parties.Add(party);

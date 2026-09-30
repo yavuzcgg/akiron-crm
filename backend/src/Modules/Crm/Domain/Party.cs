@@ -76,6 +76,9 @@ public sealed class Party : Entity<PartyId>, ITenantScoped, ISoftDeletable, IAud
 
     public string? AddressLine { get; private set; }
 
+    /// <summary>Values of the tenant's custom fields, by field key (<see cref="CustomField"/>), in stored form.</summary>
+    public IReadOnlyDictionary<string, string> CustomValues { get; private set; } = new Dictionary<string, string>();
+
     /// <summary>Folded name, code, tax number, e-mail and phone for Turkish-aware search (<see cref="TurkishText"/>).</summary>
     [AuditIgnore]
     public string SearchText { get; private set; }
@@ -129,6 +132,19 @@ public sealed class Party : Entity<PartyId>, ITenantScoped, ISoftDeletable, IAud
 
             return next;
         }
+    }
+
+    /// <summary>Replaces the custom values; returns whether anything changed.</summary>
+    public bool SetCustomValues(IReadOnlyDictionary<string, string> values)
+    {
+        var changed = values.Count != CustomValues.Count
+            || values.Any(pair => !CustomValues.TryGetValue(pair.Key, out var current) || current != pair.Value);
+        if (changed)
+        {
+            CustomValues = new Dictionary<string, string>(values, StringComparer.Ordinal);
+        }
+
+        return changed;
     }
 
     private static string? Clean(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();

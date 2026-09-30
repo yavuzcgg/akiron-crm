@@ -29,6 +29,9 @@ internal interface IPartyInput
     string? District { get; }
 
     string? AddressLine { get; }
+
+    /// <summary>Custom field values by key; null leaves them as they are.</summary>
+    IReadOnlyDictionary<string, string?>? CustomFields { get; }
 }
 
 internal static class PartyKinds
@@ -99,6 +102,7 @@ internal sealed record PartyResponse(
     string? District,
     string? AddressLine,
     DateTimeOffset CreatedAt,
+    IReadOnlyDictionary<string, string> CustomFields,
     IReadOnlyList<PartyContactResponse> Contacts)
 {
     public static PartyResponse From(Party party, IEnumerable<PartyContact> contacts) => new(
@@ -117,6 +121,7 @@ internal sealed record PartyResponse(
         party.District,
         party.AddressLine,
         party.CreatedAt,
+        party.CustomValues,
         contacts
             .OrderByDescending(contact => contact.IsPrimary)
             .ThenBy(contact => contact.CreatedAt)

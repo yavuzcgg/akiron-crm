@@ -1,7 +1,9 @@
+using System.Text.Json;
 using Akiron.BuildingBlocks.Persistence;
 using Akiron.BuildingBlocks.Tenancy;
 using Akiron.Modules.Crm.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -17,11 +19,14 @@ internal sealed class CrmDbContext(DbContextOptions<CrmDbContext> options, ITena
     public DbSet<Party> Parties => Set<Party>();
 
     public DbSet<PartyContact> Contacts => Set<PartyContact>();
+
+    public DbSet<CustomField> CustomFields => Set<CustomField>();
 }
 
 internal static class CrmConstraints
 {
     public const string PartyCodeUnique = "ix_parties_tenant_id_code";
+    public const string CustomFieldKeyUnique = "ix_custom_fields_tenant_id_key";
 }
 
 internal sealed class PartyConfiguration : IEntityTypeConfiguration<Party>
@@ -44,6 +49,17 @@ internal sealed class PartyConfiguration : IEntityTypeConfiguration<Party>
         builder.Property(party => party.District).HasMaxLength(100);
         builder.Property(party => party.AddressLine).HasMaxLength(500);
         builder.Property(party => party.SearchText).HasMaxLength(1200);
+
+        // A small key → value map; jsonb keeps it queryable later (filters on custom fields).
+        builder.Property(party => party.CustomValues)
+            .HasColumnType("jsonb")
+            .HasConversion(
+                values => JsonSerializer.Serialize(values, JsonSerializerOptions.Default),
+                json => JsonSerializer.Deserialize<Dictionary<string, string>>(json, JsonSerializerOptions.Default) ?? new Dictionary<string, string>(),
+                new ValueComparer<IReadOnlyDictionary<string, string>>(
+                    (left, right) => left!.Count == right!.Count && !left.Except(right).Any(),
+                    values => values.Aggregate(0, (hash, pair) => HashCode.Combine(hash, pair.Key, pair.Value)),
+                    values => new Dictionary<string, string>(values)));
 
         // Archived parties free their code: a new card may reuse it.
         builder.HasIndex(party => new { party.TenantId, party.Code })
@@ -68,6 +84,23 @@ internal sealed class PartyContactConfiguration : IEntityTypeConfiguration<Party
         builder.Property(contact => contact.Phone).HasMaxLength(30);
         builder.HasOne<Party>().WithMany().HasForeignKey(contact => contact.PartyId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(contact => new { contact.TenantId, contact.PartyId });
+    }
+}
+
+internal sealed class CustomFieldConfiguration : IEntityTypeConfiguration<CustomField>
+{
+    public void Configure(EntityTypeBuilder<CustomField> builder)
+    {
+        builder.ToTable("custom_fields");
+        builder.HasKey(field => field.Id);
+        builder.Property(field => field.Id).ValueGeneratedNever();
+        builder.Property(field => field.Key).HasMaxLength(40);
+        builder.Property(field => field.Label).HasMaxLength(CustomField.LabelMaxLength);
+        builder.Property(field => field.Type).HasConversion<string>().HasMaxLength(20);
+        builder.Property(field => field.Options).HasColumnType("text[]");
+
+        // A removed field keeps its key: old values stay attached to it, and a new field cannot reuse it.
+        builder.HasIndex(field => new { field.TenantId, field.Key }).IsUnique().HasDatabaseName(CrmConstraints.CustomFieldKeyUnique);
     }
 }
 

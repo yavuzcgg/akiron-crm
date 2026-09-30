@@ -20,7 +20,8 @@ internal sealed record UpdatePartyCommand(
     string? Website = null,
     string? City = null,
     string? District = null,
-    string? AddressLine = null) : IPartyInput;
+    string? AddressLine = null,
+    IReadOnlyDictionary<string, string?>? CustomFields = null) : IPartyInput;
 
 internal sealed class UpdatePartyValidator : AbstractValidator<UpdatePartyCommand>
 {
@@ -28,7 +29,7 @@ internal sealed class UpdatePartyValidator : AbstractValidator<UpdatePartyComman
 }
 
 /// <summary>Replaces the editable details; the timeline gets one line naming the fields that changed.</summary>
-internal sealed class UpdatePartyHandler(CrmDbContext db, ICurrentUser currentUser, TimeProvider timeProvider)
+internal sealed class UpdatePartyHandler(CrmDbContext db, Features.CustomFields.CustomValuesCheck customValues, ICurrentUser currentUser, TimeProvider timeProvider)
 {
     public async Task<Result<PartyResponse>> HandleAsync(Guid id, UpdatePartyCommand command, CancellationToken cancellationToken)
     {
@@ -39,7 +40,18 @@ internal sealed class UpdatePartyHandler(CrmDbContext db, ICurrentUser currentUs
             return CrmErrors.PartyNotFound;
         }
 
-        var changed = party.Update(PartyInputRules.ToDetails(command));
+        var values = await customValues.CheckAsync(command.CustomFields, party.CustomValues, cancellationToken);
+        if (!values.IsSuccess)
+        {
+            return values.Error;
+        }
+
+        var changed = party.Update(PartyInputRules.ToDetails(command)).ToList();
+        if (party.SetCustomValues(values.Value))
+        {
+            changed.Add("customFields");
+        }
+
         if (changed.Count > 0)
         {
             var userId = currentUser.UserId ?? throw new InvalidOperationException("A signed-in user is required.");
