@@ -254,5 +254,12 @@ internal static class TimelineEndpoints
             .Validate<AddNoteCommand>()
             .Produces<TimelineItemResponse>(StatusCodes.Status201Created)
             .WithSummary("Add a note to a record's history");
+
+        // For the @mention picker: whoever can write notes can name any teammate.
+        endpoints.MapGet("/mentionable", async (IMemberDirectory members, CancellationToken cancellationToken) =>
+                TypedResults.Ok(await members.ListAsync(cancellationToken)))
+            .RequirePermission(TimelinePermissions.NotesWrite)
+            .Produces<IReadOnlyList<MemberSummary>>()
+            .WithSummary("People who can be @mentioned in notes");
     }
 }

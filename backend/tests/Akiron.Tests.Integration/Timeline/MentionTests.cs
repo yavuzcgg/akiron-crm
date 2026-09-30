@@ -24,6 +24,7 @@ public sealed class MentionTests(ApiFixture api)
         using var strangerSession = await stranger.RegisterAsync();
         var strangerId = (await strangerSession.Content.ReadFromJsonAsync<SessionResponse>(Cancel))!.UserId;
 
+        var mentionable = await member.GetFromJsonAsync<JsonElement>("/api/v1/timeline/mentionable", Cancel);
         using var note = await owner.PostAsJsonAsync(
             $"/api/v1/timeline/workspace/{session.TenantId}/notes",
             new { text = "@Ayşe Yılmaz sunumu cumaya yetiştirebilir miyiz?", mentionedUserIds = new[] { memberId, session.UserId, strangerId } },
@@ -34,6 +35,7 @@ public sealed class MentionTests(ApiFixture api)
         var ownerInbox = await owner.GetStringAsync("/api/v1/notifications", Cancel);
         var strangerInbox = await stranger.GetStringAsync("/api/v1/notifications", Cancel);
 
+        Assert.Equal(2, mentionable.GetArrayLength());
         Assert.Equal(HttpStatusCode.Created, note.StatusCode);
         Assert.Equal(2, created.GetProperty("payload").GetProperty("mentions").GetArrayLength());
         Assert.Contains("timeline.note.mentioned", memberInbox, StringComparison.Ordinal);
