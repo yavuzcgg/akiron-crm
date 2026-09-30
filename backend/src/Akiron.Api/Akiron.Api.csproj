@@ -11,6 +11,7 @@
     <ProjectReference Include="..\Modules\Reference\Akiron.Modules.Reference.csproj" />
     <ProjectReference Include="..\Modules\Files\Akiron.Modules.Files.csproj" />
     <ProjectReference Include="..\Modules\Notifications\Akiron.Modules.Notifications.csproj" />
+    <ProjectReference Include="..\Modules\Crm\Akiron.Modules.Crm.csproj" />
   </ItemGroup>
 
   <ItemGroup>

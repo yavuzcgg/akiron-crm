@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\BuildingBlocks\Akiron.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Crm\Akiron.Modules.Crm.csproj" />
     <ProjectReference Include="..\..\src\Modules\Reference\Akiron.Modules.Reference.csproj" />
   </ItemGroup>
 

@@ -11,5 +11,8 @@ public static class Subjects
 
     public const string User = "user";
 
-    public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal) { Workspace, User };
+    /// <summary>A counterparty (cari) in the CRM module.</summary>
+    public const string Party = "party";
+
+    public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal) { Workspace, User, Party };
 }

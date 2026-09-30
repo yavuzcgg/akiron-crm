@@ -9,6 +9,8 @@ public static class TimelineSubjects
 
     public const string User = Subjects.User;
 
+    public const string Party = Subjects.Party;
+
     public static IReadOnlySet<string> All => Subjects.All;
 }
 
@@ -24,10 +26,22 @@ public static class TimelineEntryTypes
     public const string MemberJoined = "identity.member.joined";
     public const string InvitationSent = "identity.invitation.sent";
     public const string FileUploaded = "files.file.uploaded";
+    public const string PartyCreated = "crm.party.created";
+    public const string PartyUpdated = "crm.party.updated";
+    public const string PartyArchived = "crm.party.archived";
+    public const string PartyContactAdded = "crm.contact.added";
+
+    private const string PartiesRead = "crm.parties.read";
 
     public static readonly IReadOnlyDictionary<string, string> RequiredPermission = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         // Who was invited is personnel information; only people who can see the team see it.
         [InvitationSent] = "identity.members.read",
+
+        // Client names and contacts are commercial information.
+        [PartyCreated] = PartiesRead,
+        [PartyUpdated] = PartiesRead,
+        [PartyArchived] = PartiesRead,
+        [PartyContactAdded] = PartiesRead,
     };
 }
