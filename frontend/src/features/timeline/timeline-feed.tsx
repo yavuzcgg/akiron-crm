@@ -1,6 +1,7 @@
 "use client";
 
 import { Activity, AlertCircle } from "lucide-react";
+import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { useState, type FormEvent } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -96,7 +97,15 @@ function TimelineRow({ item }: { item: TimelineItem }) {
         <entry.icon className="size-3.5" />
       </span>
       <div className="flex items-baseline justify-between gap-4">
-        <p className="text-sm">{entry.headline}</p>
+        <p className="text-sm">
+          {entry.href ? (
+            <Link href={entry.href} className="underline-offset-4 hover:underline">
+              {entry.headline}
+            </Link>
+          ) : (
+            entry.headline
+          )}
+        </p>
         <time className="text-muted-foreground shrink-0 text-xs tabular-nums" dateTime={item.occurredAt}>
           {formatTime(item.occurredAt)}
         </time>

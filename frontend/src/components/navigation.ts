@@ -38,7 +38,7 @@ export const navigation: NavSection[] = [
   {
     label: "nav.section.sales",
     items: [
-      { label: "nav.customers", icon: UsersRound },
+      { label: "nav.customers", icon: UsersRound, href: "/crm/parties", permission: permissions.crm.partiesRead },
       { label: "nav.quotes", icon: FileText },
     ],
   },
