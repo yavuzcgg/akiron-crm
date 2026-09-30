@@ -2,11 +2,13 @@ using Akiron.BuildingBlocks.Modules;
 using Akiron.BuildingBlocks.Persistence;
 using Akiron.BuildingBlocks.Security;
 using Akiron.BuildingBlocks.Web;
+using Akiron.Contracts.Identity;
 using Akiron.Modules.Identity.Features.Account;
 using Akiron.Modules.Identity.Features.GetSession;
 using Akiron.Modules.Identity.Features.Invitations;
 using Akiron.Modules.Identity.Features.ListMembers;
 using Akiron.Modules.Identity.Features.Login;
+using Akiron.Modules.Identity.Features.MemberDirectory;
 using Akiron.Modules.Identity.Features.Logout;
 using Akiron.Modules.Identity.Features.RefreshSession;
 using Akiron.Modules.Identity.Features.Register;
@@ -47,6 +49,7 @@ public sealed class IdentityModule : IModule
         services.AddScoped<SessionIssuer>();
         services.AddScoped<InvitationLookup>();
         services.AddScoped<SystemRoleSync>();
+        services.AddScoped<IMemberDirectory, MemberDirectory>();
         services.AddHostedService<SystemRoleSyncService>();
 
         services.Configure<ConstraintErrorMap>(map => map.Add(IdentityConstraints.UserEmailUnique, IdentityErrors.EmailTaken));

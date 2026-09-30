@@ -1,7 +1,9 @@
 using Akiron.BuildingBlocks.Modules;
 using Akiron.BuildingBlocks.Persistence;
 using Akiron.BuildingBlocks.Web;
+using Akiron.Contracts.Crm;
 using Akiron.Modules.Crm.Features;
+using Akiron.Modules.Crm.Features.PartyDirectory;
 using Akiron.Modules.Crm.Persistence;
 using FluentValidation;
 using Microsoft.AspNetCore.Routing;
@@ -30,6 +32,7 @@ public sealed class CrmModule : IModule
         services.AddModuleDbContext<CrmDbContext>(configuration, CrmDbContext.SchemaName);
         services.AddHandlersFromAssembly(typeof(CrmModule).Assembly);
         services.AddValidatorsFromAssemblyContaining<CrmModule>(includeInternalTypes: true);
+        services.AddScoped<IPartyDirectory, PartyDirectory>();
         services.Configure<ConstraintErrorMap>(map => map.Add(CrmConstraints.PartyCodeUnique, CrmErrors.CodeTaken));
     }
 

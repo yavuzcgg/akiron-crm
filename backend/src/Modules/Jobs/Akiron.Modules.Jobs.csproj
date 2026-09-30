@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Akiron.Modules.Jobs</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\BuildingBlocks\Akiron.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\..\Contracts\Akiron.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Akiron.Tests.Integration" />
+    <InternalsVisibleTo Include="Akiron.Tests.Unit" />
+  </ItemGroup>
+
+</Project>

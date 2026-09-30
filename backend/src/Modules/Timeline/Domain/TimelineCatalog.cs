@@ -11,6 +11,8 @@ public static class TimelineSubjects
 
     public const string Party = Subjects.Party;
 
+    public const string WorkOrder = Subjects.WorkOrder;
+
     public static IReadOnlySet<string> All => Subjects.All;
 }
 
@@ -30,8 +32,11 @@ public static class TimelineEntryTypes
     public const string PartyUpdated = "crm.party.updated";
     public const string PartyArchived = "crm.party.archived";
     public const string PartyContactAdded = "crm.contact.added";
+    public const string WorkOrderCreated = "jobs.work_order.created";
+    public const string WorkOrderMoved = "jobs.work_order.moved";
 
     private const string PartiesRead = "crm.parties.read";
+    private const string WorkOrdersRead = "jobs.work_orders.read";
 
     public static readonly IReadOnlyDictionary<string, string> RequiredPermission = new Dictionary<string, string>(StringComparer.Ordinal)
     {
@@ -43,5 +48,7 @@ public static class TimelineEntryTypes
         [PartyUpdated] = PartiesRead,
         [PartyArchived] = PartiesRead,
         [PartyContactAdded] = PartiesRead,
+        [WorkOrderCreated] = WorkOrdersRead,
+        [WorkOrderMoved] = WorkOrdersRead,
     };
 }

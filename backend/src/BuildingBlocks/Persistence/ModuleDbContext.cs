@@ -15,7 +15,6 @@ public abstract class ModuleDbContext(DbContextOptions options, ITenantContext t
 {
     private static readonly MethodInfo TenantFilter = GetFilterMethod(nameof(ApplyTenantFilter));
     private static readonly MethodInfo SoftDeleteFilter = GetFilterMethod(nameof(ApplySoftDeleteFilter));
-    private static readonly MethodInfo CombinedFilter = GetFilterMethod(nameof(ApplyCombinedFilter));
 
     /// <summary>The module's schema; also the prefix of its routes and permission names.</summary>
     public abstract string Schema { get; }
@@ -109,32 +108,27 @@ public abstract class ModuleDbContext(DbContextOptions options, ITenantContext t
         foreach (var entityType in modelBuilder.Model.GetEntityTypes().Where(type => type.BaseType is null && !type.IsOwned()))
         {
             var clrType = entityType.ClrType;
-            var tenantScoped = typeof(ITenantScoped).IsAssignableFrom(clrType);
-            var softDeletable = typeof(ISoftDeletable).IsAssignableFrom(clrType);
-
-            var filter = (tenantScoped, softDeletable) switch
+            if (typeof(ITenantScoped).IsAssignableFrom(clrType))
             {
-                (true, true) => CombinedFilter,
-                (true, false) => TenantFilter,
-                (false, true) => SoftDeleteFilter,
-                _ => null,
-            };
+                TenantFilter.MakeGenericMethod(clrType).Invoke(this, [modelBuilder]);
+            }
 
-            filter?.MakeGenericMethod(clrType).Invoke(this, [modelBuilder]);
+            if (typeof(ISoftDeletable).IsAssignableFrom(clrType))
+            {
+                SoftDeleteFilter.MakeGenericMethod(clrType).Invoke(this, [modelBuilder]);
+            }
         }
     }
 
+    // Named filters (EF Core 10), so a query can lift one without the other:
+    // IncludingArchived() drops SoftDelete and keeps Tenant.
     private void ApplyTenantFilter<TEntity>(ModelBuilder modelBuilder)
         where TEntity : class, ITenantScoped =>
-        modelBuilder.Entity<TEntity>().HasQueryFilter(entity => entity.TenantId == CurrentTenantId);
+        modelBuilder.Entity<TEntity>().HasQueryFilter(QueryFilters.Tenant, entity => entity.TenantId == CurrentTenantId);
 
     private static void ApplySoftDeleteFilter<TEntity>(ModelBuilder modelBuilder)
         where TEntity : class, ISoftDeletable =>
-        modelBuilder.Entity<TEntity>().HasQueryFilter(entity => !entity.IsDeleted);
-
-    private void ApplyCombinedFilter<TEntity>(ModelBuilder modelBuilder)
-        where TEntity : class, ITenantScoped, ISoftDeletable =>
-        modelBuilder.Entity<TEntity>().HasQueryFilter(entity => entity.TenantId == CurrentTenantId && !entity.IsDeleted);
+        modelBuilder.Entity<TEntity>().HasQueryFilter(QueryFilters.SoftDelete, entity => !entity.IsDeleted);
 
     private static MethodInfo GetFilterMethod(string name) =>
         typeof(ModuleDbContext).GetMethod(name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic)

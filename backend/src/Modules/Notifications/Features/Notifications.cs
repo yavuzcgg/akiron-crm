@@ -4,6 +4,7 @@ using Akiron.BuildingBlocks.Events;
 using Akiron.BuildingBlocks.Security;
 using Akiron.BuildingBlocks.Web;
 using Akiron.Contracts.Identity;
+using Akiron.Contracts.Jobs;
 using Akiron.Modules.Notifications.Domain;
 using Akiron.Modules.Notifications.Persistence;
 using Akiron.Modules.Notifications.Realtime;
@@ -67,6 +68,32 @@ internal sealed class MemberJoinedNotification(NotificationSender sender) : IInt
         return sender.SendAsync(
             Notification.Create(integrationEvent.TenantId, inviter, Type, payload, integrationEvent.EventId, integrationEvent.OccurredAt),
             cancellationToken);
+    }
+}
+
+/// <summary>Tells people they were put on a work order (not the person who did it).</summary>
+internal sealed class WorkOrderAssignedNotification(NotificationSender sender) : IIntegrationEventConsumer<WorkOrderAssigned>
+{
+    public const string Type = "jobs.work_order.assigned";
+
+    public async Task HandleAsync(WorkOrderAssigned integrationEvent, CancellationToken cancellationToken)
+    {
+        var payload = JsonSerializer.Serialize(
+            new
+            {
+                workOrderId = integrationEvent.WorkOrderId,
+                number = integrationEvent.Number,
+                title = integrationEvent.Title,
+                assignedByName = integrationEvent.AssignedByName,
+            },
+            JsonSerializerOptions.Web);
+
+        foreach (var userId in integrationEvent.AddedUserIds.Where(userId => userId != integrationEvent.AssignedByUserId))
+        {
+            await sender.SendAsync(
+                Notification.Create(integrationEvent.TenantId, userId, Type, payload, integrationEvent.EventId, integrationEvent.OccurredAt),
+                cancellationToken);
+        }
     }
 }
 
