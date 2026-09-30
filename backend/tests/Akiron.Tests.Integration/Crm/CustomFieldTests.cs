@@ -84,7 +84,10 @@ public sealed class CustomFieldTests(ApiFixture api)
         using var readded = await owner.PostAsJsonAsync("/api/v1/crm/custom-fields", new { label = "Instagram hesabı", type = "text" }, Cancel);
         using var updated = await owner.PutAsJsonAsync($"/api/v1/crm/parties/{party.Id}", new
         {
-            kind = "company", name = "ABC Mobilya", isCustomer = true, isSupplier = false,
+            kind = "company",
+            name = "ABC Mobilya",
+            isCustomer = true,
+            isSupplier = false,
             customFields = new Dictionary<string, string?> { ["sektor"] = "Gıda" },
         }, Cancel);
         var after = (await updated.Content.ReadFromJsonAsync<PartyResponse>(Cancel))!;
