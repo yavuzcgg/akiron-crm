@@ -3,10 +3,10 @@ import { NextResponse, type NextRequest } from "next/server";
 /** Set by the API next to the HttpOnly session cookies. It proves nothing; it only avoids a flash of the app for signed-out visitors. */
 const sessionHintCookie = "akiron_session";
 
-const authPages = ["/login", "/register"];
+const authPages = ["/login", "/register", "/forgot-password"];
 
-/** Reachable signed in or not: an invitation link may be opened by anyone holding it. */
-const openPages = ["/invite"];
+/** Reachable signed in or not: invitation and reset links may be opened by anyone holding them. */
+const openPages = ["/invite", "/reset-password"];
 
 /**
  * Optimistic routing only (Next.js guidance): the API still checks every request, and the app shell

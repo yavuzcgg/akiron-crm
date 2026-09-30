@@ -1,4 +1,4 @@
-import { Building2, CircleDot, FileUp, MailPlus, StickyNote, UserPlus, type LucideIcon } from "lucide-react";
+import { Building2, CircleDot, FileUp, MailPlus, PencilLine, StickyNote, UserPlus, type LucideIcon } from "lucide-react";
 import { roleLabel } from "@/features/identity/role-name";
 import type { TranslationKey } from "@/lib/i18n";
 import type { TranslationParams } from "@/lib/i18n/translate";
@@ -27,6 +27,12 @@ const entryTypes: Record<string, EntryType> = {
     icon: Building2,
     tone: "bg-primary/10 text-primary",
     headline: (payload, actor, t) => t("timeline.entry.workspaceCreated", { actor, workspace: text(payload.workspaceName) }),
+  },
+  "identity.workspace.renamed": {
+    icon: PencilLine,
+    tone: "bg-primary/10 text-primary",
+    headline: (payload, actor, t) =>
+      t("timeline.entry.workspaceRenamed", { actor, oldName: text(payload.oldName), newName: text(payload.newName) }),
   },
   "identity.member.joined": {
     icon: UserPlus,

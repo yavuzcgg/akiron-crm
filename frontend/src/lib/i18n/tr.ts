@@ -181,7 +181,6 @@ export const tr = {
   "nav.section.operations": "Operasyon",
   "nav.section.finance": "Finans",
   "nav.soonHint": "Bu modül yol haritasında; yakında açılacak.",
-  "user.menu.account": "Hesap",
 
   "dashboard.greeting.morning": "Günaydın, {name}",
   "dashboard.greeting.afternoon": "İyi günler, {name}",
@@ -199,6 +198,50 @@ export const tr = {
   "dashboard.setup.done": "Kurulum tamam. Müşteriler ve iş emirleri geldiğinde burası dolacak.",
   "dashboard.roadmap.title": "Yol haritası",
   "dashboard.roadmap.description": "Sıradaki modüller",
+  "auth.login.forgot": "Parolamı unuttum",
+  "auth.forgot.title": "Parolanızı mı unuttunuz?",
+  "auth.forgot.description": "Hesabınızın e-posta adresini yazın; parola sıfırlama bağlantısı gönderelim.",
+  "auth.forgot.submit": "Bağlantı gönder",
+  "auth.forgot.sent": "{email} adresine kayıtlı bir hesap varsa sıfırlama bağlantısı yola çıktı. Bağlantı 1 saat geçerlidir.",
+  "auth.forgot.back": "Girişe dön",
+  "auth.forgot.remembered": "Parolanızı hatırladınız mı?",
+  "auth.reset.title": "Yeni parola belirleyin",
+  "auth.reset.description": "Yeni parolanızı girin. Tüm cihazlardaki oturumlar kapatılır.",
+  "auth.reset.submit": "Parolayı değiştir",
+  "auth.reset.done": "Parolanız değişti. Yeni parolanızla giriş yapabilirsiniz.",
+  "auth.reset.missingToken": "Bağlantı eksik. E-postadaki bağlantıyı tam olarak açın ya da yeni bir bağlantı isteyin.",
+  "auth.reset.requestNew": "Yeni bağlantı iste",
+  "auth.field.newPassword": "Yeni parola",
+  "auth.field.currentPassword": "Mevcut parola",
+
+  "nav.account": "Hesabım",
+  "nav.workspace": "Çalışma alanı",
+
+  "account.title": "Hesabım",
+  "account.description": "Adınız ve parolanız. Bu ayarlar yalnızca sizi etkiler.",
+  "account.profile.title": "Profil",
+  "account.profile.description": "Ekip arkadaşlarınız ve zaman çizelgesinde görünen adınız.",
+  "account.profile.email": "E-posta adresi değiştirilemez; gerekirse çalışma alanı sahibine başvurun.",
+  "account.profile.saved": "Adınız güncellendi.",
+  "account.password.title": "Parola",
+  "account.password.description": "Parolayı değiştirdiğinizde bu cihaz dışındaki tüm oturumlar kapanır.",
+  "account.password.submit": "Parolayı değiştir",
+  "account.password.saved": "Parolanız değişti; diğer cihazlardaki oturumlar kapatıldı.",
+  "common.save": "Kaydet",
+  "common.saving": "Kaydediliyor…",
+
+  "workspace.title": "Çalışma alanı",
+  "workspace.description": "Ajansınızın bu uygulamadaki adı; teklif ve faturalarda da kullanılacak.",
+  "workspace.name.title": "Ad",
+  "workspace.name.description": "Değişiklik etkinlik akışına yazılır.",
+  "workspace.name.label": "Çalışma alanı adı",
+  "workspace.name.saved": "Çalışma alanının adı güncellendi.",
+  "workspace.ownerOnly": "Çalışma alanının adını yalnızca sahibi değiştirebilir.",
+
+  "timeline.entry.workspaceRenamed": "{actor}, çalışma alanının adını {oldName} iken {newName} yaptı",
+
+  "error.identity.password.current_wrong": "Mevcut parola hatalı.",
+  "error.identity.password.reset_invalid": "Bu bağlantı geçersiz, süresi dolmuş ya da daha önce kullanılmış. Yeni bir bağlantı isteyin.",
 } as const;
 
 export type TranslationKey = keyof typeof tr;

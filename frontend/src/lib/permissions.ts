@@ -7,6 +7,7 @@ export const permissions = {
   identity: {
     membersRead: "identity.members.read",
     membersManage: "identity.members.manage",
+    tenantManage: "identity.tenant.manage",
   },
   files: {
     read: "files.read",

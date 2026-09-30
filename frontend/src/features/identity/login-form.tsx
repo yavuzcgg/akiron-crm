@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle } from "lucide-react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -77,6 +78,9 @@ export function LoginForm() {
         error={errors.password?.message}
         {...form.register("password")}
       />
+      <Link href="/forgot-password" className="text-primary -mt-2 justify-self-end text-[13px] font-medium underline-offset-4 hover:underline">
+        {t("auth.login.forgot")}
+      </Link>
       <Button type="submit" size="lg" className="mt-1 w-full" disabled={login.isPending}>
         {login.isPending ? t("common.loading") : t("auth.login.submit")}
       </Button>

@@ -1,8 +1,10 @@
 import {
   BriefcaseBusiness,
+  Building2,
   CalendarDays,
   FileText,
   LayoutDashboard,
+  UserRound,
   Users,
   UsersRound,
   Wallet,
@@ -53,7 +55,11 @@ export const navigation: NavSection[] = [
   },
   {
     label: "nav.section.settings",
-    items: [{ label: "nav.team", icon: Users, href: "/settings/team", permission: permissions.identity.membersRead }],
+    items: [
+      { label: "nav.account", icon: UserRound, href: "/settings/account" },
+      { label: "nav.workspace", icon: Building2, href: "/settings/workspace", permission: permissions.identity.tenantManage },
+      { label: "nav.team", icon: Users, href: "/settings/team", permission: permissions.identity.membersRead },
+    ],
   },
 ];
 

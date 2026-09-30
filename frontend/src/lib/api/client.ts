@@ -9,7 +9,14 @@ export const sessionExpiredEvent = "akiron:session-expired";
 const refreshPath = "/api/v1/identity/auth/refresh";
 
 /** Paths where a 401 is an answer, not an expired access token. */
-const authPaths = ["/api/v1/identity/auth/login", "/api/v1/identity/auth/register", refreshPath, "/api/v1/identity/auth/logout"];
+const authPaths = [
+  "/api/v1/identity/auth/login",
+  "/api/v1/identity/auth/register",
+  refreshPath,
+  "/api/v1/identity/auth/logout",
+  "/api/v1/identity/auth/forgot-password",
+  "/api/v1/identity/auth/reset-password",
+];
 
 let refreshInFlight: Promise<boolean> | null = null;
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronsUpDown, Languages, LogOut, Monitor, Moon, Sun } from "lucide-react";
+import { ChevronsUpDown, Languages, LogOut, Monitor, Moon, Sun, UserRound } from "lucide-react";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -58,6 +59,10 @@ export function UserMenu({ session }: { session: Session }) {
             </div>
           </DropdownMenuLabel>
         </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem render={<Link href="/settings/account" />}>
+          <UserRound /> {t("nav.account")}
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuLabel className="flex items-center gap-2 text-xs">
