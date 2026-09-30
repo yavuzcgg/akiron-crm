@@ -115,6 +115,19 @@ Domain event + outbox + Hangfire (timeline bunun üstüne kurulur), activity tim
 ### Sprint 3
 `Entitlement` + modül bayrakları + `RequireModule()`, ayarlar sayfası, docker-compose prod profili (api, web, postgres, minio), yedek/geri yükleme scripti, Playwright kritik akış, güvenlik temelleri (rate limit, CORS, secrets doğrulama), Faz 2 veri modeli ADR'leri.
 
+## Faz 2 — Müşteri & İş Takibi
+
+**Durum (30 Eyl 2026): ilk yarı tamamlandı.**
+
+- Hesap ve çalışma alanı: ad ve parola değişikliği (diğer cihazlar kapanır), e-postayla parola sıfırlama, çalışma alanı adı (yalnız sahip, zaman çizelgesine düşer).
+- Sistem rolleri her açılışta modül şablonlarıyla eşitlenir; sonradan gelen modül eski kiracıların yöneticilerine de açılır. Üye rolü varsayılan olarak zaman çizelgesi, dosyalar ve iş emirlerini alır; cari, finans ve ekip yönetimi almaz.
+- CRM modülü (ADR-0008): tek Cari, müşteri/tedarikçi bayrakları, C00001 kod serisi (elle Logo kodu da olur), VKN/TCKN kontrol hanesi, Türkçe harfsiz arama, tr ICU sıralama, kişiler (birincil kişi), arşivleme, cari zaman çizelgesi.
+- Jobs modülü: IS-2026-0001 numaralı iş emirleri, kiracıya özel aşamalar (4 yerleşik; adlandır/ekle/sırala/sil), Kanban (fare, dokunma, klavye ve "aşamaya taşı" menüsü), görev listesi, atama bildirimi, sayaç (kişi başı tek çalışan sayaç, veritabanı indeksiyle), elle süre girişi, haftalık zaman çizelgesi, müşteri adı değişince iş emirlerine yayılır.
+- Modüller arası okuma `Contracts` üzerinden (`IMemberDirectory`, `IPartyDirectory`); sorgu filtreleri adlandırıldı (`IncludingArchived()` tenant filtresini korur).
+- 124 backend testi, 16 frontend testi; bütün akışlar Next üzerinden tarayıcıda doğrulandı.
+
+**İkinci yarı:** personel profili ve saatlik maliyet → iş karlılığı, izin talebi + onay motoru, özel alanlar (cari kartı), iş şablonları, @bahsetme.
+
 ## Paralel idari işler
 
 Kod değil ama bekleme süreleri uzun; Faz 1'de başlatılır. Liste ve takip: [INTEGRATIONS.md](INTEGRATIONS.md#idari-checklist).

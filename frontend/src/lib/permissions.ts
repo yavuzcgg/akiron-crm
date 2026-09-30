@@ -13,6 +13,13 @@ export const permissions = {
     read: "files.read",
     write: "files.write",
   },
+  jobs: {
+    workOrdersRead: "jobs.work_orders.read",
+    workOrdersWrite: "jobs.work_orders.write",
+    stagesManage: "jobs.stages.manage",
+    timeWrite: "jobs.time.write",
+    timeReadAll: "jobs.time.read_all",
+  },
   crm: {
     partiesRead: "crm.parties.read",
     partiesWrite: "crm.parties.write",

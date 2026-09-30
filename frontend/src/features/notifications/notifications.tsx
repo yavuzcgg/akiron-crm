@@ -2,7 +2,8 @@
 
 import { HubConnectionBuilder, HubConnectionState, LogLevel } from "@microsoft/signalr";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, UserPlus, type LucideIcon } from "lucide-react";
+import { Bell, BriefcaseBusiness, UserPlus, type LucideIcon } from "lucide-react";
+import Link from "next/link";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -30,19 +31,39 @@ const notificationsKey = ["notifications"] as const;
 const text = (value: unknown) => (typeof value === "string" ? value : "");
 
 /** How each notification type reads; unknown types (a newer server) fall back to a generic line. */
-const notificationTypes: Record<string, { icon: LucideIcon; message: (payload: Record<string, unknown>, t: Translate) => string }> = {
+interface NotificationType {
+  icon: LucideIcon;
+  message: (payload: Record<string, unknown>, t: Translate) => string;
+  /** The page the notification is about, when it has one. */
+  href?: (payload: Record<string, unknown>) => string | undefined;
+}
+
+const notificationTypes: Record<string, NotificationType> = {
   "identity.invitation.accepted": {
     icon: UserPlus,
     message: (payload, t) =>
       t("notifications.invitationAccepted", { member: text(payload.memberName), role: roleLabel(text(payload.role), t) }),
+    href: () => "/settings/team",
+  },
+  "jobs.work_order.assigned": {
+    icon: BriefcaseBusiness,
+    message: (payload, t) =>
+      t("notifications.workOrderAssigned", {
+        actor: text(payload.assignedByName) || t("timeline.actor.system"),
+        number: text(payload.number),
+        title: text(payload.title),
+      }),
+    href: (payload) => (typeof payload.workOrderId === "string" ? `/jobs/${payload.workOrderId}` : undefined),
   },
 };
 
 function describe(item: NotificationItem, t: Translate) {
   const type = notificationTypes[item.type];
+  const payload = (item.payload ?? {}) as Record<string, unknown>;
   return {
     icon: type?.icon ?? Bell,
-    message: type ? type.message((item.payload ?? {}) as Record<string, unknown>, t) : t("notifications.unknown"),
+    message: type ? type.message(payload, t) : t("notifications.unknown"),
+    href: type?.href?.(payload),
   };
 }
 
@@ -107,6 +128,13 @@ export function NotificationBell() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: notificationsKey }),
   });
 
+  const markRead = useMutation({
+    mutationFn: async (id: string) => {
+      unwrap(await api.POST("/api/v1/notifications/{id}/read", { params: { path: { id } } }));
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: notificationsKey }),
+  });
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -136,12 +164,18 @@ export function NotificationBell() {
         {notifications.data?.items.length ? (
           <ul className="max-h-96 overflow-y-auto">
             {notifications.data.items.map((item) => {
-              const { icon: Icon, message } = describe(item, t);
+              const { icon: Icon, message, href } = describe(item, t);
               return (
-                <li key={item.id} className={cn("flex gap-3 px-2 py-2.5 text-sm", !item.readAt && "bg-primary/5")}>
+                <li key={item.id} className={cn("hover:bg-muted/60 relative flex gap-3 rounded-md px-2 py-2.5 text-sm", !item.readAt && "bg-primary/5")}>
                   <Icon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
                   <div className="grid gap-0.5">
-                    <p>{message}</p>
+                    {href ? (
+                      <Link href={href} className="after:absolute after:inset-0" onClick={() => !item.readAt && markRead.mutate(item.id)}>
+                        {message}
+                      </Link>
+                    ) : (
+                      <p>{message}</p>
+                    )}
                     <time className="text-muted-foreground text-xs" dateTime={item.createdAt}>
                       {formatDateTime(item.createdAt)}
                     </time>

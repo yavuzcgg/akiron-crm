@@ -1,5 +1,6 @@
-import { Archive, Building2, CircleDot, Contact, FileUp, MailPlus, PencilLine, StickyNote, UserPlus, UsersRound, type LucideIcon } from "lucide-react";
+import { Archive, BriefcaseBusiness, Building2, CircleDot, Contact, FileUp, MailPlus, MoveRight, PencilLine, StickyNote, UserPlus, UsersRound, type LucideIcon } from "lucide-react";
 import { roleLabel } from "@/features/identity/role-name";
+import { stageLabel } from "@/features/jobs/labels";
 import type { TranslationKey } from "@/lib/i18n";
 import type { TranslationParams } from "@/lib/i18n/translate";
 import type { TimelineItem } from "./timeline-api";
@@ -19,6 +20,8 @@ interface EntryType {
 }
 
 const text = (value: unknown) => (typeof value === "string" ? value : "");
+
+const workOrderHref = (payload: Payload) => (typeof payload.workOrderId === "string" ? `/jobs/${payload.workOrderId}` : undefined);
 
 const partyHref = (payload: Payload) => (typeof payload.partyId === "string" ? `/crm/parties/${payload.partyId}` : undefined);
 
@@ -103,6 +106,29 @@ const entryTypes: Record<string, EntryType> = {
     headline: (payload, actor, t) =>
       t("timeline.entry.contactAdded", { actor, contact: text(payload.contactName), party: text(payload.partyName) }),
     href: (payload) => partyHref(payload),
+  },
+  "jobs.work_order.created": {
+    icon: BriefcaseBusiness,
+    tone: "bg-primary/10 text-primary",
+    headline: (payload, actor, t) =>
+      payload.partyName
+        ? t("timeline.entry.workOrderCreatedFor", { actor, number: text(payload.number), title: text(payload.title), party: text(payload.partyName) })
+        : t("timeline.entry.workOrderCreated", { actor, number: text(payload.number), title: text(payload.title) }),
+    href: (payload) => workOrderHref(payload),
+  },
+  "jobs.work_order.moved": {
+    icon: MoveRight,
+    tone: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+    headline: (payload, actor, t) =>
+      payload.completed
+        ? t("timeline.entry.workOrderCompleted", { actor, number: text(payload.number), title: text(payload.title) })
+        : t("timeline.entry.workOrderMoved", {
+            actor,
+            number: text(payload.number),
+            from: stageLabel({ key: text(payload.fromKey), name: text(payload.fromName) }, t),
+            to: stageLabel({ key: text(payload.toKey), name: text(payload.toName) }, t),
+          }),
+    href: (payload) => workOrderHref(payload),
   },
   "timeline.note": {
     icon: StickyNote,

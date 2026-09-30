@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/brand/logo";
-import { navigation } from "@/components/navigation";
+import { navigation, pageLabel } from "@/components/navigation";
 import {
   Sidebar,
   SidebarContent,
@@ -25,6 +25,8 @@ import { hasPermission } from "@/lib/permissions";
 export function AppSidebar({ session }: { session: Session }) {
   const { t } = useI18n();
   const pathname = usePathname();
+  // One active item: the longest matching link (/jobs/time is not also /jobs).
+  const activeLabel = pageLabel(pathname);
 
   return (
     <Sidebar collapsible="icon">
@@ -50,7 +52,7 @@ export function AppSidebar({ session }: { session: Session }) {
                     <SidebarMenuItem key={item.label}>
                       {item.href ? (
                         <SidebarMenuButton
-                          isActive={pathname.startsWith(item.href)}
+                          isActive={activeLabel === item.label}
                           tooltip={t(item.label)}
                           render={<Link href={item.href} />}
                         >

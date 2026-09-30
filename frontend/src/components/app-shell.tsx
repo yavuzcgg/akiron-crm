@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useSession } from "@/features/identity/session";
+import { TimerChip } from "@/features/jobs/timer";
 import { NotificationBell, useRealtimeNotifications } from "@/features/notifications/notifications";
 import { sessionExpiredEvent } from "@/lib/api/client";
 import { useI18n } from "@/lib/i18n";
@@ -65,6 +66,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Separator orientation="vertical" className="h-5" />
           <p className="text-sm font-semibold">{currentPage ? t(currentPage) : session.data.tenantName}</p>
           <div className="flex-1" />
+          <TimerChip />
           <NotificationBell />
         </header>
         <main id="main" className="flex-1 px-4 py-6 md:px-8 md:py-8">

@@ -2,6 +2,7 @@ import {
   BriefcaseBusiness,
   Building2,
   CalendarDays,
+  Clock3,
   FileText,
   LayoutDashboard,
   UserRound,
@@ -45,7 +46,8 @@ export const navigation: NavSection[] = [
   {
     label: "nav.section.operations",
     items: [
-      { label: "nav.jobs", icon: BriefcaseBusiness },
+      { label: "nav.jobs", icon: BriefcaseBusiness, href: "/jobs", permission: permissions.jobs.workOrdersRead },
+      { label: "nav.time", icon: Clock3, href: "/jobs/time", permission: permissions.jobs.timeWrite },
       { label: "nav.content", icon: CalendarDays },
     ],
   },
@@ -65,10 +67,12 @@ export const navigation: NavSection[] = [
 
 /** The nav label of the page at <paramref name="pathname"/>, for the header. */
 export function pageLabel(pathname: string): TranslationKey | null {
+  // The longest matching link wins: /jobs/time is "Time", not "Work orders".
+  let best: NavItem | null = null;
   for (const section of navigation) {
     for (const item of section.items) {
-      if (item.href && pathname.startsWith(item.href)) return item.label;
+      if (item.href && pathname.startsWith(item.href) && item.href.length > (best?.href?.length ?? 0)) best = item;
     }
   }
-  return null;
+  return best?.label ?? null;
 }

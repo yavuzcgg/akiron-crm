@@ -1,6 +1,6 @@
 "use client";
 
-import { BriefcaseBusiness, CalendarDays, FileText, UsersRound, Wallet, type LucideIcon } from "lucide-react";
+import { CalendarDays, FileText, UserRoundCheck, Wallet, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -12,12 +12,12 @@ import { TimelineFeed } from "@/features/timeline/timeline-feed";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
 import { hasPermission, permissions } from "@/lib/permissions";
 
-const roadmap: { icon: LucideIcon; label: TranslationKey; phase: string }[] = [
-  { icon: UsersRound, label: "nav.customers", phase: "Faz 2" },
-  { icon: BriefcaseBusiness, label: "nav.jobs", phase: "Faz 2" },
-  { icon: FileText, label: "nav.quotes", phase: "Faz 3" },
-  { icon: Wallet, label: "nav.finance", phase: "Faz 3" },
-  { icon: CalendarDays, label: "nav.content", phase: "Faz 4" },
+/** What comes next (docs/PLAN.md); shipped modules leave this list. */
+const roadmap: { icon: LucideIcon; label: TranslationKey; phase: number }[] = [
+  { icon: UserRoundCheck, label: "dashboard.roadmap.people", phase: 2 },
+  { icon: FileText, label: "nav.quotes", phase: 3 },
+  { icon: Wallet, label: "nav.finance", phase: 3 },
+  { icon: CalendarDays, label: "nav.content", phase: 4 },
 ];
 
 function greetingKey(hour: number): TranslationKey {
@@ -87,7 +87,7 @@ export default function DashboardPage() {
                     </span>
                     <span className="flex-1 font-medium">{t(item.label)}</span>
                     <Badge variant="outline" className="tabular">
-                      {item.phase}
+                      {t("dashboard.roadmap.phase", { phase: item.phase })}
                     </Badge>
                   </li>
                 ))}
