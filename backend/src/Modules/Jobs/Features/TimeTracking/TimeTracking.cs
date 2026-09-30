@@ -2,6 +2,7 @@ using Akiron.BuildingBlocks.Domain;
 using Akiron.BuildingBlocks.Persistence;
 using Akiron.BuildingBlocks.Security;
 using Akiron.Contracts.Identity;
+using Akiron.Contracts.People;
 using Akiron.Modules.Jobs.Domain;
 using Akiron.Modules.Jobs.Persistence;
 using FluentValidation;
@@ -67,7 +68,7 @@ internal sealed record TimeEntryResponse(
 /// The timer (one running per person, enforced by a unique index), manual entries and the
 /// timesheet. Everyone logs their own time; reading others' needs <c>jobs.time.read_all</c>.
 /// </summary>
-internal sealed class TimeTrackingHandler(JobsDbContext db, IMemberDirectory members, ICurrentUser currentUser, TimeProvider timeProvider)
+internal sealed class TimeTrackingHandler(JobsDbContext db, IMemberDirectory members, IPeopleCosts costs, ICurrentUser currentUser, TimeProvider timeProvider)
 {
     /// <summary>Calendar days are Turkish days: a manual entry for "Tuesday" is Tuesday in Istanbul.</summary>
     private static readonly TimeZoneInfo Istanbul = TimeZoneInfo.FindSystemTimeZoneById("Europe/Istanbul");
@@ -95,7 +96,7 @@ internal sealed class TimeTrackingHandler(JobsDbContext db, IMemberDirectory mem
         var running = await db.TimeEntries.FirstOrDefaultAsync(entry => entry.UserId == me && entry.EndedAt == null, cancellationToken);
         if (running is not null)
         {
-            running.Stop(now);
+            running.Stop(now, await CostOfAsync(me, cancellationToken));
 
             // The stop must reach the database before the new row, or the one-timer index refuses it.
             await db.SaveChangesAsync(cancellationToken);
@@ -116,7 +117,7 @@ internal sealed class TimeTrackingHandler(JobsDbContext db, IMemberDirectory mem
             return JobsErrors.NoRunningTimer;
         }
 
-        running.Stop(timeProvider.GetUtcNow());
+        running.Stop(timeProvider.GetUtcNow(), await CostOfAsync(me, cancellationToken));
         await db.SaveChangesAsync(cancellationToken);
         return (await ToResponsesAsync([running], cancellationToken))[0];
     }
@@ -132,7 +133,8 @@ internal sealed class TimeTrackingHandler(JobsDbContext db, IMemberDirectory mem
         // Manual entries carry the day, not the hour: they start at 09:00 local time.
         var local = command.Date.ToDateTime(new TimeOnly(9, 0));
         var startedAt = new DateTimeOffset(local, Istanbul.GetUtcOffset(local)).ToUniversalTime();
-        var entry = TimeEntry.Log(Me, workOrderId, startedAt, command.Minutes, command.Note, command.IsBillable);
+        var me = Me;
+        var entry = TimeEntry.Log(me, workOrderId, startedAt, command.Minutes, command.Note, command.IsBillable, await CostOfAsync(me, cancellationToken));
         db.TimeEntries.Add(entry);
         await db.SaveChangesAsync(cancellationToken);
         return (await ToResponsesAsync([entry], cancellationToken))[0];
@@ -179,6 +181,9 @@ internal sealed class TimeTrackingHandler(JobsDbContext db, IMemberDirectory mem
         var entries = await query.OrderBy(entry => entry.StartedAt).Take(2000).ToListAsync(cancellationToken);
         return (await ToResponsesAsync(entries, cancellationToken)).ToList();
     }
+
+    private async Task<decimal?> CostOfAsync(Guid userId, CancellationToken cancellationToken) =>
+        (await costs.HourlyCostsAsync([userId], cancellationToken)).TryGetValue(userId, out var cost) ? cost : null;
 
     private static DateTimeOffset StartOfDay(DateOnly date)
     {

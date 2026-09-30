@@ -5,6 +5,7 @@ using Akiron.BuildingBlocks.Web;
 using Akiron.Contracts.Crm;
 using Akiron.Contracts.Identity;
 using Akiron.Modules.Jobs.Features.ArchiveWorkOrder;
+using Akiron.Modules.Jobs.Features.Budget;
 using Akiron.Modules.Jobs.Features.CreateWorkOrder;
 using Akiron.Modules.Jobs.Features.GetWorkOrder;
 using Akiron.Modules.Jobs.Features.ListWorkOrders;
@@ -124,6 +125,14 @@ internal static class JobsEndpoints
             .ProducesProblem(StatusCodes.Status404NotFound)
             .WithSummary("Change a work order's details and people");
 
+        workOrders.MapPut("/{id:guid}/budget", async (Guid id, SetBudgetCommand command, SetBudgetHandler handler, CancellationToken cancellationToken) =>
+                Ok(await handler.HandleAsync(id, command, cancellationToken)))
+            .RequirePermission(JobsPermissions.Financials)
+            .Validate<SetBudgetCommand>()
+            .Produces<WorkOrderResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithSummary("Set the agreed price the job's cost is weighed against");
+
         workOrders.MapPost("/{id:guid}/move", async (Guid id, MoveWorkOrderCommand command, MoveWorkOrderHandler handler, CancellationToken cancellationToken) =>
                 Ok(await handler.HandleAsync(id, command, cancellationToken)))
             .RequirePermission(JobsPermissions.WorkOrdersWrite)
@@ -196,7 +205,7 @@ internal static class JobsEndpoints
             .WithSummary("Log time after the fact");
 
         time.MapGet("/entries", async ([AsParameters] TimeEntryFilter filter, TimeTrackingHandler handler, ClaimsPrincipal user, CancellationToken cancellationToken) =>
-                Ok(await handler.ListAsync(filter, Holds(user, JobsPermissions.TimeReadAll), cancellationToken)))
+                Ok(await handler.ListAsync(filter, user.HasPermission(JobsPermissions.TimeReadAll), cancellationToken)))
             .RequirePermission(JobsPermissions.TimeWrite)
             .Validate<TimeEntryFilter>()
             .Produces<IReadOnlyList<TimeEntryResponse>>()
@@ -204,15 +213,13 @@ internal static class JobsEndpoints
             .WithSummary("Time entries between two days (yours, or someone's with jobs.time.read_all)");
 
         time.MapDelete("/entries/{id:guid}", async (Guid id, TimeTrackingHandler handler, ClaimsPrincipal user, CancellationToken cancellationToken) =>
-                NoContent(await handler.RemoveAsync(id, Holds(user, JobsPermissions.TimeReadAll), cancellationToken)))
+                NoContent(await handler.RemoveAsync(id, user.HasPermission(JobsPermissions.TimeReadAll), cancellationToken)))
             .RequirePermission(JobsPermissions.TimeWrite)
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .WithSummary("Remove a time entry (your own)");
     }
 
-    private static bool Holds(ClaimsPrincipal user, string permission) =>
-        user.FindAll(AkironClaimTypes.Permission).Any(claim => claim.Value == permission || claim.Value == PermissionNames.All);
 
     private static IResult Ok<T>(Result<T> result) => result.IsSuccess ? TypedResults.Ok(result.Value) : result.Error.ToProblem();
 

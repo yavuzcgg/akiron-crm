@@ -24,7 +24,10 @@ public static class JobsPermissions
     /// <summary>Seeing everyone's time: timesheets of the whole team.</summary>
     public const string TimeReadAll = "jobs.time.read_all";
 
-    public static IReadOnlyCollection<string> All { get; } = [WorkOrdersRead, WorkOrdersWrite, StagesManage, TimeWrite, TimeReadAll];
+    /// <summary>A work order's money: agreed budget, cost of the time logged on it, and the difference.</summary>
+    public const string Financials = "jobs.financials";
+
+    public static IReadOnlyCollection<string> All { get; } = [WorkOrdersRead, WorkOrdersWrite, StagesManage, TimeWrite, TimeReadAll, Financials];
 
     public static IReadOnlyCollection<string> Member { get; } = [WorkOrdersRead, WorkOrdersWrite, TimeWrite];
 }

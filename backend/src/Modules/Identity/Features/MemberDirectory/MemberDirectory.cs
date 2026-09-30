@@ -1,4 +1,5 @@
 using Akiron.BuildingBlocks.Domain;
+using Akiron.BuildingBlocks.Security;
 using Akiron.Contracts.Identity;
 using Akiron.Modules.Identity.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,17 @@ internal sealed class MemberDirectory(IdentityDbContext db) : IMemberDirectory
             .OrderBy(member => member.FullName, StringComparer.Create(System.Globalization.CultureInfo.GetCultureInfo("tr-TR"), ignoreCase: true))
             .Select(member => new MemberSummary(member.UserId.Value, member.FullName))
             .ToList();
+    }
+
+    public async Task<IReadOnlyList<MemberSummary>> WithPermissionAsync(string permission, CancellationToken cancellationToken)
+    {
+        var members = await db.Memberships
+            .Where(membership => membership.IsActive)
+            .Join(db.Roles, membership => membership.RoleId, role => role.Id, (membership, role) => new { membership.UserId, role.Permissions })
+            .Where(row => row.Permissions.Contains(permission) || row.Permissions.Contains(PermissionNames.All))
+            .Join(db.Users, row => row.UserId, user => user.Id, (row, user) => new ActiveMember(user.Id, user.FullName))
+            .ToListAsync(cancellationToken);
+        return members.Select(member => new MemberSummary(member.UserId.Value, member.FullName)).ToList();
     }
 
     /// <summary>Filters before projecting: EF cannot translate a condition on a constructed record.</summary>

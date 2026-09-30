@@ -29,6 +29,13 @@ internal sealed record WorkOrderCard(
 
 internal sealed record WorkOrderTaskResponse(Guid Id, string Title, bool IsDone, DateTimeOffset? DoneAt);
 
+/// <summary>
+/// The job's money (TRY). <see cref="Cost"/> is logged minutes times each person's hourly cost at
+/// the time; <see cref="UncostedMinutes"/> are hours of people without a cost set, so a low cost
+/// is not mistaken for a cheap job.
+/// </summary>
+internal sealed record WorkOrderFinancials(decimal? Budget, decimal Cost, int UncostedMinutes, decimal? Profit, decimal? MarginPercent);
+
 internal sealed record WorkOrderResponse(
     Guid Id,
     string Number,
@@ -43,6 +50,7 @@ internal sealed record WorkOrderResponse(
     IReadOnlyList<WorkOrderTaskResponse> Tasks,
     int MinutesLogged,
     int BillableMinutes,
+    WorkOrderFinancials? Financials,
     DateTimeOffset? CompletedAt,
     DateTimeOffset CreatedAt);
 
@@ -89,7 +97,7 @@ internal static class JobsApi
 }
 
 /// <summary>Builds cards and details: task counts, logged minutes and assignee names in a few queries.</summary>
-internal sealed class WorkOrderReader(JobsDbContext db, IMemberDirectory members)
+internal sealed class WorkOrderReader(JobsDbContext db, IMemberDirectory members, Akiron.BuildingBlocks.Security.ICurrentUser currentUser)
 {
     public async Task<IReadOnlyList<WorkOrderCard>> CardsAsync(IReadOnlyList<WorkOrder> workOrders, CancellationToken cancellationToken)
     {
@@ -138,8 +146,23 @@ internal sealed class WorkOrderReader(JobsDbContext db, IMemberDirectory members
         var time = await db.TimeEntries
             .Where(entry => entry.WorkOrderId == workOrder.Id && entry.EndedAt != null)
             .GroupBy(_ => 1)
-            .Select(group => new { Total = group.Sum(entry => entry.Minutes), Billable = group.Where(entry => entry.IsBillable).Sum(entry => entry.Minutes) })
+            .Select(group => new
+            {
+                Total = group.Sum(entry => entry.Minutes),
+                Billable = group.Where(entry => entry.IsBillable).Sum(entry => entry.Minutes),
+                Cost = group.Where(entry => entry.CostPerHour != null).Sum(entry => entry.Minutes * entry.CostPerHour!.Value),
+                Uncosted = group.Where(entry => entry.CostPerHour == null).Sum(entry => entry.Minutes),
+            })
             .FirstOrDefaultAsync(cancellationToken);
+
+        WorkOrderFinancials? financials = null;
+        if (currentUser.HasPermission(JobsPermissions.Financials))
+        {
+            var cost = decimal.Round((time?.Cost ?? 0m) / 60m, 2, MidpointRounding.AwayFromZero);
+            var profit = workOrder.Budget - cost;
+            var margin = workOrder.Budget is > 0m ? decimal.Round(profit!.Value / workOrder.Budget.Value * 100m, 1) : (decimal?)null;
+            financials = new WorkOrderFinancials(workOrder.Budget, cost, time?.Uncosted ?? 0, profit, margin);
+        }
         var names = await members.FindAsync(workOrder.Assignees.Select(assignee => assignee.UserId), cancellationToken);
 
         return new WorkOrderResponse(
@@ -156,6 +179,7 @@ internal sealed class WorkOrderReader(JobsDbContext db, IMemberDirectory members
             tasks,
             time?.Total ?? 0,
             time?.Billable ?? 0,
+            financials,
             workOrder.CompletedAt,
             workOrder.CreatedAt);
     }

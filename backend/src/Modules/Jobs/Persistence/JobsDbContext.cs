@@ -57,6 +57,7 @@ internal sealed class WorkOrderConfiguration : IEntityTypeConfiguration<WorkOrde
         builder.Property(workOrder => workOrder.Description).HasMaxLength(WorkOrder.DescriptionMaxLength);
         builder.Property(workOrder => workOrder.PartyName).HasMaxLength(250);
         builder.Property(workOrder => workOrder.Priority).HasConversion<string>().HasMaxLength(20);
+        builder.Property(workOrder => workOrder.Budget).HasPrecision(18, 2);
         builder.HasOne<Stage>().WithMany().HasForeignKey(workOrder => workOrder.StageId).OnDelete(DeleteBehavior.Restrict);
         builder.HasMany(workOrder => workOrder.Assignees).WithOne().HasForeignKey(assignee => assignee.WorkOrderId).OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(workOrder => workOrder.Assignees).UsePropertyAccessMode(PropertyAccessMode.Field);
@@ -99,6 +100,7 @@ internal sealed class TimeEntryConfiguration : IEntityTypeConfiguration<TimeEntr
         builder.HasKey(entry => entry.Id);
         builder.Property(entry => entry.Id).ValueGeneratedNever();
         builder.Property(entry => entry.Note).HasMaxLength(TimeEntry.NoteMaxLength);
+        builder.Property(entry => entry.CostPerHour).HasPrecision(18, 2);
         builder.Ignore(entry => entry.IsRunning);
         builder.HasOne<WorkOrder>().WithMany().HasForeignKey(entry => entry.WorkOrderId).OnDelete(DeleteBehavior.Restrict);
 

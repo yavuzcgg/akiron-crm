@@ -37,6 +37,9 @@ public sealed class TimeEntry : Entity<TimeEntryId>, ITenantScoped, ISoftDeletab
 
     public bool IsBillable { get; private set; }
 
+    /// <summary>The person's hourly cost (TRY) when the time was recorded; null when none was set.</summary>
+    public decimal? CostPerHour { get; private set; }
+
     public bool IsRunning => EndedAt is null;
 
     public bool IsDeleted { get; private set; }
@@ -54,22 +57,25 @@ public sealed class TimeEntry : Entity<TimeEntryId>, ITenantScoped, ISoftDeletab
     public static TimeEntry Start(Guid userId, WorkOrderId workOrderId, string? note, bool isBillable, DateTimeOffset now) =>
         new(TimeEntryId.New(), userId, workOrderId, now) { Note = Clean(note), IsBillable = isBillable };
 
-    public static TimeEntry Log(Guid userId, WorkOrderId workOrderId, DateTimeOffset startedAt, int minutes, string? note, bool isBillable) =>
+    public static TimeEntry Log(Guid userId, WorkOrderId workOrderId, DateTimeOffset startedAt, int minutes, string? note, bool isBillable, decimal? costPerHour) =>
         new(TimeEntryId.New(), userId, workOrderId, startedAt)
         {
             EndedAt = startedAt.AddMinutes(minutes),
             Minutes = minutes,
             Note = Clean(note),
             IsBillable = isBillable,
+            CostPerHour = costPerHour,
         };
 
     /// <summary>Stops a running timer; rounds up to a whole minute and caps at <see cref="MaxMinutes"/>.</summary>
-    public void Stop(DateTimeOffset now)
+    public void Stop(DateTimeOffset now, decimal? costPerHour)
     {
         if (!IsRunning)
         {
             return;
         }
+
+        CostPerHour = costPerHour;
 
         var minutes = (int)Math.Ceiling(Math.Max(0, (now - StartedAt).TotalMinutes));
         Minutes = Math.Clamp(minutes, 1, MaxMinutes);

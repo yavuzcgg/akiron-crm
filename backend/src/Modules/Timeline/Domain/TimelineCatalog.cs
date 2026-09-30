@@ -34,6 +34,8 @@ public static class TimelineEntryTypes
     public const string PartyContactAdded = "crm.contact.added";
     public const string WorkOrderCreated = "jobs.work_order.created";
     public const string WorkOrderMoved = "jobs.work_order.moved";
+    public const string LeaveRequested = "people.leave.requested";
+    public const string LeaveDecided = "people.leave.decided";
 
     private const string PartiesRead = "crm.parties.read";
     private const string WorkOrdersRead = "jobs.work_orders.read";
@@ -50,5 +52,9 @@ public static class TimelineEntryTypes
         [PartyContactAdded] = PartiesRead,
         [WorkOrderCreated] = WorkOrdersRead,
         [WorkOrderMoved] = WorkOrdersRead,
+
+        // Leave, and above all its reason (a sick note is health data under KVKK), is for approvers.
+        [LeaveRequested] = "people.leave.approve",
+        [LeaveDecided] = "people.leave.approve",
     };
 }

@@ -13,4 +13,7 @@ public interface IMemberDirectory
 
     /// <summary>Every active member of the current tenant, by name.</summary>
     Task<IReadOnlyList<MemberSummary>> ListAsync(CancellationToken cancellationToken);
+
+    /// <summary>Active members whose role grants <paramref name="permission"/> (owners always do): who approves, who gets told.</summary>
+    Task<IReadOnlyList<MemberSummary>> WithPermissionAsync(string permission, CancellationToken cancellationToken);
 }

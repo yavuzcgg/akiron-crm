@@ -15,4 +15,6 @@ public sealed class HttpCurrentUser(IHttpContextAccessor httpContextAccessor) : 
     }
 
     public string? DisplayName => httpContextAccessor.HttpContext?.User.FindFirst(AkironClaimTypes.Name)?.Value;
+
+    public bool HasPermission(string permission) => httpContextAccessor.HttpContext?.User.HasPermission(permission) ?? false;
 }

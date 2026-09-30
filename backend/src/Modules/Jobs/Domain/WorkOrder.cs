@@ -63,6 +63,9 @@ public sealed class WorkOrder : Entity<WorkOrderId>, ITenantScoped, ISoftDeletab
 
     public DateOnly? DueDate { get; private set; }
 
+    /// <summary>The agreed price of the job in TRY, excluding VAT; what cost is weighed against.</summary>
+    public decimal? Budget { get; private set; }
+
     /// <summary>Set when the work order enters a done stage, cleared when it leaves one.</summary>
     public DateTimeOffset? CompletedAt { get; private set; }
 
@@ -103,6 +106,8 @@ public sealed class WorkOrder : Entity<WorkOrderId>, ITenantScoped, ISoftDeletab
     }
 
     public void RenameParty(string partyName) => PartyName = partyName;
+
+    public void SetBudget(decimal? budget) => Budget = budget is { } amount ? decimal.Round(amount, 2) : null;
 
     /// <summary>Moves the card; returns true when the stage (not only the order) changed.</summary>
     public bool MoveTo(Stage stage, double rank, DateTimeOffset now)

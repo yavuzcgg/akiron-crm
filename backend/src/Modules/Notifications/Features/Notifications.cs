@@ -5,6 +5,7 @@ using Akiron.BuildingBlocks.Security;
 using Akiron.BuildingBlocks.Web;
 using Akiron.Contracts.Identity;
 using Akiron.Contracts.Jobs;
+using Akiron.Contracts.People;
 using Akiron.Modules.Notifications.Domain;
 using Akiron.Modules.Notifications.Persistence;
 using Akiron.Modules.Notifications.Realtime;
@@ -94,6 +95,66 @@ internal sealed class WorkOrderAssignedNotification(NotificationSender sender) :
                 Notification.Create(integrationEvent.TenantId, userId, Type, payload, integrationEvent.EventId, integrationEvent.OccurredAt),
                 cancellationToken);
         }
+    }
+}
+
+/// <summary>Tells everyone who can approve leave that a request is waiting (not the requester).</summary>
+internal sealed class LeaveRequestedNotification(NotificationSender sender, IMemberDirectory members) : IIntegrationEventConsumer<LeaveRequested>
+{
+    public const string Type = "people.leave.requested";
+
+    public async Task HandleAsync(LeaveRequested integrationEvent, CancellationToken cancellationToken)
+    {
+        var payload = JsonSerializer.Serialize(
+            new
+            {
+                leaveRequestId = integrationEvent.LeaveRequestId,
+                userName = integrationEvent.UserName,
+                type = integrationEvent.Type,
+                startDate = integrationEvent.StartDate,
+                endDate = integrationEvent.EndDate,
+                days = integrationEvent.Days,
+            },
+            JsonSerializerOptions.Web);
+
+        foreach (var approver in await members.WithPermissionAsync("people.leave.approve", cancellationToken))
+        {
+            if (approver.UserId != integrationEvent.UserId)
+            {
+                await sender.SendAsync(
+                    Notification.Create(integrationEvent.TenantId, approver.UserId, Type, payload, integrationEvent.EventId, integrationEvent.OccurredAt),
+                    cancellationToken);
+            }
+        }
+    }
+}
+
+/// <summary>Tells the requester how their leave request was decided.</summary>
+internal sealed class LeaveDecidedNotification(NotificationSender sender) : IIntegrationEventConsumer<LeaveDecided>
+{
+    public const string Type = "people.leave.decided";
+
+    public Task HandleAsync(LeaveDecided integrationEvent, CancellationToken cancellationToken)
+    {
+        if (integrationEvent.UserId == integrationEvent.DecidedByUserId)
+        {
+            return Task.CompletedTask;
+        }
+
+        var payload = JsonSerializer.Serialize(
+            new
+            {
+                leaveRequestId = integrationEvent.LeaveRequestId,
+                approved = integrationEvent.Approved,
+                startDate = integrationEvent.StartDate,
+                endDate = integrationEvent.EndDate,
+                decidedByName = integrationEvent.DecidedByName,
+                note = integrationEvent.Note,
+            },
+            JsonSerializerOptions.Web);
+        return sender.SendAsync(
+            Notification.Create(integrationEvent.TenantId, integrationEvent.UserId, Type, payload, integrationEvent.EventId, integrationEvent.OccurredAt),
+            cancellationToken);
     }
 }
 
