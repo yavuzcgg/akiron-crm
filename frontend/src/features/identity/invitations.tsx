@@ -2,11 +2,12 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, X } from "lucide-react";
+import { AlertCircle, Mail, MailPlus, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { EmptyState } from "@/components/empty-state";
 import { FormField } from "@/components/form-field";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +29,7 @@ const invitableRoles = ["member", "admin"] as const;
 
 const fields = ["email", "role"] as const;
 
-export function InviteForm() {
+export function InviteForm({ onSent }: { onSent?: () => void }) {
   const { t, tError } = useI18n();
   const queryClient = useQueryClient();
   const [formError, setFormError] = useState<string | null>(null);
@@ -62,15 +63,16 @@ export function InviteForm() {
     try {
       await invite.mutateAsync(values);
       form.reset({ email: "", role: values.role });
+      onSent?.();
     } catch (error) {
       setFormError(applyApiError(error, fields, form.setError, tError));
     }
   });
 
   return (
-    <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-[1fr_10rem_auto] sm:items-end" noValidate>
+    <form onSubmit={onSubmit} className="grid gap-4" noValidate>
       {formError ? (
-        <Alert variant="destructive" className="sm:col-span-3">
+        <Alert variant="destructive">
           <AlertCircle />
           <AlertDescription>{formError}</AlertDescription>
         </Alert>
@@ -87,7 +89,7 @@ export function InviteForm() {
         <Label htmlFor="invite-role">{t("team.invite.role")}</Label>
         <select
           id="invite-role"
-          className="border-input bg-background h-8 rounded-lg border px-2.5 text-sm"
+          className="border-input bg-card focus-visible:border-ring focus-visible:ring-ring/25 h-10 rounded-lg border px-3 text-sm outline-none focus-visible:ring-3"
           {...form.register("role")}
         >
           {invitableRoles.map((role) => (
@@ -97,7 +99,7 @@ export function InviteForm() {
           ))}
         </select>
       </div>
-      <Button type="submit" disabled={invite.isPending}>
+      <Button type="submit" size="lg" className="w-full" disabled={invite.isPending}>
         {invite.isPending ? t("common.loading") : t("team.invite.submit")}
       </Button>
     </form>
@@ -123,37 +125,43 @@ export function PendingInvitations({ canManage }: { canManage: boolean }) {
     },
   });
 
-  if (invitations.isPending) return <Skeleton className="h-10 w-full" />;
+  if (invitations.isPending) return <Skeleton className="h-14 w-full" />;
   if (invitations.isError || invitations.data.length === 0) {
-    return <p className="text-muted-foreground text-sm">{t("team.invitations.empty")}</p>;
+    return <EmptyState icon={MailPlus} title={t("team.invitations.empty")} className="py-8" />;
   }
 
   return (
     <ul className="divide-border divide-y">
-      {invitations.data.map((invitation) => (
-        <li key={invitation.id} className="flex items-center gap-3 py-2.5">
-          <div className="grid flex-1 gap-0.5">
-            <span className="text-sm font-medium">{invitation.email}</span>
-            <span className="text-muted-foreground text-xs">
-              {invitation.status === "expired"
-                ? t("team.invitations.expired")
-                : t("team.invitations.expires", { date: formatDate(invitation.expiresAt) })}
+      {invitations.data.map((invitation) => {
+        const expired = invitation.status === "expired";
+        return (
+          <li key={invitation.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+            <span className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-full">
+              <Mail className="size-4" aria-hidden />
             </span>
-          </div>
-          <Badge variant="secondary">{roleLabel(invitation.role, t)}</Badge>
-          {canManage ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => revoke.mutate(invitation.id)}
-              disabled={revoke.isPending}
-              aria-label={t("team.invitations.revoke")}
-            >
-              <X /> {t("team.invitations.revoke")}
-            </Button>
-          ) : null}
-        </li>
-      ))}
+            <div className="grid min-w-0 flex-1 gap-0.5">
+              <span className="truncate font-medium">{invitation.email}</span>
+              <span className="text-muted-foreground text-xs">
+                {expired ? t("team.invitations.expired") : t("team.invitations.expires", { date: formatDate(invitation.expiresAt) })}
+              </span>
+            </div>
+            {expired ? <Badge variant="warning">{t("team.invitations.expired")}</Badge> : null}
+            <Badge variant={invitation.role === "admin" ? "brand" : "secondary"}>{roleLabel(invitation.role, t)}</Badge>
+            {canManage ? (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => revoke.mutate(invitation.id)}
+                disabled={revoke.isPending}
+                aria-label={`${t("team.invitations.revoke")}: ${invitation.email}`}
+                title={t("team.invitations.revoke")}
+              >
+                <X />
+              </Button>
+            ) : null}
+          </li>
+        );
+      })}
     </ul>
   );
 }

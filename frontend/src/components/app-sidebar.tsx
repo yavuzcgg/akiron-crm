@@ -1,21 +1,13 @@
 "use client";
 
-import {
-  BriefcaseBusiness,
-  CalendarDays,
-  FileText,
-  LayoutDashboard,
-  Users,
-  UsersRound,
-  Wallet,
-  type LucideIcon,
-} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
+import { Logo } from "@/components/brand/logo";
+import { navigation } from "@/components/navigation";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -23,89 +15,75 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
 } from "@/components/ui/sidebar";
+import { UserMenu } from "@/components/user-menu";
 import type { Session } from "@/features/identity/session";
-import { useI18n, type TranslationKey } from "@/lib/i18n";
-import { hasPermission, permissions } from "@/lib/permissions";
-
-interface NavItem {
-  label: TranslationKey;
-  icon: LucideIcon;
-  href?: string;
-  permission?: string;
-}
-
-/** Modules without an href are on the roadmap; they are shown so the product's shape is visible from day one. */
-const workItems: NavItem[] = [
-  { label: "nav.dashboard", icon: LayoutDashboard, href: "/dashboard" },
-  { label: "nav.customers", icon: UsersRound },
-  { label: "nav.jobs", icon: BriefcaseBusiness },
-  { label: "nav.quotes", icon: FileText },
-  { label: "nav.finance", icon: Wallet },
-  { label: "nav.content", icon: CalendarDays },
-];
-
-const settingsItems: NavItem[] = [
-  { label: "nav.team", icon: Users, href: "/settings/team", permission: permissions.identity.membersRead },
-];
+import { useI18n } from "@/lib/i18n";
+import { hasPermission } from "@/lib/permissions";
 
 export function AppSidebar({ session }: { session: Session }) {
   const { t } = useI18n();
   const pathname = usePathname();
 
-  const renderItems = (items: NavItem[]) =>
-    items
-      .filter((item) => !item.permission || hasPermission(session.permissions, item.permission))
-      .map((item) => (
-        <SidebarMenuItem key={item.label}>
-          {item.href ? (
-            <SidebarMenuButton isActive={pathname.startsWith(item.href)} tooltip={t(item.label)} render={<Link href={item.href} />}>
-              <item.icon />
-              <span>{t(item.label)}</span>
-            </SidebarMenuButton>
-          ) : (
-            <SidebarMenuButton disabled tooltip={t(item.label)} className="opacity-60">
-              <item.icon />
-              <span>{t(item.label)}</span>
-              <Badge variant="outline" className="ml-auto text-[10px]">
-                {t("common.soon")}
-              </Badge>
-            </SidebarMenuButton>
-          )}
-        </SidebarMenuItem>
-      ));
-
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link href="/dashboard" />}>
-              <div className="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg font-semibold">
-                A
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{session.tenantName}</span>
-                <span className="text-muted-foreground truncate text-xs">{t("app.name")}</span>
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+      <SidebarHeader className="h-14 justify-center border-b px-3">
+        <Link href="/dashboard" className="rounded-lg outline-none" aria-label={t("app.name")}>
+          <Logo subtitle={session.tenantName} />
+        </Link>
       </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>{t("nav.section.work")}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>{renderItems(workItems)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>{t("nav.section.settings")}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>{renderItems(settingsItems)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+
+      <SidebarContent className="gap-0 py-2">
+        {navigation.map((section) => {
+          const items = section.items.filter((item) => !item.permission || hasPermission(session.permissions, item.permission));
+          if (items.length === 0) return null;
+
+          return (
+            <SidebarGroup key={section.label} className="py-1.5">
+              <SidebarGroupLabel className="text-muted-foreground px-2.5 text-[11px] font-semibold tracking-wider uppercase">
+                {t(section.label)}
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu className="gap-0.5">
+                  {items.map((item) => (
+                    <SidebarMenuItem key={item.label}>
+                      {item.href ? (
+                        <SidebarMenuButton
+                          isActive={pathname.startsWith(item.href)}
+                          tooltip={t(item.label)}
+                          render={<Link href={item.href} />}
+                        >
+                          <item.icon />
+                          <span>{t(item.label)}</span>
+                        </SidebarMenuButton>
+                      ) : (
+                        // Still readable at full contrast: the "soon" tag says why it cannot be opened.
+                        <SidebarMenuButton
+                          aria-disabled
+                          aria-description={t("nav.soonHint")}
+                          className="text-muted-foreground aria-disabled:opacity-100"
+                        >
+                          <item.icon />
+                          <span className="flex-1">{t(item.label)}</span>
+                          <span className="border-border text-muted-foreground rounded-md border px-1.5 py-px text-[10px] font-medium group-data-[collapsible=icon]:hidden">
+                            {t("common.soon")}
+                          </span>
+                        </SidebarMenuButton>
+                      )}
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          );
+        })}
       </SidebarContent>
+
+      <SidebarFooter className="border-t p-2">
+        <UserMenu session={session} />
+      </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }

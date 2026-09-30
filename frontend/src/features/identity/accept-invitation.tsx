@@ -8,7 +8,6 @@ import { useState, type FormEvent } from "react";
 import { FormField } from "@/components/form-field";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api/client";
 import { ApiError, unwrap } from "@/lib/api/errors";
@@ -51,17 +50,15 @@ export function AcceptInvitation() {
 
   if (!token || preview.isError) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">{t("invite.title")}</CardTitle>
-          <CardDescription>{t("invite.invalid")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Link href="/login" className={buttonVariants({ variant: "outline" })}>
-            {t("invite.toLogin")}
-          </Link>
-        </CardContent>
-      </Card>
+      <div className="grid gap-6">
+        <div className="grid gap-2">
+          <h1 className="text-[28px] leading-tight font-bold tracking-[-0.01em]">{t("invite.title")}</h1>
+          <p className="text-muted-foreground text-[15px]">{t("invite.invalid")}</p>
+        </div>
+        <Link href="/login" className={buttonVariants({ variant: "outline", size: "lg" })}>
+          {t("invite.toLogin")}
+        </Link>
+      </div>
     );
   }
 
@@ -86,18 +83,17 @@ export function AcceptInvitation() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">{t("invite.title")}</CardTitle>
-        <CardDescription>
+    <div className="grid gap-8">
+      <div className="grid gap-2">
+        <h1 className="text-[28px] leading-tight font-bold tracking-[-0.01em]">{invitation.workspaceName}</h1>
+        <p className="text-muted-foreground text-[15px]">
           {t("invite.description", {
             inviter: invitation.invitedByName,
             workspace: invitation.workspaceName,
             role: roleLabel(invitation.role, t),
           })}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+        </p>
+      </div>
         <form onSubmit={submit} className="grid gap-4" noValidate>
           <p className="text-muted-foreground text-sm">
             {t(isNewAccount ? "invite.newAccount" : "invite.existingAccount", { email: invitation.email })}
@@ -126,11 +122,10 @@ export function AcceptInvitation() {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
-          <Button type="submit" size="lg" disabled={accept.isPending}>
+          <Button type="submit" size="lg" className="mt-1 w-full" disabled={accept.isPending}>
             {accept.isPending ? t("common.loading") : t("invite.submit")}
           </Button>
         </form>
-      </CardContent>
-    </Card>
+    </div>
   );
 }

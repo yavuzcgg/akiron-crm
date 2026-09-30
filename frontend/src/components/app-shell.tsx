@@ -5,10 +5,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/app-sidebar";
+import { pageLabel } from "@/components/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { UserMenu } from "@/components/user-menu";
 import { useSession } from "@/features/identity/session";
 import { NotificationBell, useRealtimeNotifications } from "@/features/notifications/notifications";
 import { sessionExpiredEvent } from "@/lib/api/client";
@@ -25,6 +25,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const session = useSession();
   useRealtimeNotifications(!!session.data);
+  const currentPage = pageLabel(pathname);
 
   useEffect(() => {
     const onExpired = () => {
@@ -59,14 +60,16 @@ export function AppShell({ children }: { children: ReactNode }) {
     <SidebarProvider>
       <AppSidebar session={session.data} />
       <SidebarInset>
-        <header className="bg-background/80 sticky top-0 z-10 flex h-14 items-center gap-2 border-b px-4 backdrop-blur">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
+        <header className="bg-background/85 sticky top-0 z-20 flex h-14 items-center gap-3 border-b px-4 backdrop-blur-sm md:px-6">
+          <SidebarTrigger className="-ml-1.5" />
+          <Separator orientation="vertical" className="h-5" />
+          <p className="text-sm font-semibold">{currentPage ? t(currentPage) : session.data.tenantName}</p>
           <div className="flex-1" />
           <NotificationBell />
-          <UserMenu session={session.data} />
         </header>
-        <main className="flex-1 p-4 md:p-6">{children}</main>
+        <main id="main" className="flex-1 px-4 py-6 md:px-8 md:py-8">
+          <div className="mx-auto w-full max-w-[1280px]">{children}</div>
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );

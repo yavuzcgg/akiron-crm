@@ -1,7 +1,8 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, FileText, Trash2, Upload } from "lucide-react";
+import { Download, FileText, FolderOpen, Trash2, Upload } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import { useRef, type ChangeEvent } from "react";
 import { toast } from "sonner";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -69,7 +70,7 @@ export function FileList({ subjectType, subjectId, canWrite }: FileListProps) {
       {canWrite ? (
         <div>
           <input ref={input} type="file" className="hidden" onChange={onPick} />
-          <Button variant="outline" size="sm" onClick={() => input.current?.click()} disabled={upload.isPending}>
+          <Button variant="outline" className="w-full" onClick={() => input.current?.click()} disabled={upload.isPending}>
             <Upload /> {upload.isPending ? t("files.uploading") : t("files.upload")}
           </Button>
         </div>
@@ -78,12 +79,14 @@ export function FileList({ subjectType, subjectId, canWrite }: FileListProps) {
       {files.isPending ? (
         <Skeleton className="h-10 w-full" />
       ) : !files.data?.length ? (
-        <p className="text-muted-foreground text-sm">{t("files.empty")}</p>
+        <EmptyState icon={FolderOpen} title={t("files.empty")} className="py-6" />
       ) : (
         <ul className="divide-border divide-y">
           {files.data.map((file) => (
-            <li key={file.id} className="flex items-center gap-3 py-2">
-              <FileText className="text-muted-foreground size-4 shrink-0" />
+            <li key={file.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+              <span className="bg-primary-soft text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+                <FileText className="size-4" aria-hidden />
+              </span>
               <div className="grid min-w-0 flex-1">
                 <span className="truncate text-sm font-medium">{file.fileName}</span>
                 <span className="text-muted-foreground text-xs">

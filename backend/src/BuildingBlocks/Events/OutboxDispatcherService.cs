@@ -25,7 +25,8 @@ public sealed partial class OutboxDispatcherService(
             {
                 handled = await processor.ProcessAsync(stoppingToken);
             }
-            catch (Exception exception) when (exception is not OperationCanceledException)
+            // An HTTP or database timeout also surfaces as a cancellation; only the host shutting down may end the loop.
+            catch (Exception exception) when (!stoppingToken.IsCancellationRequested)
             {
                 // The database may be briefly unavailable; keep the loop alive.
                 LogCycleFailed(logger, exception);

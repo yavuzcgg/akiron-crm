@@ -124,7 +124,8 @@ internal sealed partial class ExchangeRateSyncService(ExchangeRateSync sync, ILo
             {
                 await sync.SyncAsync(stoppingToken);
             }
-            catch (Exception exception) when (exception is not OperationCanceledException)
+            // An HTTP or database timeout also surfaces as a cancellation; only the host shutting down may end the loop.
+            catch (Exception exception) when (!stoppingToken.IsCancellationRequested)
             {
                 // TCMB or the network may be down; the next hour tries again.
                 LogSyncFailed(logger, exception);

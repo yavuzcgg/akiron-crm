@@ -490,3 +490,6 @@ out/
 
 # Vendor reference material (licensed, never published): Logo data dictionaries etc.
 docs/vendor/
+
+# Design tooling, installed per machine: npm i -g ui-ux-pro-max-cli && uipro init --ai claude --offline
+.claude/skills/

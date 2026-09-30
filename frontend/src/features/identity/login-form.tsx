@@ -77,7 +77,7 @@ export function LoginForm() {
         error={errors.password?.message}
         {...form.register("password")}
       />
-      <Button type="submit" size="lg" disabled={login.isPending}>
+      <Button type="submit" size="lg" className="mt-1 w-full" disabled={login.isPending}>
         {login.isPending ? t("common.loading") : t("auth.login.submit")}
       </Button>
     </form>

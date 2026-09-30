@@ -100,7 +100,7 @@ export function RegisterForm() {
         error={errors.password?.message}
         {...form.register("password")}
       />
-      <Button type="submit" size="lg" disabled={register.isPending}>
+      <Button type="submit" size="lg" className="mt-1 w-full" disabled={register.isPending}>
         {register.isPending ? t("common.loading") : t("auth.register.submit")}
       </Button>
     </form>

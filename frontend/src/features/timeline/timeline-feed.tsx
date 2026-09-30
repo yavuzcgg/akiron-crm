@@ -1,6 +1,7 @@
 "use client";
 
-import { AlertCircle } from "lucide-react";
+import { Activity, AlertCircle } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import { useState, type FormEvent } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -55,7 +56,7 @@ export function TimelineFeed({ subjectType, subjectId, canWriteNotes }: Timeline
       {canWriteNotes ? <NoteComposer subjectType={subjectType} subjectId={subjectId} /> : null}
 
       {items.length === 0 ? (
-        <p className="text-muted-foreground text-sm">{t("timeline.empty")}</p>
+        <EmptyState icon={Activity} title={t("timeline.empty")} className="py-6" />
       ) : (
         <ol className="grid gap-6">
           {groupByDay(items).map(([day, entries]) => (
@@ -113,7 +114,7 @@ function DayHeading({ day, sample, now }: { day: string; sample: string; now: nu
   const yesterday = dayKey(new Date(now - 86_400_000));
   const label = day === today ? t("common.today") : day === yesterday ? t("common.yesterday") : formatDate(sample);
 
-  return <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">{label}</h3>;
+  return <h3 className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">{label}</h3>;
 }
 
 function NoteComposer({ subjectType, subjectId }: { subjectType: TimelineSubjectType; subjectId: string }) {
@@ -136,8 +137,10 @@ function NoteComposer({ subjectType, subjectId }: { subjectType: TimelineSubject
   };
 
   return (
-    <form onSubmit={submit} className="grid gap-2">
+    <form onSubmit={submit} className="bg-muted/40 focus-within:border-ring focus-within:ring-ring/20 grid gap-2 rounded-xl border p-3 transition-shadow focus-within:ring-3">
       <Textarea
+        className="min-h-14 resize-none border-0 bg-transparent p-1 shadow-none focus-visible:ring-0 dark:bg-transparent"
+        aria-label={t("timeline.note.placeholder")}
         value={text}
         onChange={(event) => setText(event.target.value)}
         placeholder={t("timeline.note.placeholder")}

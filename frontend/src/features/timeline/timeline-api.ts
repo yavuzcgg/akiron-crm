@@ -12,9 +12,10 @@ export type TimelineSubjectType = "workspace" | "user";
 export const timelineQueryKey = (subjectType: TimelineSubjectType, subjectId: string) =>
   ["timeline", subjectType, subjectId] as const;
 
-export function useTimeline(subjectType: TimelineSubjectType, subjectId: string) {
+export function useTimeline(subjectType: TimelineSubjectType, subjectId: string, enabled = true) {
   return useInfiniteQuery({
     queryKey: timelineQueryKey(subjectType, subjectId),
+    enabled,
     initialPageParam: undefined as string | undefined,
     queryFn: async ({ pageParam }) =>
       unwrap(

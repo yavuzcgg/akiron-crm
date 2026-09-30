@@ -78,12 +78,16 @@ export function useRealtimeNotifications(enabled: boolean) {
       toast.info(describe(item, t).message);
     });
 
-    connection.start().catch(() => {
+    const starting = connection.start().catch(() => {
       // Offline or blocked (proxies that drop long polling); the bell keeps polling.
     });
 
+    // Stop only after start settles: stopping mid-negotiation (React re-running effects in
+    // development, fast navigation) makes SignalR log an error for a normal teardown.
     return () => {
-      if (connection.state !== HubConnectionState.Disconnected) void connection.stop();
+      void starting.then(() => {
+        if (connection.state !== HubConnectionState.Disconnected) return connection.stop();
+      });
     };
     // The translator only formats the toast; reconnecting when the language changes is not needed.
     // eslint-disable-next-line react-hooks/exhaustive-deps

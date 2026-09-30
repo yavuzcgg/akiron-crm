@@ -39,6 +39,8 @@ Talk to the owner in Turkish. Write code, database columns, commits and ADRs in 
 
 ## Frontend (`frontend/`)
 
+- **Design:** every screen follows `design-system/akiron-crm/MASTER.md` (tokens, type, spacing, components, measured contrast); a page-specific file in `design-system/akiron-crm/pages/` overrides it. New screens start from the UI/UX Pro Max skill (`npm i -g ui-ux-pro-max-cli && uipro init --ai claude --offline`, then `python .claude/skills/ui-ux-pro-max/scripts/search.py "<query>" --domain <domain>`); curate its output and record deviations in MASTER.md "Decisions".
+- Colours come from semantic tokens in `src/app/globals.css` (`primary`, `success`, `warning`, `muted-foreground` …), never raw hex in components. No invented numbers or placeholder charts: empty states until real data exists.
 - Next.js App Router, TypeScript strict, Tailwind v4, shadcn/ui, TanStack Query + Table, react-hook-form + zod.
 - API types are generated (`npm run api:gen`, with the API running) into `src/lib/api/schema.d.ts` and committed; never hand-write response interfaces. Call the API through `api` from `src/lib/api/client.ts` and `unwrap()` results.
 - The browser only talks to the Next.js origin; `next.config.ts` rewrites `/api/*` to the backend, so session cookies stay first-party. Never put tokens in JavaScript.

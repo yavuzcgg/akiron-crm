@@ -8,6 +8,15 @@ Ajanslar için iş yönetimi ve ön muhasebe platformu — Türkiye'ye göre.
 
 > Durum: Faz 1 / Sprint 1–2 tamamlandı — modüler iskelet, çok kiracılı veri katmanı, kimlik doğrulama ve davet, activity timeline, denetim izi, dosya deposu, bildirimler (anlık), e-posta, TCMB kurları. Üretime hazır değildir.
 
+## Ekranlar
+
+| Panel | Ekip |
+| --- | --- |
+| ![Panel: başlarken listesi, etkinlik akışı, dosyalar](docs/screenshots/dashboard.png) | ![Ekip ve davetler](docs/screenshots/team.png) |
+| ![Giriş ekranı](docs/screenshots/login.png) | ![Koyu tema](docs/screenshots/dashboard-dark.png) |
+
+Tasarım sistemi: [design-system/akiron-crm/MASTER.md](design-system/akiron-crm/MASTER.md).
+
 ## Belgeler
 
 | Belge | İçerik |
