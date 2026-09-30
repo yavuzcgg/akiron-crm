@@ -15,6 +15,8 @@ public sealed class WorkOrderTests(ApiFixture api)
 {
     private const string WorkOrders = "/api/v1/jobs/work-orders";
 
+    private static readonly string[] LogoTasks = ["Brief toplantısı", "3 eskiz", "Sunum", "Final teslim"];
+
     private static CancellationToken Cancel => TestContext.Current.CancellationToken;
 
     private async Task<(HttpClient Client, SessionResponse Session)> OwnerAsync()
@@ -293,5 +295,30 @@ public sealed class WorkOrderTests(ApiFixture api)
         Assert.Equal(HttpStatusCode.Forbidden, stage.StatusCode);
         Assert.Equal(2, (await people.Content.ReadFromJsonAsync<JsonElement>(Cancel)).GetArrayLength());
         Assert.Single((await mine.Content.ReadFromJsonAsync<BoardResponse>(Cancel))!.WorkOrders);
+    }
+
+    [Fact]
+    public async Task Template_FillsTheChecklistAndDueDateOfANewWorkOrder()
+    {
+        var (owner, _) = await OwnerAsync();
+        var (member, _) = await MemberOfAsync(owner);
+
+        using var created = await owner.PostAsJsonAsync("/api/v1/jobs/templates", new
+        {
+            name = "Logo tasarımı",
+            title = "Logo tasarımı",
+            priority = "high",
+            dueInDays = 10,
+            tasks = LogoTasks,
+        }, Cancel);
+        var template = await ReadAsync<JsonElement>(created, HttpStatusCode.Created);
+        using var memberCreates = await member.PostAsJsonAsync("/api/v1/jobs/templates", new { name = "Yetkisiz" }, Cancel);
+        var workOrder = await CreateAsync(member, new { title = "Logo tasarımı", priority = "high", templateId = template.GetProperty("id").GetGuid() });
+        using var unknown = await owner.PostAsJsonAsync(WorkOrders, new { title = "X", templateId = Guid.NewGuid() }, Cancel);
+
+        Assert.Equal(HttpStatusCode.Forbidden, memberCreates.StatusCode);
+        Assert.Equal(LogoTasks, workOrder.Tasks.Select(task => task.Title));
+        Assert.Equal(DateOnly.FromDateTime(DateTime.UtcNow).AddDays(10), workOrder.DueDate);
+        Assert.Equal("jobs.template.not_found", await unknown.ReadErrorCodeAsync());
     }
 }

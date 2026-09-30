@@ -8,6 +8,7 @@ using Akiron.Contracts.Jobs;
 using Akiron.Modules.Jobs.Domain;
 using Akiron.Modules.Jobs.Persistence;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 
 namespace Akiron.Modules.Jobs.Features.CreateWorkOrder;
 
@@ -77,7 +78,8 @@ internal sealed record CreateWorkOrderCommand(
     Guid? StageId = null,
     string? Priority = null,
     DateOnly? DueDate = null,
-    IReadOnlyList<Guid>? AssigneeIds = null) : IWorkOrderInput;
+    IReadOnlyList<Guid>? AssigneeIds = null,
+    Guid? TemplateId = null) : IWorkOrderInput;
 
 internal sealed class CreateWorkOrderValidator : AbstractValidator<CreateWorkOrderCommand>
 {
@@ -104,6 +106,18 @@ internal sealed class CreateWorkOrderHandler(
         }
 
         var (party, assignees) = resolved.Value;
+
+        // A template adds its checklist, and its lead time when no due date was chosen.
+        WorkOrderTemplate? template = null;
+        if (command.TemplateId is { } templateId)
+        {
+            template = await db.Templates.FirstOrDefaultAsync(candidate => candidate.Id == WorkOrderTemplateId.From(templateId), cancellationToken);
+            if (template is null)
+            {
+                return Templates.TemplatesHandler.NotFound;
+            }
+        }
+
         var stages = await board.StagesAsync(cancellationToken);
         var stage = command.StageId is { } stageId
             ? stages.FirstOrDefault(candidate => candidate.Id == Domain.StageId.From(stageId))
@@ -119,10 +133,17 @@ internal sealed class CreateWorkOrderHandler(
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         var sequence = await db.NextDocumentSequenceAsync(NumberSeries, now.Year, cancellationToken);
         var rank = await board.RankAtAsync(stage.Id, null, null, cancellationToken);
-        var workOrder = WorkOrder.Create(DocumentNumber.Format(NumberSeries, now.Year, sequence), stage, rank, WorkOrderReferences.Details(command, party), now);
+        var details = WorkOrderReferences.Details(command, party);
+        if (details.DueDate is null && template?.DueInDays is { } days)
+        {
+            details = details with { DueDate = DateOnly.FromDateTime(now.UtcDateTime).AddDays(days) };
+        }
+
+        var workOrder = WorkOrder.Create(DocumentNumber.Format(NumberSeries, now.Year, sequence), stage, rank, details, now);
         workOrder.AssignExactly(assignees);
 
         db.WorkOrders.Add(workOrder);
+        db.Tasks.AddRange((template?.Tasks ?? []).Select((title, position) => WorkOrderTask.Create(workOrder.Id, title, position)));
         db.Publish(new WorkOrderCreated(
             tenantContext.TenantId, now, workOrder.Id.Value, workOrder.Number, workOrder.Title, workOrder.PartyId, workOrder.PartyName, assignees, userId.Value, currentUser.DisplayName));
         if (assignees.Count > 0)

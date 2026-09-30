@@ -23,6 +23,8 @@ internal sealed class JobsDbContext(DbContextOptions<JobsDbContext> options, ITe
     public DbSet<WorkOrderTask> Tasks => Set<WorkOrderTask>();
 
     public DbSet<TimeEntry> TimeEntries => Set<TimeEntry>();
+
+    public DbSet<WorkOrderTemplate> Templates => Set<WorkOrderTemplate>();
 }
 
 internal static class JobsConstraints
@@ -112,6 +114,22 @@ internal sealed class TimeEntryConfiguration : IEntityTypeConfiguration<TimeEntr
             .HasDatabaseName(JobsConstraints.OneRunningTimer);
         builder.HasIndex(entry => new { entry.TenantId, entry.UserId, entry.StartedAt });
         builder.HasIndex(entry => new { entry.TenantId, entry.WorkOrderId });
+    }
+}
+
+internal sealed class WorkOrderTemplateConfiguration : IEntityTypeConfiguration<WorkOrderTemplate>
+{
+    public void Configure(EntityTypeBuilder<WorkOrderTemplate> builder)
+    {
+        builder.ToTable("work_order_templates");
+        builder.HasKey(template => template.Id);
+        builder.Property(template => template.Id).ValueGeneratedNever();
+        builder.Property(template => template.Name).HasMaxLength(WorkOrderTemplate.NameMaxLength);
+        builder.Property(template => template.Title).HasMaxLength(WorkOrder.TitleMaxLength);
+        builder.Property(template => template.Description).HasMaxLength(WorkOrder.DescriptionMaxLength);
+        builder.Property(template => template.Priority).HasConversion<string>().HasMaxLength(20);
+        builder.Property(template => template.Tasks).HasColumnType("text[]");
+        builder.HasIndex(template => new { template.TenantId, template.Name });
     }
 }
 

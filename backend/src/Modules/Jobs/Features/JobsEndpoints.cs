@@ -12,6 +12,7 @@ using Akiron.Modules.Jobs.Features.ListWorkOrders;
 using Akiron.Modules.Jobs.Features.MoveWorkOrder;
 using Akiron.Modules.Jobs.Features.Stages;
 using Akiron.Modules.Jobs.Features.Tasks;
+using Akiron.Modules.Jobs.Features.Templates;
 using Akiron.Modules.Jobs.Features.TimeTracking;
 using Akiron.Modules.Jobs.Features.UpdateWorkOrder;
 using Microsoft.AspNetCore.Builder;
@@ -27,6 +28,7 @@ internal static class JobsEndpoints
         MapStages(endpoints.MapGroup("/stages"));
         MapWorkOrders(endpoints.MapGroup("/work-orders"));
         MapTime(endpoints.MapGroup("/time"));
+        MapTemplates(endpoints.MapGroup("/templates"));
 
         // Who can be put on a work order: the people of this organisation, names only.
         endpoints.MapGet("/assignable-members", async (IMemberDirectory members, CancellationToken cancellationToken) =>
@@ -170,6 +172,40 @@ internal static class JobsEndpoints
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .WithSummary("Remove a checklist item");
+    }
+
+    private static void MapTemplates(RouteGroupBuilder templates)
+    {
+        templates.MapGet("/", async (TemplatesHandler handler, CancellationToken cancellationToken) =>
+                TypedResults.Ok(await handler.ListAsync(cancellationToken)))
+            .RequirePermission(JobsPermissions.WorkOrdersWrite)
+            .Produces<IReadOnlyList<TemplateResponse>>()
+            .WithSummary("Work order templates, by name");
+
+        templates.MapPost("/", async (TemplateCommand command, TemplatesHandler handler, CancellationToken cancellationToken) =>
+            {
+                var template = await handler.CreateAsync(command, cancellationToken);
+                return TypedResults.Created($"/api/v1/jobs/templates/{template.Id}", template);
+            })
+            .RequirePermission(JobsPermissions.TemplatesManage)
+            .Validate<TemplateCommand>()
+            .Produces<TemplateResponse>(StatusCodes.Status201Created)
+            .WithSummary("Add a template");
+
+        templates.MapPut("/{id:guid}", async (Guid id, TemplateCommand command, TemplatesHandler handler, CancellationToken cancellationToken) =>
+                Ok(await handler.UpdateAsync(id, command, cancellationToken)))
+            .RequirePermission(JobsPermissions.TemplatesManage)
+            .Validate<TemplateCommand>()
+            .Produces<TemplateResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithSummary("Change a template; work orders made from it stay as they are");
+
+        templates.MapDelete("/{id:guid}", async (Guid id, TemplatesHandler handler, CancellationToken cancellationToken) =>
+                NoContent(await handler.RemoveAsync(id, cancellationToken)))
+            .RequirePermission(JobsPermissions.TemplatesManage)
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithSummary("Remove a template");
     }
 
     private static void MapTime(RouteGroupBuilder time)

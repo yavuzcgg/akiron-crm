@@ -27,7 +27,9 @@ public static class JobsPermissions
     /// <summary>A work order's money: agreed budget, cost of the time logged on it, and the difference.</summary>
     public const string Financials = "jobs.financials";
 
-    public static IReadOnlyCollection<string> All { get; } = [WorkOrdersRead, WorkOrdersWrite, StagesManage, TimeWrite, TimeReadAll, Financials];
+    public const string TemplatesManage = "jobs.templates.manage";
+
+    public static IReadOnlyCollection<string> All { get; } = [WorkOrdersRead, WorkOrdersWrite, StagesManage, TimeWrite, TimeReadAll, Financials, TemplatesManage];
 
     public static IReadOnlyCollection<string> Member { get; } = [WorkOrdersRead, WorkOrdersWrite, TimeWrite];
 }
