@@ -6,6 +6,7 @@ using Akiron.BuildingBlocks.Web;
 using Akiron.Contracts.Identity;
 using Akiron.Contracts.Jobs;
 using Akiron.Contracts.People;
+using Akiron.Contracts.Timeline;
 using Akiron.Modules.Notifications.Domain;
 using Akiron.Modules.Notifications.Persistence;
 using Akiron.Modules.Notifications.Realtime;
@@ -155,6 +156,32 @@ internal sealed class LeaveDecidedNotification(NotificationSender sender) : IInt
         return sender.SendAsync(
             Notification.Create(integrationEvent.TenantId, integrationEvent.UserId, Type, payload, integrationEvent.EventId, integrationEvent.OccurredAt),
             cancellationToken);
+    }
+}
+
+/// <summary>Tells people they were @mentioned in a note (not the author mentioning themselves).</summary>
+internal sealed class NoteMentionedNotification(NotificationSender sender) : IIntegrationEventConsumer<NoteMentioned>
+{
+    public const string Type = "timeline.note.mentioned";
+
+    public async Task HandleAsync(NoteMentioned integrationEvent, CancellationToken cancellationToken)
+    {
+        var payload = JsonSerializer.Serialize(
+            new
+            {
+                subjectType = integrationEvent.SubjectType,
+                subjectId = integrationEvent.SubjectId,
+                excerpt = integrationEvent.Excerpt,
+                authorName = integrationEvent.AuthorName,
+            },
+            JsonSerializerOptions.Web);
+
+        foreach (var userId in integrationEvent.MentionedUserIds.Where(userId => userId != integrationEvent.AuthorUserId))
+        {
+            await sender.SendAsync(
+                Notification.Create(integrationEvent.TenantId, userId, Type, payload, integrationEvent.EventId, integrationEvent.OccurredAt),
+                cancellationToken);
+        }
     }
 }
 

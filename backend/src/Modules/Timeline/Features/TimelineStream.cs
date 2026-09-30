@@ -6,6 +6,8 @@ using Akiron.BuildingBlocks.Domain;
 using Akiron.BuildingBlocks.Security;
 using Akiron.BuildingBlocks.Tenancy;
 using Akiron.BuildingBlocks.Web;
+using Akiron.Contracts.Identity;
+using Akiron.Contracts.Timeline;
 using Akiron.Modules.Timeline.Domain;
 using Akiron.Modules.Timeline.Persistence;
 using FluentValidation;
@@ -155,17 +157,29 @@ internal sealed class GetTimelineHandler(TimelineDbContext db)
     };
 }
 
-internal sealed record AddNoteCommand(string Text);
+/// <param name="MentionedUserIds">People @mentioned in the text; each is notified.</param>
+internal sealed record AddNoteCommand(string Text, IReadOnlyList<Guid>? MentionedUserIds = null);
 
 internal sealed class AddNoteValidator : AbstractValidator<AddNoteCommand>
 {
     public const int MaxLength = 4000;
 
-    public AddNoteValidator() => RuleFor(command => command.Text).NotEmpty().MaximumLength(MaxLength);
+    public AddNoteValidator()
+    {
+        RuleFor(command => command.Text).NotEmpty().MaximumLength(MaxLength);
+        RuleFor(command => command.MentionedUserIds!.Count).LessThanOrEqualTo(20).When(command => command.MentionedUserIds is not null)
+            .OverridePropertyName(nameof(AddNoteCommand.MentionedUserIds));
+    }
 }
 
 /// <summary>A note a person writes on a record's timeline; the one entry type written directly, not projected.</summary>
-internal sealed class AddNoteHandler(TimelineWriter writer, ICurrentUser currentUser, ITenantContext tenantContext, TimeProvider timeProvider)
+internal sealed class AddNoteHandler(
+    TimelineWriter writer,
+    TimelineDbContext db,
+    IMemberDirectory members,
+    ICurrentUser currentUser,
+    ITenantContext tenantContext,
+    TimeProvider timeProvider)
 {
     public async Task<Result<TimelineItemResponse>> HandleAsync(string subjectType, Guid subjectId, AddNoteCommand command, CancellationToken cancellationToken)
     {
@@ -175,15 +189,31 @@ internal sealed class AddNoteHandler(TimelineWriter writer, ICurrentUser current
             return TimelineErrors.UnknownSubject;
         }
 
+        // Only this organisation's people can be mentioned; unknown ids are dropped, not an error,
+        // since someone may have left between typing and sending.
+        var mentioned = await members.FindAsync(command.MentionedUserIds ?? [], cancellationToken);
+        var text = command.Text.Trim();
+
         var userId = currentUser.UserId ?? throw new InvalidOperationException("Notes need a signed-in user.");
+        var now = timeProvider.GetUtcNow();
         var entry = TimelineEntry.Create(
             tenantContext.TenantId,
             TimelineEntryTypes.Note,
-            timeProvider.GetUtcNow(),
+            now,
             TimelineActor.User(userId.Value, currentUser.DisplayName),
-            JsonSerializer.Serialize(new { text = command.Text.Trim() }, JsonSerializerOptions.Web),
+            JsonSerializer.Serialize(
+                new { text, mentions = mentioned.Values.Select(member => new { userId = member.UserId, name = member.FullName }) },
+                JsonSerializerOptions.Web),
             Guid.CreateVersion7().ToString(),
             [new TimelineSubject(subjectType, subjectId)]);
+
+        if (mentioned.Count > 0)
+        {
+            // Saved by the writer below, in the same transaction as the note.
+            db.Publish(new NoteMentioned(
+                tenantContext.TenantId, now, entry.Id.Value, subjectType, subjectId, [.. mentioned.Keys],
+                text.Length <= 140 ? text : text[..140] + "…", userId.Value, currentUser.DisplayName));
+        }
 
         await writer.WriteAsync(entry, cancellationToken);
         return GetTimelineHandler.ToResponse(entry);
