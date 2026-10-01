@@ -19,6 +19,7 @@ import { formatDate, initials } from "@/lib/format";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
 import { hasPermission, permissions } from "@/lib/permissions";
 import { Checklist } from "./checklist";
+import { Financials } from "./financials";
 import { useArchiveWorkOrder, useMoveWorkOrder, useStages, useWorkOrder } from "./jobs-api";
 import { stageLabel } from "./labels";
 import { TimePanel } from "./time-panel";
@@ -220,6 +221,18 @@ export function WorkOrderDetail({ id }: { id: string }) {
               </dl>
             </CardContent>
           </Card>
+
+          {data.financials ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("jobs.financials.title")}</CardTitle>
+                <CardDescription>{t("jobs.financials.description")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Financials key={data.id} workOrder={data} />
+              </CardContent>
+            </Card>
+          ) : null}
 
           <Card>
             <CardHeader>

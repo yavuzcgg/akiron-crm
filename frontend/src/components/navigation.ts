@@ -3,6 +3,8 @@ import {
   Building2,
   CalendarDays,
   Clock3,
+  Contact,
+  Palmtree,
   FileText,
   LayoutDashboard,
   UserRound,
@@ -48,6 +50,8 @@ export const navigation: NavSection[] = [
     items: [
       { label: "nav.jobs", icon: BriefcaseBusiness, href: "/jobs", permission: permissions.jobs.workOrdersRead },
       { label: "nav.time", icon: Clock3, href: "/jobs/time", permission: permissions.jobs.timeWrite },
+      { label: "nav.people", icon: Contact, href: "/people", permission: permissions.people.read },
+      { label: "nav.leave", icon: Palmtree, href: "/people/leave", permission: permissions.people.leaveRequest },
       { label: "nav.content", icon: CalendarDays },
     ],
   },

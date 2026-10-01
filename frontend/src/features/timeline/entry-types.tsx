@@ -1,4 +1,4 @@
-import { Archive, BriefcaseBusiness, Building2, CircleDot, Contact, FileUp, MailPlus, MoveRight, PencilLine, StickyNote, UserPlus, UsersRound, type LucideIcon } from "lucide-react";
+import { Archive, BriefcaseBusiness, Building2, CircleDot, Contact, FileUp, MailPlus, MoveRight, Palmtree, PencilLine, StickyNote, UserPlus, UsersRound, type LucideIcon } from "lucide-react";
 import { roleLabel } from "@/features/identity/role-name";
 import { stageLabel } from "@/features/jobs/labels";
 import type { TranslationKey } from "@/lib/i18n";
@@ -39,6 +39,7 @@ const partyFieldLabels = {
   city: "crm.field.city",
   district: "crm.field.district",
   addressLine: "crm.field.address",
+  customFields: "crm.customFields.section",
 } as const satisfies Record<string, TranslationKey>;
 
 const isPartyField = (field: string): field is keyof typeof partyFieldLabels => field in partyFieldLabels;
@@ -130,6 +131,16 @@ const entryTypes: Record<string, EntryType> = {
           }),
     href: (payload) => workOrderHref(payload),
   },
+  "people.leave.requested": {
+    icon: Palmtree,
+    tone: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    headline: (payload, actor, t) => t("timeline.entry.leaveRequested", { actor, days: text(String(payload.days ?? "")) }),
+  },
+  "people.leave.decided": {
+    icon: Palmtree,
+    tone: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    headline: (payload, actor, t) => t(payload.approved ? "timeline.entry.leaveApproved" : "timeline.entry.leaveRejected", { actor }),
+  },
   "timeline.note": {
     icon: StickyNote,
     tone: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
@@ -156,5 +167,11 @@ export function describeEntry(item: TimelineItem, t: Translate) {
     headline: type.headline(payload, actor, t),
     body: type.body?.(payload),
     href: type.href?.(payload),
+    mentions: Array.isArray(payload.mentions)
+      ? (payload.mentions as unknown[]).filter(
+          (mention): mention is { userId: string; name: string } =>
+            typeof mention === "object" && mention !== null && typeof (mention as { name?: unknown }).name === "string",
+        )
+      : [],
   };
 }

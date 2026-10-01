@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { applyApiError } from "@/features/identity/form-errors";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { CustomFieldInputs } from "./custom-fields";
 import { useSaveParty, type Party } from "./parties-api";
 import { isValidTaxNumber } from "./tax-number";
 
@@ -53,6 +54,7 @@ export function PartyForm({ party, onSaved, onCancel }: PartyFormProps) {
   const { t, tError } = useI18n();
   const save = useSaveParty(party?.id);
   const [formError, setFormError] = useState<string | null>(null);
+  const [customValues, setCustomValues] = useState<Record<string, string>>(() => ({ ...(party?.customFields ?? {}) }));
 
   const schema = useMemo(() => {
     const max = (maxLength: number) => t("validation.max_length", { maxLength });
@@ -117,7 +119,8 @@ export function PartyForm({ party, onSaved, onCancel }: PartyFormProps) {
   const onSubmit = form.handleSubmit(async (values) => {
     setFormError(null);
     try {
-      const saved = await save.mutateAsync(party ? { ...values, code: undefined } : values);
+      const customFields = Object.fromEntries(Object.entries(customValues).map(([key, value]) => [key, value.trim()]));
+      const saved = await save.mutateAsync(party ? { ...values, code: undefined, customFields } : { ...values, customFields });
       toast.success(t(party ? "crm.party.saved" : "crm.party.created", { name: saved.name }));
       onSaved(saved);
     } catch (error) {
@@ -234,6 +237,8 @@ export function PartyForm({ party, onSaved, onCancel }: PartyFormProps) {
           />
         )}
       </div>
+
+      <CustomFieldInputs values={customValues} onChange={setCustomValues} />
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button type="button" variant="outline" onClick={onCancel}>

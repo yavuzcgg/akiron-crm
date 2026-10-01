@@ -126,7 +126,16 @@ Domain event + outbox + Hangfire (timeline bunun üstüne kurulur), activity tim
 - Modüller arası okuma `Contracts` üzerinden (`IMemberDirectory`, `IPartyDirectory`); sorgu filtreleri adlandırıldı (`IncludingArchived()` tenant filtresini korur).
 - 124 backend testi, 16 frontend testi; bütün akışlar Next üzerinden tarayıcıda doğrulandı.
 
-**İkinci yarı:** personel profili ve saatlik maliyet → iş karlılığı, izin talebi + onay motoru, özel alanlar (cari kartı), iş şablonları, @bahsetme.
+**İkinci yarı (1 Eki 2026): tamamlandı. Faz 2 bitti; dogfooding başlayabilir.**
+
+- People modülü (İK-lite, bordro yok): unvan, departman, işe başlama, yıllık izin hakkı, saatlik maliyet (yalnız yetkiliye görünür).
+- İzin talepleri: iş günü sayımı (hafta sonu ve sabit resmî tatiller hariç, yarım gün), çakışma ve yıllık hak kontrolü, tek adımlı onay (sahip kendi talebini onaylayabilir), bildirimler, ekip izin takvimi (sebep yalnız onaylayanlara: rapor sağlık verisidir, KVKK). Dini bayramlar Reference takvimine kaldı.
+- İş karlılığı: süre girişleri o günkü saatlik maliyeti saklar; iş emrinde bütçe, maliyet, kâr ve marj (`jobs.financials`).
+- İş şablonları: görev listesi, öncelik ve termin süresiyle hazır iş.
+- Cari kartı özel alanları: metin, sayı, tarih, seçim, onay kutusu; zorunlu olabilir; kaldırılan alanın değerleri saklanır.
+- Notlarda @bahsetme: etiketlenen kişiye bildirim.
+- Genel onay motoru, ilk ikinci kullanıcısıyla (gider veya içerik onayı) birlikte izin akışından çıkarılacak.
+- 142 backend, 21 frontend testi; tüm akış tarayıcıda uçtan uca doğrulandı.
 
 ## Paralel idari işler
 

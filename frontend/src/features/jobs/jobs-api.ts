@@ -76,7 +76,7 @@ function useRefreshJobs() {
 export function useSaveWorkOrder(id?: string) {
   const refresh = useRefreshJobs();
   return useMutation({
-    mutationFn: async (input: WorkOrderInput & { stageId?: string | null }) =>
+    mutationFn: async (input: WorkOrderInput & { stageId?: string | null; templateId?: string | null }) =>
       id
         ? unwrap(await api.PUT("/api/v1/jobs/work-orders/{id}", { params: { path: { id } }, body: input }))
         : unwrap(await api.POST("/api/v1/jobs/work-orders", { body: input })),

@@ -3,16 +3,17 @@
 import { Activity, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { ApiError } from "@/lib/api/errors";
-import { dayKey, formatDate, formatTime } from "@/lib/format";
+import { dayKey, formatDate, formatTime, initials } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { describeEntry } from "./entry-types";
+import { fold, highlightMentions, mentionQuery, mentionsIn, useMentionable, type Mention } from "./mentions";
 import { useAddNote, useTimeline, type TimelineItem, type TimelineSubjectType } from "./timeline-api";
 
 interface TimelineFeedProps {
@@ -111,7 +112,7 @@ function TimelineRow({ item }: { item: TimelineItem }) {
         </time>
       </div>
       {entry.body ? (
-        <p className="bg-muted/50 mt-2 rounded-md px-3 py-2 text-sm whitespace-pre-wrap">{entry.body}</p>
+        <p className="bg-muted/50 mt-2 rounded-md px-3 py-2 text-sm whitespace-pre-wrap">{highlightMentions(entry.body, entry.mentions)}</p>
       ) : null}
     </li>
   );
@@ -126,11 +127,38 @@ function DayHeading({ day, sample, now }: { day: string; sample: string; now: nu
   return <h3 className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">{label}</h3>;
 }
 
+/**
+ * The note box. Typing "@" opens a list of teammates (arrows and Enter pick one); the people whose
+ * "@Name" is still in the text when it is sent get notified.
+ */
 function NoteComposer({ subjectType, subjectId }: { subjectType: TimelineSubjectType; subjectId: string }) {
   const { t, tError } = useI18n();
   const addNote = useAddNote(subjectType, subjectId);
+  const textarea = useRef<HTMLTextAreaElement>(null);
   const [text, setText] = useState("");
+  const [picked, setPicked] = useState<Mention[]>([]);
+  const [query, setQuery] = useState<{ query: string; start: number } | null>(null);
+  const [active, setActive] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const people = useMentionable(true);
+
+  const options = query
+    ? (people.data ?? []).filter((person) => fold(person.fullName).includes(fold(query.query))).slice(0, 6)
+    : [];
+
+  const pick = (person: { userId: string; fullName: string }) => {
+    if (!query) return;
+    const caret = query.start + query.query.length + 1;
+    const next = `${text.slice(0, query.start)}@${person.fullName} ${text.slice(caret)}`;
+    const position = query.start + person.fullName.length + 2;
+    setText(next);
+    setPicked([...picked, { userId: person.userId, name: person.fullName }]);
+    setQuery(null);
+    requestAnimationFrame(() => {
+      textarea.current?.focus();
+      textarea.current?.setSelectionRange(position, position);
+    });
+  };
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -138,24 +166,65 @@ function NoteComposer({ subjectType, subjectId }: { subjectType: TimelineSubject
 
     setError(null);
     try {
-      await addNote.mutateAsync(text);
+      await addNote.mutateAsync({ text, mentionedUserIds: mentionsIn(text, picked).map((mention) => mention.userId) });
       setText("");
+      setPicked([]);
     } catch (failure) {
       setError(tError(failure instanceof ApiError ? failure.code : "common.network"));
     }
   };
 
   return (
-    <form onSubmit={submit} className="bg-muted/40 focus-within:border-ring focus-within:ring-ring/20 grid gap-2 rounded-xl border p-3 transition-shadow focus-within:ring-3">
+    <form onSubmit={submit} className="bg-muted/40 focus-within:border-ring focus-within:ring-ring/20 relative grid gap-2 rounded-xl border p-3 transition-shadow focus-within:ring-3">
       <Textarea
+        ref={textarea}
         className="min-h-14 resize-none border-0 bg-transparent p-1 shadow-none focus-visible:ring-0 dark:bg-transparent"
         aria-label={t("timeline.note.placeholder")}
+        aria-expanded={options.length > 0}
+        aria-controls="mention-list"
         value={text}
-        onChange={(event) => setText(event.target.value)}
-        placeholder={t("timeline.note.placeholder")}
+        onChange={(event) => {
+          setText(event.target.value);
+          setQuery(mentionQuery(event.target.value, event.target.selectionStart));
+          setActive(0);
+        }}
+        onKeyDown={(event) => {
+          if (options.length === 0) return;
+          if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+            setActive((current) => (current + (event.key === "ArrowDown" ? 1 : options.length - 1)) % options.length);
+          } else if (event.key === "Enter" || event.key === "Tab") {
+            event.preventDefault();
+            pick(options[active]!);
+          } else if (event.key === "Escape") {
+            setQuery(null);
+          }
+        }}
+        placeholder={t("timeline.note.placeholderMentions")}
         maxLength={4000}
         rows={2}
       />
+      {options.length > 0 ? (
+        <ul id="mention-list" role="listbox" className="bg-popover absolute top-full left-3 z-50 mt-1 w-64 rounded-lg border p-1 shadow-md">
+          {options.map((person, index) => (
+            <li
+              key={person.userId}
+              role="option"
+              aria-selected={index === active}
+              onMouseDown={(event) => {
+                event.preventDefault();
+                pick(person);
+              }}
+              className={cn("flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm", index === active && "bg-muted")}
+            >
+              <span className="bg-primary-soft text-primary-strong flex size-6 items-center justify-center rounded-full text-[10px] font-semibold">
+                {initials(person.fullName)}
+              </span>
+              {person.fullName}
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {error ? <p className="text-destructive text-sm">{error}</p> : null}
       <div className="flex justify-end">
         <Button type="submit" size="sm" disabled={addNote.isPending || !text.trim()}>

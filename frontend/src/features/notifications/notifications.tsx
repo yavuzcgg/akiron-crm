@@ -2,7 +2,7 @@
 
 import { HubConnectionBuilder, HubConnectionState, LogLevel } from "@microsoft/signalr";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, BriefcaseBusiness, UserPlus, type LucideIcon } from "lucide-react";
+import { AtSign, Bell, BriefcaseBusiness, CalendarCheck2, Palmtree, UserPlus, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 import { toast } from "sonner";
@@ -18,7 +18,7 @@ import {
 import { roleLabel } from "@/features/identity/role-name";
 import { api, type Schemas } from "@/lib/api/client";
 import { unwrap } from "@/lib/api/errors";
-import { formatDateTime } from "@/lib/format";
+import { formatCalendarDate, formatDateTime, formatNumber } from "@/lib/format";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
 import type { TranslationParams } from "@/lib/i18n/translate";
 import { cn } from "@/lib/utils";
@@ -55,7 +55,37 @@ const notificationTypes: Record<string, NotificationType> = {
       }),
     href: (payload) => (typeof payload.workOrderId === "string" ? `/jobs/${payload.workOrderId}` : undefined),
   },
+  "people.leave.requested": {
+    icon: Palmtree,
+    message: (payload, t) =>
+      t("notifications.leaveRequested", { name: text(payload.userName), days: formatNumber(Number(payload.days ?? 0)), start: calendar(payload.startDate) }),
+    href: () => "/people/leave",
+  },
+  "people.leave.decided": {
+    icon: CalendarCheck2,
+    message: (payload, t) =>
+      t(payload.approved ? "notifications.leaveApproved" : "notifications.leaveRejected", {
+        actor: text(payload.decidedByName),
+        start: calendar(payload.startDate),
+      }),
+    href: () => "/people/leave",
+  },
+  "timeline.note.mentioned": {
+    icon: AtSign,
+    message: (payload, t) => t("notifications.mentioned", { actor: text(payload.authorName), excerpt: text(payload.excerpt) }),
+    href: (payload) => subjectHref(text(payload.subjectType), text(payload.subjectId)),
+  },
 };
+
+const calendar = (value: unknown) => (typeof value === "string" && value ? formatCalendarDate(value) : "");
+
+/** The page of the record a note was written on. */
+function subjectHref(subjectType: string, subjectId: string): string | undefined {
+  if (subjectType === "work_order") return `/jobs/${subjectId}`;
+  if (subjectType === "party") return `/crm/parties/${subjectId}`;
+  if (subjectType === "workspace") return "/dashboard";
+  return undefined;
+}
 
 function describe(item: NotificationItem, t: Translate) {
   const type = notificationTypes[item.type];

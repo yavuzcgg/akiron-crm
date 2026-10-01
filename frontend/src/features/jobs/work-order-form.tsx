@@ -17,6 +17,7 @@ import { AssigneePicker } from "./assignee-picker";
 import { ClientPicker } from "./client-picker";
 import { priorities, useSaveWorkOrder, type WorkOrder } from "./jobs-api";
 import { priorityLabels } from "./labels";
+import { useTemplates } from "./templates";
 
 // A client error (partyId) has no field of that name here; it shows above the form.
 const fields = ["title", "description", "priority", "dueDate", "assigneeIds"] as const;
@@ -38,6 +39,8 @@ export function WorkOrderForm({ workOrder, stageId, client, onSaved, onCancel }:
   const { t, tError } = useI18n();
   const save = useSaveWorkOrder(workOrder?.id);
   const [formError, setFormError] = useState<string | null>(null);
+  const [templateId, setTemplateId] = useState("");
+  const templates = useTemplates(!workOrder);
 
   const schema = useMemo(
     () =>
@@ -75,6 +78,7 @@ export function WorkOrderForm({ workOrder, stageId, client, onSaved, onCancel }:
         dueDate: values.dueDate || null,
         assigneeIds: values.assigneeIds,
         stageId: workOrder ? undefined : stageId,
+        templateId: workOrder ? undefined : templateId || null,
       });
       toast.success(t(workOrder ? "jobs.workOrder.saved" : "jobs.workOrder.created", { number: saved.number }));
       onSaved(saved);
@@ -92,6 +96,39 @@ export function WorkOrderForm({ workOrder, stageId, client, onSaved, onCancel }:
           <AlertCircle />
           <AlertDescription>{formError}</AlertDescription>
         </Alert>
+      ) : null}
+
+      {!workOrder && (templates.data?.length ?? 0) > 0 ? (
+        <div className="grid gap-1.5">
+          <Label htmlFor="wo-template" className="text-[13px] font-medium">
+            {t("jobs.templates.pick")}
+          </Label>
+          <select
+            id="wo-template"
+            className={selectClass}
+            value={templateId}
+            onChange={(event) => {
+              setTemplateId(event.target.value);
+              const template = templates.data?.find((candidate) => candidate.id === event.target.value);
+              if (!template) return;
+              // The template fills the form; the checklist is added by the server from the template.
+              form.setValue("title", template.title ?? template.name, { shouldDirty: true });
+              form.setValue("description", template.description ?? "");
+              form.setValue("priority", template.priority as (typeof priorities)[number]);
+              if (template.dueInDays !== null) {
+                const due = new Date(Date.now() + template.dueInDays * 86_400_000);
+                form.setValue("dueDate", `${due.getFullYear()}-${String(due.getMonth() + 1).padStart(2, "0")}-${String(due.getDate()).padStart(2, "0")}`);
+              }
+            }}
+          >
+            <option value="">{t("jobs.templates.none")}</option>
+            {templates.data!.map((template) => (
+              <option key={template.id} value={template.id}>
+                {t("jobs.templates.option", { name: template.name, tasks: template.tasks.length })}
+              </option>
+            ))}
+          </select>
+        </div>
       ) : null}
 
       <FormField id="wo-title" autoComplete="off" label={t("jobs.field.title")} error={errors.title?.message} {...form.register("title")} />

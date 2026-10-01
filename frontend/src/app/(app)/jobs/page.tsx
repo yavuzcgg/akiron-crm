@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Search, Settings2, UserRound } from "lucide-react";
+import { LayoutTemplate, Plus, Search, Settings2, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/page-header";
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useSession } from "@/features/identity/session";
 import { WorkOrderBoard } from "@/features/jobs/board";
 import { StageManager } from "@/features/jobs/stage-manager";
+import { TemplateManager } from "@/features/jobs/templates";
 import { WorkOrderForm } from "@/features/jobs/work-order-form";
 import { useI18n } from "@/lib/i18n";
 import { hasPermission, permissions } from "@/lib/permissions";
@@ -27,6 +28,8 @@ export default function JobsBoardPage() {
   // undefined: closed · string: the stage a new card goes into ("" = first open stage).
   const [creatingIn, setCreatingIn] = useState<string | undefined>(undefined);
   const [stagesOpen, setStagesOpen] = useState(false);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
+  const canManageTemplates = hasPermission(session?.permissions, permissions.jobs.templatesManage);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setSearch(searchInput.trim()), 250);
@@ -62,8 +65,13 @@ export default function JobsBoardPage() {
         <Button variant={mine ? "secondary" : "outline"} size="sm" className="h-9" aria-pressed={mine} onClick={() => setMine(!mine)}>
           <UserRound /> {t("jobs.board.mine")}
         </Button>
+        {canManageTemplates ? (
+          <Button variant="ghost" size="sm" className="h-9 sm:ml-auto" onClick={() => setTemplatesOpen(true)}>
+            <LayoutTemplate /> {t("jobs.templates.manage")}
+          </Button>
+        ) : null}
         {canManageStages ? (
-          <Button variant="ghost" size="sm" className="h-9 sm:ml-auto" onClick={() => setStagesOpen(true)}>
+          <Button variant="ghost" size="sm" className={canManageTemplates ? "h-9" : "h-9 sm:ml-auto"} onClick={() => setStagesOpen(true)}>
             <Settings2 /> {t("jobs.stages.manage")}
           </Button>
         ) : null}
@@ -87,6 +95,16 @@ export default function JobsBoardPage() {
               onCancel={() => setCreatingIn(undefined)}
             />
           ) : null}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={templatesOpen} onOpenChange={setTemplatesOpen}>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl" closeLabel={t("common.cancel")}>
+          <DialogHeader>
+            <DialogTitle>{t("jobs.templates.title")}</DialogTitle>
+            <DialogDescription>{t("jobs.templates.description")}</DialogDescription>
+          </DialogHeader>
+          {templatesOpen ? <TemplateManager /> : null}
         </DialogContent>
       </Dialog>
 

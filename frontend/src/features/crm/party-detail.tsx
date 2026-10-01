@@ -20,6 +20,7 @@ import { useI18n, type TranslationKey } from "@/lib/i18n";
 import { hasPermission, permissions } from "@/lib/permissions";
 import { useArchiveParty, useParty, type Party } from "./parties-api";
 import { PartyRoleBadges } from "./party-badges";
+import { CustomFieldValues } from "./custom-fields";
 import { PartyContacts } from "./party-contacts";
 import { PartyForm } from "./party-form";
 
@@ -171,7 +172,10 @@ export function PartyDetail({ id }: { id: string }) {
               <CardDescription>{t("crm.detail.since", { date: formatDate(data.createdAt) })}</CardDescription>
             </CardHeader>
             <CardContent>
-              <PartyInfo party={data} />
+              <div className="grid gap-4">
+                <PartyInfo party={data} />
+                <CustomFieldValues values={data.customFields} />
+              </div>
             </CardContent>
           </Card>
 

@@ -13,16 +13,26 @@ export const permissions = {
     read: "files.read",
     write: "files.write",
   },
+  people: {
+    read: "people.read",
+    manage: "people.manage",
+    costsRead: "people.costs.read",
+    leaveRequest: "people.leave.request",
+    leaveApprove: "people.leave.approve",
+  },
   jobs: {
     workOrdersRead: "jobs.work_orders.read",
     workOrdersWrite: "jobs.work_orders.write",
     stagesManage: "jobs.stages.manage",
     timeWrite: "jobs.time.write",
     timeReadAll: "jobs.time.read_all",
+    financials: "jobs.financials",
+    templatesManage: "jobs.templates.manage",
   },
   crm: {
     partiesRead: "crm.parties.read",
     partiesWrite: "crm.parties.write",
+    customFieldsManage: "crm.custom_fields.manage",
   },
   timeline: {
     read: "timeline.read",
