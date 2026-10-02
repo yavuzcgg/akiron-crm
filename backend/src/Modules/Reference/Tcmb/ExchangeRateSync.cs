@@ -64,7 +64,9 @@ internal sealed partial class ExchangeRateSync(
             .ToListAsync(cancellationToken);
 
         var added = 0;
-        for (var day = today; day > from; day = day.AddDays(-1))
+        // Inclusive: a full week back, so last Friday's bulletin is there even on Friday and Saturday
+        // (a Sunday document asks for the Friday before it).
+        for (var day = today; day >= from; day = day.AddDays(-1))
         {
             var publishedYet = day < today || turkeyNow.TimeOfDay >= PublishedAfter;
             if (day.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday || !publishedYet || stored.Contains(day))

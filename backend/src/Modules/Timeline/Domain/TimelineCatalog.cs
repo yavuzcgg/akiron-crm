@@ -13,6 +13,8 @@ public static class TimelineSubjects
 
     public const string WorkOrder = Subjects.WorkOrder;
 
+    public const string Quote = Subjects.Quote;
+
     public static IReadOnlySet<string> All => Subjects.All;
 }
 
@@ -36,6 +38,9 @@ public static class TimelineEntryTypes
     public const string WorkOrderMoved = "jobs.work_order.moved";
     public const string LeaveRequested = "people.leave.requested";
     public const string LeaveDecided = "people.leave.decided";
+    public const string QuoteSent = "sales.quote.sent";
+    public const string QuoteViewed = "sales.quote.viewed";
+    public const string QuoteDecided = "sales.quote.decided";
 
     private const string PartiesRead = "crm.parties.read";
     private const string WorkOrdersRead = "jobs.work_orders.read";
@@ -56,5 +61,10 @@ public static class TimelineEntryTypes
         // Leave, and above all its reason (a sick note is health data under KVKK), is for approvers.
         [LeaveRequested] = "people.leave.approve",
         [LeaveDecided] = "people.leave.approve",
+
+        // Prices are commercial information.
+        [QuoteSent] = "sales.quotes.read",
+        [QuoteViewed] = "sales.quotes.read",
+        [QuoteDecided] = "sales.quotes.read",
     };
 }

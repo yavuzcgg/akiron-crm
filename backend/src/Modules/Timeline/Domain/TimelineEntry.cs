@@ -134,6 +134,9 @@ public sealed record TimelineActor(ActorKind Kind, Guid? Id, string? Name)
     public static TimelineActor User(Guid id, string? name) => new(ActorKind.User, id, name);
 
     public static readonly TimelineActor SystemActor = new(ActorKind.System, null, null);
+
+    /// <summary>Someone on the client's side without an account (a quote link), named as they typed it.</summary>
+    public static TimelineActor ClientContact(string? name) => new(ActorKind.PortalContact, null, name);
 }
 
 public sealed record TimelineSubject(string Type, Guid Id);

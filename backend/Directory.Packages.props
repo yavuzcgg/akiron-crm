@@ -31,6 +31,10 @@
     <!-- SMTP for transactional e-mail; Mailpit locally. MIT. -->
     <PackageVersion Include="MailKit" Version="4.18.1" />
   </ItemGroup>
+  <ItemGroup Label="Documents">
+    <!-- Quote and invoice PDFs. Community licence: free for businesses under USD 1M yearly revenue (ADR-0010). -->
+    <PackageVersion Include="QuestPDF" Version="2026.9.1" />
+  </ItemGroup>
   <ItemGroup Label="Observability">
     <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
   </ItemGroup>

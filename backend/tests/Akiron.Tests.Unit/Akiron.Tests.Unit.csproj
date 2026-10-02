@@ -10,6 +10,7 @@
     <ProjectReference Include="..\..\src\Modules\Crm\Akiron.Modules.Crm.csproj" />
     <ProjectReference Include="..\..\src\Modules\People\Akiron.Modules.People.csproj" />
     <ProjectReference Include="..\..\src\Modules\Reference\Akiron.Modules.Reference.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Sales\Akiron.Modules.Sales.csproj" />
   </ItemGroup>
 
   <ItemGroup>

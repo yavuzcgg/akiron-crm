@@ -51,6 +51,7 @@ internal sealed record WorkOrderResponse(
     int MinutesLogged,
     int BillableMinutes,
     WorkOrderFinancials? Financials,
+    Guid? SourceQuoteId,
     DateTimeOffset? CompletedAt,
     DateTimeOffset CreatedAt);
 
@@ -180,6 +181,7 @@ internal sealed class WorkOrderReader(JobsDbContext db, IMemberDirectory members
             time?.Total ?? 0,
             time?.Billable ?? 0,
             financials,
+            workOrder.SourceQuoteId,
             workOrder.CompletedAt,
             workOrder.CreatedAt);
     }

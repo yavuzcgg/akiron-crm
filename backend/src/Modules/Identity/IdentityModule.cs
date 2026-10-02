@@ -50,6 +50,7 @@ public sealed class IdentityModule : IModule
         services.AddScoped<InvitationLookup>();
         services.AddScoped<SystemRoleSync>();
         services.AddScoped<IMemberDirectory, MemberDirectory>();
+        services.AddScoped<IWorkspaceDirectory, Features.WorkspaceDirectory.WorkspaceDirectory>();
         services.AddHostedService<SystemRoleSyncService>();
 
         services.Configure<ConstraintErrorMap>(map => map.Add(IdentityConstraints.UserEmailUnique, IdentityErrors.EmailTaken));

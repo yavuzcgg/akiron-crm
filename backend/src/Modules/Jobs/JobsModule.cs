@@ -52,6 +52,8 @@ internal static class JobsErrors
 
     public static readonly Error StageOrderMismatch = Error.Validation("jobs.stage.order_mismatch", "Send every stage exactly once.");
 
+    public static readonly Error QuoteNotAccepted = Error.Rule("jobs.work_order.quote_not_accepted", "Only an accepted quote can open a work order.");
+
     public static readonly Error TimeEntryNotFound = Error.NotFound("jobs.time_entry.not_found", "No such time entry.");
 
     public static readonly Error NoRunningTimer = Error.Rule("jobs.timer.not_running", "No timer is running.");

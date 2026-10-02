@@ -123,6 +123,16 @@ public sealed partial class ApiFixture : IAsyncLifetime
     [GeneratedRegex(@"/reset-password\?token=(?<token>[0-9A-F]+)")]
     private static partial Regex ResetLink();
 
+    /// <summary>The quote link secret from the last quote e-mail sent to <paramref name="email"/>, or null.</summary>
+    public string? QuoteTokenFor(string email)
+    {
+        var body = _emails.Sent.LastOrDefault(message => message.To == email && message.TextBody.Contains("/q/", StringComparison.Ordinal))?.TextBody;
+        return body is null ? null : QuoteLink().Match(body).Groups["token"].Value;
+    }
+
+    [GeneratedRegex(@"/q/(?<token>[0-9A-F]+)")]
+    private static partial Regex QuoteLink();
+
     /// <summary>Overwrites a system role's permissions, e.g. to look like a tenant from before a module existed.</summary>
     public async Task SetRolePermissionsAsync(Guid tenantId, string roleName, params string[] permissions)
     {

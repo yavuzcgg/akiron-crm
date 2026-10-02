@@ -5,6 +5,7 @@ using Akiron.BuildingBlocks.Tenancy;
 using Akiron.Contracts.Crm;
 using Akiron.Contracts.Identity;
 using Akiron.Contracts.Jobs;
+using Akiron.Contracts.Sales;
 using Akiron.Modules.Jobs.Domain;
 using Akiron.Modules.Jobs.Persistence;
 using FluentValidation;
@@ -79,7 +80,8 @@ internal sealed record CreateWorkOrderCommand(
     string? Priority = null,
     DateOnly? DueDate = null,
     IReadOnlyList<Guid>? AssigneeIds = null,
-    Guid? TemplateId = null) : IWorkOrderInput;
+    Guid? TemplateId = null,
+    Guid? QuoteId = null) : IWorkOrderInput;
 
 internal sealed class CreateWorkOrderValidator : AbstractValidator<CreateWorkOrderCommand>
 {
@@ -91,6 +93,7 @@ internal sealed class CreateWorkOrderHandler(
     StageBoard board,
     WorkOrderReferences references,
     WorkOrderReader reader,
+    IAcceptedQuotes acceptedQuotes,
     ITenantContext tenantContext,
     ICurrentUser currentUser,
     TimeProvider timeProvider)
@@ -99,6 +102,19 @@ internal sealed class CreateWorkOrderHandler(
 
     public async Task<Result<WorkOrderResponse>> HandleAsync(CreateWorkOrderCommand command, CancellationToken cancellationToken)
     {
+        // From an accepted quote: its client, its net total as the budget, its lines as the checklist.
+        AcceptedQuote? quote = null;
+        if (command.QuoteId is { } quoteId)
+        {
+            quote = await acceptedQuotes.FindAsync(quoteId, cancellationToken);
+            if (quote is null)
+            {
+                return JobsErrors.QuoteNotAccepted;
+            }
+
+            command = command with { PartyId = quote.PartyId };
+        }
+
         var resolved = await references.ResolveAsync(command, cancellationToken);
         if (!resolved.IsSuccess)
         {
@@ -143,7 +159,13 @@ internal sealed class CreateWorkOrderHandler(
         workOrder.AssignExactly(assignees);
 
         db.WorkOrders.Add(workOrder);
-        db.Tasks.AddRange((template?.Tasks ?? []).Select((title, position) => WorkOrderTask.Create(workOrder.Id, title, position)));
+        if (quote is not null)
+        {
+            workOrder.FromQuote(quote.QuoteId, quote.NetTotalTry);
+        }
+
+        var checklist = template?.Tasks ?? quote?.LineNames ?? [];
+        db.Tasks.AddRange(checklist.Select((title, position) => WorkOrderTask.Create(workOrder.Id, title, position)));
         db.Publish(new WorkOrderCreated(
             tenantContext.TenantId, now, workOrder.Id.Value, workOrder.Number, workOrder.Title, workOrder.PartyId, workOrder.PartyName, assignees, userId.Value, currentUser.DisplayName));
         if (assignees.Count > 0)

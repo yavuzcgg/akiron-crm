@@ -63,6 +63,9 @@ public sealed class WorkOrder : Entity<WorkOrderId>, ITenantScoped, ISoftDeletab
 
     public DateOnly? DueDate { get; private set; }
 
+    /// <summary>The accepted quote the work order was opened from, if any.</summary>
+    public Guid? SourceQuoteId { get; private set; }
+
     /// <summary>The agreed price of the job in TRY, excluding VAT; what cost is weighed against.</summary>
     public decimal? Budget { get; private set; }
 
@@ -106,6 +109,12 @@ public sealed class WorkOrder : Entity<WorkOrderId>, ITenantScoped, ISoftDeletab
     }
 
     public void RenameParty(string partyName) => PartyName = partyName;
+
+    public void FromQuote(Guid quoteId, decimal netTotalTry)
+    {
+        SourceQuoteId = quoteId;
+        SetBudget(netTotalTry);
+    }
 
     public void SetBudget(decimal? budget) => Budget = budget is { } amount ? decimal.Round(amount, 2) : null;
 

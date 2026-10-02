@@ -6,6 +6,7 @@ using Akiron.BuildingBlocks.Web;
 using Akiron.Contracts.Identity;
 using Akiron.Contracts.Jobs;
 using Akiron.Contracts.People;
+using Akiron.Contracts.Sales;
 using Akiron.Contracts.Timeline;
 using Akiron.Modules.Notifications.Domain;
 using Akiron.Modules.Notifications.Persistence;
@@ -182,6 +183,51 @@ internal sealed class NoteMentionedNotification(NotificationSender sender) : IIn
                 Notification.Create(integrationEvent.TenantId, userId, Type, payload, integrationEvent.EventId, integrationEvent.OccurredAt),
                 cancellationToken);
         }
+    }
+}
+
+/// <summary>Tells the quote's author that the client opened it.</summary>
+internal sealed class QuoteViewedNotification(NotificationSender sender) : IIntegrationEventConsumer<QuoteViewed>
+{
+    public const string Type = "sales.quote.viewed";
+
+    public Task HandleAsync(QuoteViewed integrationEvent, CancellationToken cancellationToken)
+    {
+        if (integrationEvent.OwnerUserId is not { } owner)
+        {
+            return Task.CompletedTask;
+        }
+
+        var payload = JsonSerializer.Serialize(
+            new { quoteId = integrationEvent.QuoteId, number = integrationEvent.Number, partyName = integrationEvent.PartyName },
+            JsonSerializerOptions.Web);
+        return sender.SendAsync(Notification.Create(integrationEvent.TenantId, owner, Type, payload, integrationEvent.EventId, integrationEvent.OccurredAt), cancellationToken);
+    }
+}
+
+/// <summary>Tells the quote's author that the client accepted or rejected it.</summary>
+internal sealed class QuoteDecidedNotification(NotificationSender sender) : IIntegrationEventConsumer<QuoteDecided>
+{
+    public const string Type = "sales.quote.decided";
+
+    public Task HandleAsync(QuoteDecided integrationEvent, CancellationToken cancellationToken)
+    {
+        if (integrationEvent.OwnerUserId is not { } owner)
+        {
+            return Task.CompletedTask;
+        }
+
+        var payload = JsonSerializer.Serialize(
+            new
+            {
+                quoteId = integrationEvent.QuoteId,
+                number = integrationEvent.Number,
+                partyName = integrationEvent.PartyName,
+                accepted = integrationEvent.Accepted,
+                decidedByName = integrationEvent.DecidedByName,
+            },
+            JsonSerializerOptions.Web);
+        return sender.SendAsync(Notification.Create(integrationEvent.TenantId, owner, Type, payload, integrationEvent.EventId, integrationEvent.OccurredAt), cancellationToken);
     }
 }
 

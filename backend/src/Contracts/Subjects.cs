@@ -17,5 +17,8 @@ public static class Subjects
     /// <summary>A work order (iş emri) in the Jobs module.</summary>
     public const string WorkOrder = "work_order";
 
-    public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal) { Workspace, User, Party, WorkOrder };
+    /// <summary>A quote (teklif) in the Sales module.</summary>
+    public const string Quote = "quote";
+
+    public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal) { Workspace, User, Party, WorkOrder, Quote };
 }

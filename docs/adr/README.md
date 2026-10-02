@@ -13,3 +13,4 @@ Short records of decisions that are expensive to reverse. Format: Context, Decis
 | [0007](0007-auth-cookie-jwt-permissions.md) | Custom cookie JWT auth with refresh rotation; permission-based authorization | Accepted |
 | [0008](0008-single-party-cari.md) | One party model (Cari) for customers, suppliers and both | Accepted |
 | [0009](0009-activity-timeline.md) | Activity timeline as a first-class read model | Accepted |
+| [0010](0010-documents-and-public-links.md) | Documents as PDF with QuestPDF; public links for client decisions | Accepted |
