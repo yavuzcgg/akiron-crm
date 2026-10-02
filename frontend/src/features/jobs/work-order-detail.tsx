@@ -217,6 +217,13 @@ export function WorkOrderDetail({ id }: { id: string }) {
                   {data.dueDate ? <DueDate dueDate={data.dueDate} done={data.completedAt !== null} /> : <span className="text-muted-foreground">—</span>}
                 </Fact>
                 <Fact label="jobs.detail.opened">{formatDate(data.createdAt)}</Fact>
+                {data.sourceQuoteId && hasPermission(granted, permissions.sales.quotesRead) ? (
+                  <Fact label="jobs.detail.sourceQuote">
+                    <Link href={`/sales/quotes/${data.sourceQuoteId}`} className="text-primary underline-offset-4 hover:underline">
+                      {t("jobs.detail.openQuote")}
+                    </Link>
+                  </Fact>
+                ) : null}
                 {data.completedAt ? <Fact label="jobs.detail.completed">{formatDate(data.completedAt)}</Fact> : null}
               </dl>
             </CardContent>

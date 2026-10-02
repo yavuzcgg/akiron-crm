@@ -3514,6 +3514,715 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sales/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Services and products, by name */
+        get: {
+            parameters: {
+                query?: {
+                    search?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CatalogItemResponse"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Add a service or product */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CatalogItemCommand"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CatalogItemResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/catalog/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Change an item; quotes already written keep their values */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CatalogItemCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CatalogItemResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        /** Archive an item */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/quotes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Quotes, newest first */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    search?: string;
+                    status?: string;
+                    partyId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagedResultOfQuoteListItem"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Start a quote as a draft */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["QuoteCommand"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["QuoteResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/quotes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One quote with its lines and totals */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["QuoteResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        /** Change a draft */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["QuoteCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["QuoteResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Unprocessable Entity */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        /** Delete a draft that was never sent */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unprocessable Entity */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/quotes/{id}/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The quote as a PDF */
+        get: {
+            parameters: {
+                query?: {
+                    lang?: string;
+                };
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/quotes/{id}/send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Freeze the draft, open its public link and e-mail it to the recipient */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SendQuoteCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SendQuoteResponse"];
+                    };
+                };
+                /** @description Unprocessable Entity */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/quotes/{id}/revise": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Turn a sent or rejected quote into the next revision's draft; the old link stops working */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["QuoteResponse"];
+                    };
+                };
+                /** @description Unprocessable Entity */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/public/quotes/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A quote as its recipient sees it */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    token: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PublicQuoteResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/public/quotes/{token}/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The quote's PDF for its recipient */
+        get: {
+            parameters: {
+                query?: {
+                    lang?: string;
+                };
+                header?: never;
+                path: {
+                    token: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/public/quotes/{token}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept the quote */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    token: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["DecideQuoteCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PublicQuoteResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Unprocessable Entity */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/public/quotes/{token}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decline the quote, optionally saying why */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    token: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["DecideQuoteCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PublicQuoteResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Unprocessable Entity */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3538,6 +4247,46 @@ export interface components {
         BoardResponse: {
             stages: components["schemas"]["StageResponse"][];
             workOrders: components["schemas"]["WorkOrderCard"][];
+        };
+        CatalogItemCommand: {
+            name: string;
+            description: null | string;
+            unit: string;
+            /** Format: double */
+            unitPrice: number;
+            /** @default TRY */
+            currency: string;
+            /** @default false */
+            priceIncludesVat: boolean;
+            /**
+             * Format: int32
+             * @default 20
+             */
+            vatRate: number;
+            /**
+             * Format: int32
+             * @default 0
+             */
+            withholdingTenths: number;
+            withholdingCode?: null | string;
+        };
+        CatalogItemResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            description: null | string;
+            unit: string;
+            /** Format: double */
+            unitPrice: number;
+            currency: string;
+            priceIncludesVat: boolean;
+            /** Format: int32 */
+            vatRate: number;
+            /** Format: int32 */
+            withholdingTenths: number;
+            withholdingCode: null | string;
+            /** Format: double */
+            netUnitPrice: number;
         };
         ChangePasswordCommand: {
             currentPassword: string;
@@ -3586,6 +4335,8 @@ export interface components {
             assigneeIds?: null | string[];
             /** Format: uuid */
             templateId?: null | string;
+            /** Format: uuid */
+            quoteId?: null | string;
         };
         CustomFieldCommand: {
             label: string;
@@ -3607,6 +4358,10 @@ export interface components {
         };
         DecideLeaveCommand: {
             approve: boolean;
+            note?: null | string;
+        };
+        DecideQuoteCommand: {
+            name: string;
             note?: null | string;
         };
         EmployeeResponse: {
@@ -3790,6 +4545,15 @@ export interface components {
             /** Format: int32 */
             totalCount: number;
         };
+        PagedResultOfQuoteListItem: {
+            items: components["schemas"]["QuoteListItem"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+        };
         PagedResultOfWorkOrderCard: {
             items: components["schemas"]["WorkOrderCard"][];
             /** Format: int32 */
@@ -3858,6 +4622,196 @@ export interface components {
             detail?: null | string;
             instance?: null | string;
         };
+        PublicQuoteLine: {
+            name: string;
+            description: null | string;
+            /** Format: double */
+            quantity: number;
+            unit: string;
+            /** Format: double */
+            unitPrice: number;
+            /** Format: double */
+            discountPercent: number;
+            /** Format: int32 */
+            vatRate: number;
+            /** Format: double */
+            net: number;
+        };
+        PublicQuoteResponse: {
+            workspaceName: string;
+            number: string;
+            /** Format: int32 */
+            revision: number;
+            status: string;
+            title: string;
+            partyName: string;
+            recipientName: null | string;
+            currency: string;
+            /** Format: double */
+            exchangeRate: null | number;
+            /** Format: date */
+            issueDate: string;
+            /** Format: date */
+            validUntil: string;
+            notes: null | string;
+            lines: components["schemas"]["PublicQuoteLine"][];
+            totals: components["schemas"]["QuoteTotals"];
+            /** Format: date-time */
+            decidedAt: null | string;
+            decidedByName: null | string;
+        };
+        QuoteCommand: {
+            /** Format: uuid */
+            partyId: string;
+            title: string;
+            lines: components["schemas"]["QuoteLineCommand"][];
+            /** @default TRY */
+            currency: string;
+            /** Format: double */
+            exchangeRate?: null | number;
+            /** Format: date */
+            issueDate?: null | string;
+            /** Format: date */
+            validUntil?: null | string;
+            recipientName?: null | string;
+            recipientEmail?: null | string;
+            notes?: null | string;
+        };
+        QuoteLineCommand: {
+            name: string;
+            /** Format: double */
+            quantity: number;
+            /** Format: double */
+            unitPrice: number;
+            /** @default piece */
+            unit: string;
+            /** Format: uuid */
+            catalogItemId?: null | string;
+            description?: null | string;
+            /**
+             * Format: double
+             * @default 0
+             */
+            discountPercent: number;
+            /**
+             * Format: int32
+             * @default 20
+             */
+            vatRate: number;
+            /**
+             * Format: int32
+             * @default 0
+             */
+            withholdingTenths: number;
+            /** @default false */
+            priceIncludesVat: boolean;
+        };
+        QuoteLineResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            catalogItemId: null | string;
+            name: string;
+            description: null | string;
+            /** Format: double */
+            quantity: number;
+            unit: string;
+            /** Format: double */
+            unitPrice: number;
+            /** Format: double */
+            discountPercent: number;
+            /** Format: int32 */
+            vatRate: number;
+            /** Format: int32 */
+            withholdingTenths: number;
+            /** Format: double */
+            gross: number;
+            /** Format: double */
+            discount: number;
+            /** Format: double */
+            net: number;
+            /** Format: double */
+            vat: number;
+            /** Format: double */
+            withholding: number;
+            /** Format: double */
+            total: number;
+        };
+        QuoteListItem: {
+            /** Format: uuid */
+            id: string;
+            number: string;
+            /** Format: int32 */
+            revision: number;
+            status: string;
+            title: string;
+            /** Format: uuid */
+            partyId: string;
+            partyName: string;
+            currency: string;
+            /** Format: double */
+            grandTotal: number;
+            /** Format: date */
+            issueDate: string;
+            /** Format: date */
+            validUntil: string;
+            /** Format: date-time */
+            sentAt: null | string;
+            /** Format: date-time */
+            viewedAt: null | string;
+        };
+        QuoteResponse: {
+            /** Format: uuid */
+            id: string;
+            number: string;
+            /** Format: int32 */
+            revision: number;
+            status: string;
+            /** Format: uuid */
+            partyId: string;
+            partyName: string;
+            title: string;
+            recipientName: null | string;
+            recipientEmail: null | string;
+            currency: string;
+            /** Format: double */
+            exchangeRate: null | number;
+            /** Format: date */
+            rateDate: null | string;
+            /** Format: date */
+            issueDate: string;
+            /** Format: date */
+            validUntil: string;
+            notes: null | string;
+            lines: components["schemas"]["QuoteLineResponse"][];
+            totals: components["schemas"]["QuoteTotals"];
+            /** Format: date-time */
+            sentAt: null | string;
+            /** Format: date-time */
+            viewedAt: null | string;
+            /** Format: date-time */
+            decidedAt: null | string;
+            decidedByName: null | string;
+            decisionNote: null | string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        QuoteTotals: {
+            /** Format: double */
+            gross: number;
+            /** Format: double */
+            discount: number;
+            /** Format: double */
+            net: number;
+            /** Format: double */
+            vat: number;
+            /** Format: double */
+            withholding: number;
+            /** Format: double */
+            grand: number;
+            /** Format: double */
+            netTry: number;
+        };
         RegisterCommand: {
             organizationName: string;
             fullName: string;
@@ -3876,6 +4830,15 @@ export interface components {
         ResetPasswordCommand: {
             token: string;
             newPassword: string;
+        };
+        SendQuoteCommand: {
+            /** @default true */
+            email: boolean;
+        };
+        SendQuoteResponse: {
+            quote: components["schemas"]["QuoteResponse"];
+            link: string;
+            emailed: boolean;
         };
         SessionResponse: {
             /** Format: uuid */
@@ -4087,6 +5050,8 @@ export interface components {
             /** Format: int32 */
             billableMinutes: number;
             financials: null | components["schemas"]["WorkOrderFinancials"];
+            /** Format: uuid */
+            sourceQuoteId: null | string;
             /** Format: date-time */
             completedAt: null | string;
             /** Format: date-time */

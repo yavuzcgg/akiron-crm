@@ -8,13 +8,16 @@ const authPages = ["/login", "/register", "/forgot-password"];
 /** Reachable signed in or not: invitation and reset links may be opened by anyone holding them. */
 const openPages = ["/invite", "/reset-password"];
 
+/** Links sent to clients (quotes now, payments later); never behind a sign-in. */
+const publicPrefixes = ["/q/"];
+
 /**
  * Optimistic routing only (Next.js guidance): the API still checks every request, and the app shell
  * sends the user to sign in if the session turns out to be invalid.
  */
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  if (openPages.includes(pathname)) return NextResponse.next();
+  if (openPages.includes(pathname) || publicPrefixes.some((prefix) => pathname.startsWith(prefix))) return NextResponse.next();
 
   const hasSession = request.cookies.has(sessionHintCookie);
   const onAuthPage = authPages.includes(pathname);

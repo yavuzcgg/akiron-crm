@@ -7,7 +7,7 @@ import { unwrap } from "@/lib/api/errors";
 export type TimelineItem = Schemas["TimelineItemResponse"];
 
 /** Streams the API knows (ADR-0009); modules add theirs as they arrive. */
-export type TimelineSubjectType = "workspace" | "user" | "party" | "work_order";
+export type TimelineSubjectType = "workspace" | "user" | "party" | "work_order" | "quote";
 
 export const timelineQueryKey = (subjectType: TimelineSubjectType, subjectId: string) =>
   ["timeline", subjectType, subjectId] as const;

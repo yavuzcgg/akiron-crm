@@ -15,7 +15,7 @@ import { hasPermission, permissions } from "@/lib/permissions";
 /** What comes next (docs/PLAN.md); shipped modules leave this list. */
 const roadmap: { icon: LucideIcon; label: TranslationKey; phase: number }[] = [
   { icon: UserRoundCheck, label: "dashboard.roadmap.people", phase: 2 },
-  { icon: FileText, label: "nav.quotes", phase: 3 },
+  { icon: FileText, label: "dashboard.roadmap.leads", phase: 3 },
   { icon: Wallet, label: "nav.finance", phase: 3 },
   { icon: CalendarDays, label: "nav.content", phase: 4 },
 ];

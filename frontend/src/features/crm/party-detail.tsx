@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FileList } from "@/features/files/file-list";
 import { useSession } from "@/features/identity/session";
 import { PartyWorkOrders } from "@/features/jobs/party-work-orders";
+import { PartyQuotes } from "@/features/sales/party-quotes";
 import { TimelineFeed } from "@/features/timeline/timeline-feed";
 import { ApiError } from "@/lib/api/errors";
 import { formatDate } from "@/lib/format";
@@ -178,6 +179,18 @@ export function PartyDetail({ id }: { id: string }) {
               </div>
             </CardContent>
           </Card>
+
+          {hasPermission(session?.permissions, permissions.sales.quotesRead) ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("sales.quotes.title")}</CardTitle>
+                <CardDescription>{t("sales.party.description")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PartyQuotes partyId={data.id} partyName={data.name} canWrite={hasPermission(session?.permissions, permissions.sales.quotesWrite)} />
+              </CardContent>
+            </Card>
+          ) : null}
 
           {hasPermission(session?.permissions, permissions.jobs.workOrdersRead) ? (
             <Card>

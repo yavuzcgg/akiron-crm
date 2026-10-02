@@ -13,6 +13,11 @@ export const permissions = {
     read: "files.read",
     write: "files.write",
   },
+  sales: {
+    quotesRead: "sales.quotes.read",
+    quotesWrite: "sales.quotes.write",
+    catalogManage: "sales.catalog.manage",
+  },
   people: {
     read: "people.read",
     manage: "people.manage",

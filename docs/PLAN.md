@@ -137,6 +137,19 @@ Domain event + outbox + Hangfire (timeline bunun üstüne kurulur), activity tim
 - Genel onay motoru, ilk ikinci kullanıcısıyla (gider veya içerik onayı) birlikte izin akışından çıkarılacak.
 - 142 backend, 21 frontend testi; tüm akış tarayıcıda uçtan uca doğrulandı.
 
+## Faz 3 — Satış & Para
+
+**Durum (2 Eki 2026): katalog ve teklif tamamlandı.**
+
+- Sales modülü: hizmet/ürün kataloğu (birim, KDV dahil/hariç fiyat, KDV oranı, KDV tevkifatı ve GİB kodu).
+- Teklif: TKL-2026-0001, satır indirimi, KDV ve tevkifat satır bazında yuvarlanır; döviz teklifte önceki günün TCMB döviz alış kuru sabitlenir; revizyonlar ve her gönderimin anlık görüntüsü.
+- PDF (QuestPDF, TR/EN) ve public onay linki (ADR-0010): müşteri hesap açmadan görür, kabul eder ya da reddeder; ajansa bildirim ve zaman çizelgesi. Link yalnız bir kez gösterilir; e-postayla ya da elle (WhatsApp paylaş linki) gönderilir.
+- Kabul edilen tekliften tek tıkla iş emri: müşteri, bütçe (KDV hariç, TL) ve görev listesi tekliften gelir.
+- Kur senkronu penceresi düzeltildi (cuma/cumartesi önceki cumanın bülteni eksik kalıyordu).
+- 158 backend, 24 frontend testi; akış tarayıcıda uçtan uca doğrulandı.
+
+**Sırada:** lead hunisi, sözleşme/retainer, Finance Lite (cari defter, tahsilat ve eşleştirme). PayTR/iyzico ve SMS sonra değerlendirilecek; WhatsApp şirket hesabı olmadığı için beklemede.
+
 ## Paralel idari işler
 
 Kod değil ama bekleme süreleri uzun; Faz 1'de başlatılır. Liste ve takip: [INTEGRATIONS.md](INTEGRATIONS.md#idari-checklist).

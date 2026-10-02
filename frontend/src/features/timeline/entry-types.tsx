@@ -1,4 +1,4 @@
-import { Archive, BriefcaseBusiness, Building2, CircleDot, Contact, FileUp, MailPlus, MoveRight, Palmtree, PencilLine, StickyNote, UserPlus, UsersRound, type LucideIcon } from "lucide-react";
+import { Archive, Eye, FileText, Send, BriefcaseBusiness, Building2, CircleDot, Contact, FileUp, MailPlus, MoveRight, Palmtree, PencilLine, StickyNote, UserPlus, UsersRound, type LucideIcon } from "lucide-react";
 import { roleLabel } from "@/features/identity/role-name";
 import { stageLabel } from "@/features/jobs/labels";
 import type { TranslationKey } from "@/lib/i18n";
@@ -20,6 +20,8 @@ interface EntryType {
 }
 
 const text = (value: unknown) => (typeof value === "string" ? value : "");
+
+const quoteHref = (payload: Payload) => (typeof payload.quoteId === "string" ? `/sales/quotes/${payload.quoteId}` : undefined);
 
 const workOrderHref = (payload: Payload) => (typeof payload.workOrderId === "string" ? `/jobs/${payload.workOrderId}` : undefined);
 
@@ -140,6 +142,31 @@ const entryTypes: Record<string, EntryType> = {
     icon: Palmtree,
     tone: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
     headline: (payload, actor, t) => t(payload.approved ? "timeline.entry.leaveApproved" : "timeline.entry.leaveRejected", { actor }),
+  },
+  "sales.quote.sent": {
+    icon: Send,
+    tone: "bg-primary/10 text-primary",
+    headline: (payload, actor, t) =>
+      t("timeline.entry.quoteSent", { actor, number: text(payload.number), title: text(payload.title), party: text(payload.partyName) }),
+    href: (payload) => quoteHref(payload),
+  },
+  "sales.quote.viewed": {
+    icon: Eye,
+    tone: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+    headline: (payload, _actor, t) => t("timeline.entry.quoteViewed", { number: text(payload.number), party: text(payload.partyName) }),
+    href: (payload) => quoteHref(payload),
+  },
+  "sales.quote.decided": {
+    icon: FileText,
+    tone: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    headline: (payload, actor, t) =>
+      t(payload.accepted ? "timeline.entry.quoteAccepted" : "timeline.entry.quoteRejected", {
+        actor,
+        number: text(payload.number),
+        party: text(payload.partyName),
+      }),
+    body: (payload) => text(payload.note) || undefined,
+    href: (payload) => quoteHref(payload),
   },
   "timeline.note": {
     icon: StickyNote,

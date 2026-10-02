@@ -44,8 +44,8 @@ Her dış servis bir sağlayıcı arayüzünün arkasındadır ([ADR-0005](adr/0
 
 Kod değil ama bekleme süresi uzun; Faz 1'de başlatılır.
 
-- [ ] Meta Business doğrulaması + WhatsApp Cloud API numarası + ilk mesaj şablonları (Faz 3'e yetişmeli)
-- [ ] PayTR test mağazası; sonra gerçek başvuru (Faz 3)
+- [ ] Meta Business doğrulaması + WhatsApp Cloud API (beklemede: şirket hesabı yok; her ajans kendi numarasını bağlayacak, geliştirmede Meta test numarası + sahte sağlayıcı)
+- [ ] Ödeme: her ajans kendi PayTR/iyzico mağaza bilgisini girer; geliştirmede sahte sağlayıcı + iyzico sandbox (şirket gerekmez). Akiron'un kendi mağazası Faz 8 (SaaS faturalama)
 - [x] SMTP gönderim altyapısı (MailKit); yerelde Mailpit. Prod için SMTP relay seçimi bekliyor (Faz 1 sonu)
 - [ ] Resend veya SES: gönderen domain doğrulaması + gelen e-posta için MX (Faz 1 / Faz 4)
 - [ ] Netgsm SMS hesabı (Faz 4)

@@ -2,7 +2,7 @@
 
 import { HubConnectionBuilder, HubConnectionState, LogLevel } from "@microsoft/signalr";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AtSign, Bell, BriefcaseBusiness, CalendarCheck2, Palmtree, UserPlus, type LucideIcon } from "lucide-react";
+import { AtSign, Bell, BriefcaseBusiness, CalendarCheck2, Eye, FileText, Palmtree, UserPlus, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 import { toast } from "sonner";
@@ -70,6 +70,21 @@ const notificationTypes: Record<string, NotificationType> = {
       }),
     href: () => "/people/leave",
   },
+  "sales.quote.viewed": {
+    icon: Eye,
+    message: (payload, t) => t("notifications.quoteViewed", { number: text(payload.number), party: text(payload.partyName) }),
+    href: (payload) => (typeof payload.quoteId === "string" ? `/sales/quotes/${payload.quoteId}` : undefined),
+  },
+  "sales.quote.decided": {
+    icon: FileText,
+    message: (payload, t) =>
+      t(payload.accepted ? "notifications.quoteAccepted" : "notifications.quoteRejected", {
+        number: text(payload.number),
+        party: text(payload.partyName),
+        name: text(payload.decidedByName),
+      }),
+    href: (payload) => (typeof payload.quoteId === "string" ? `/sales/quotes/${payload.quoteId}` : undefined),
+  },
   "timeline.note.mentioned": {
     icon: AtSign,
     message: (payload, t) => t("notifications.mentioned", { actor: text(payload.authorName), excerpt: text(payload.excerpt) }),
@@ -83,6 +98,7 @@ const calendar = (value: unknown) => (typeof value === "string" && value ? forma
 function subjectHref(subjectType: string, subjectId: string): string | undefined {
   if (subjectType === "work_order") return `/jobs/${subjectId}`;
   if (subjectType === "party") return `/crm/parties/${subjectId}`;
+  if (subjectType === "quote") return `/sales/quotes/${subjectId}`;
   if (subjectType === "workspace") return "/dashboard";
   return undefined;
 }

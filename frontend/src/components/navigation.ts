@@ -4,6 +4,7 @@ import {
   CalendarDays,
   Clock3,
   Contact,
+  Package,
   Palmtree,
   FileText,
   LayoutDashboard,
@@ -42,7 +43,8 @@ export const navigation: NavSection[] = [
     label: "nav.section.sales",
     items: [
       { label: "nav.customers", icon: UsersRound, href: "/crm/parties", permission: permissions.crm.partiesRead },
-      { label: "nav.quotes", icon: FileText },
+      { label: "nav.quotes", icon: FileText, href: "/sales/quotes", permission: permissions.sales.quotesRead },
+      { label: "nav.catalog", icon: Package, href: "/sales/catalog", permission: permissions.sales.quotesRead },
     ],
   },
   {
