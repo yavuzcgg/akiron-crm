@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, ArrowLeft, BriefcaseBusiness, Building2, CircleCheck, CircleX, Eye, FileDown, HandCoins, PencilLine, Send } from "lucide-react";
+import { AlertCircle, ArrowLeft, BriefcaseBusiness, Building2, CircleCheck, CircleX, Eye, FileDown, FileSignature, HandCoins, PencilLine, Send } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useSession } from "@/features/identity/session";
+import { ContractDialog } from "@/features/contracts/contract-dialog";
 import { ChargeDialog } from "@/features/finance/money-dialogs";
 import { useSaveWorkOrder } from "@/features/jobs/jobs-api";
 import { TimelineFeed } from "@/features/timeline/timeline-feed";
@@ -35,6 +36,8 @@ function QuoteView({ quote }: { quote: Quote }) {
   const canOpenJobs = hasPermission(session?.permissions, permissions.jobs.workOrdersWrite);
   const canCharge = hasPermission(session?.permissions, permissions.finance.write);
   const [chargeOpen, setChargeOpen] = useState(false);
+  const canContract = hasPermission(session?.permissions, permissions.sales.contractsWrite);
+  const [contractOpen, setContractOpen] = useState(false);
   const money = (value: number) => formatMoney(value, quote.currency);
   const fail = (failure: unknown) => toast.error(tError(failure instanceof ApiError ? failure.code : "common.network"));
 
@@ -86,6 +89,11 @@ function QuoteView({ quote }: { quote: Quote }) {
               <PencilLine /> {t("sales.quote.revise")}
             </Button>
           ) : null}
+          {quote.status === "accepted" && canContract ? (
+            <Button variant="outline" onClick={() => setContractOpen(true)}>
+              <FileSignature /> {t("contracts.fromQuote")}
+            </Button>
+          ) : null}
           {quote.status === "accepted" && canCharge ? (
             <Button variant="outline" onClick={() => setChargeOpen(true)}>
               <HandCoins /> {t("finance.charge.fromQuote")}
@@ -106,6 +114,15 @@ function QuoteView({ quote }: { quote: Quote }) {
           ) : null}
         </div>
       </div>
+
+      {contractOpen ? (
+        <ContractDialog
+          open
+          onOpenChange={setContractOpen}
+          quote={{ id: quote.id, title: quote.title, partyId: quote.partyId, partyName: quote.partyName, currency: quote.currency }}
+          onSaved={(contract) => router.push(`/sales/contracts/${contract.id}`)}
+        />
+      ) : null}
 
       {chargeOpen ? (
         <ChargeDialog

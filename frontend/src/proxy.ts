@@ -9,7 +9,7 @@ const authPages = ["/login", "/register", "/forgot-password"];
 const openPages = ["/invite", "/reset-password"];
 
 /** Links sent to clients (quotes now, payments later); never behind a sign-in. */
-const publicPrefixes = ["/q/"];
+const publicPrefixes = ["/q/", "/forms/"];
 
 /**
  * Optimistic routing only (Next.js guidance): the API still checks every request, and the app shell

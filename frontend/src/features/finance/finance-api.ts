@@ -87,6 +87,11 @@ export function useFinanceMutations() {
         unwrap(await api.POST("/api/v1/finance/charges/{id}/cancel", { params: { path: { id } }, body: { reason } })),
       onSuccess: refresh,
     }),
+    remind: useMutation({
+      mutationFn: async ({ id, email }: { id: string; email?: string }) =>
+        unwrap(await api.POST("/api/v1/finance/open-items/{id}/remind", { params: { path: { id } }, body: { email: email || null } })),
+      onSuccess: refresh,
+    }),
     invoiced: useMutation({
       mutationFn: async ({ id, invoiceNumber, invoiceDate }: { id: string; invoiceNumber: string; invoiceDate: string }) =>
         unwrap(await api.POST("/api/v1/finance/charges/{id}/invoiced", { params: { path: { id } }, body: { invoiceNumber, invoiceDate } })),

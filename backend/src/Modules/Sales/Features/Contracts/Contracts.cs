@@ -9,6 +9,7 @@ using Akiron.Modules.Sales.Domain;
 using Akiron.Modules.Sales.Features.Quotes;
 using Akiron.Modules.Sales.Persistence;
 using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Akiron.Modules.Sales.Features.Contracts;
@@ -75,7 +76,10 @@ internal sealed class EndContractValidator : AbstractValidator<EndContractComman
     public EndContractValidator() => RuleFor(command => command.Reason).NotEmpty().MaximumLength(500);
 }
 
-internal sealed record ContractFilter(string? Status = null, Guid? PartyId = null, string? Search = null);
+internal sealed record ContractFilter(
+    [FromQuery(Name = "status")] string? Status = null,
+    [FromQuery(Name = "partyId")] Guid? PartyId = null,
+    [FromQuery(Name = "search")] string? Search = null);
 
 internal sealed class ContractFilterValidator : AbstractValidator<ContractFilter>
 {

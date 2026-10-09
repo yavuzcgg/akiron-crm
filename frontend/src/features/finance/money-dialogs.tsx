@@ -14,7 +14,7 @@ import { currencies } from "@/features/sales/labels";
 import { PartyPicker, type PickedParty } from "@/features/sales/party-picker";
 import { parseDecimal } from "@/features/sales/quote-math";
 import { ApiError } from "@/lib/api/errors";
-import { dayKey, formatCalendarDate, formatMoney } from "@/lib/format";
+import { dayKey, formatCalendarDate, formatDateTime, formatMoney } from "@/lib/format";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
 import { paymentMethods, splitMonthly, useFinanceMutations, useOpenItems } from "./finance-api";
 
@@ -334,5 +334,50 @@ export function DueLabel({ dueDate, overdue, days }: { dueDate: string; overdue:
     <span className="text-destructive font-medium">{t("finance.overdueDays", { date: formatCalendarDate(dueDate), days })}</span>
   ) : (
     <span className="text-muted-foreground">{formatCalendarDate(dueDate)}</span>
+  );
+}
+
+/** E-mails the client a reminder about one open instalment; empty address uses the party's primary contact. */
+export function RemindDialog({ item, onOpenChange }: { item: { id: string; chargeNumber: string; remaining: number; currency: string; dueDate: string; lastRemindedAt?: string | null }; onOpenChange: (open: boolean) => void }) {
+  const { t, tError } = useI18n();
+  const { remind } = useFinanceMutations();
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async () => {
+    setError(null);
+    try {
+      const sent = await remind.mutateAsync({ id: item.id, email: email.trim() || undefined });
+      toast.success(t("finance.remind.sent", { email: sent.email }));
+      onOpenChange(false);
+    } catch (failure) {
+      setError(tError(failure instanceof ApiError ? failure.code : "common.network"));
+    }
+  };
+
+  return (
+    <Dialog open onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md" closeLabel={t("common.cancel")}>
+        <DialogHeader>
+          <DialogTitle>{t("finance.remind.title")}</DialogTitle>
+          <DialogDescription>
+            {t("finance.remind.description", { number: item.chargeNumber, amount: formatMoney(item.remaining, item.currency), date: formatCalendarDate(item.dueDate) })}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4">
+          <ErrorAlert message={error} />
+          <FormField id="remind-email" type="email" label={t("finance.remind.email")} hint={t("finance.remind.emailHint")} value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} />
+          {item.lastRemindedAt ? <p className="text-muted-foreground text-[13px]">{t("finance.remind.last", { date: formatDateTime(item.lastRemindedAt) })}</p> : null}
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button onClick={() => void submit()} disabled={remind.isPending}>
+              {remind.isPending ? t("common.saving") : t("finance.remind.send")}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

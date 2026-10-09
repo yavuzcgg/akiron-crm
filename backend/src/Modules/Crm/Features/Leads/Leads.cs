@@ -8,6 +8,7 @@ using Akiron.Modules.Crm.Domain;
 using Akiron.Modules.Crm.Features.CreateParty;
 using Akiron.Modules.Crm.Persistence;
 using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Akiron.Modules.Crm.Features.Leads;
@@ -80,7 +81,11 @@ internal sealed class MoveLeadValidator : AbstractValidator<MoveLeadCommand>
 /// <param name="PartyId">Link to an existing party instead of creating one.</param>
 internal sealed record ConvertLeadCommand(Guid? PartyId = null);
 
-internal sealed record LeadFilter(string? View = null, string? Search = null, Guid? OwnerId = null, Guid? PartyId = null);
+internal sealed record LeadFilter(
+    [FromQuery(Name = "view")] string? View = null,
+    [FromQuery(Name = "search")] string? Search = null,
+    [FromQuery(Name = "ownerId")] Guid? OwnerId = null,
+    [FromQuery(Name = "partyId")] Guid? PartyId = null);
 
 internal sealed class LeadFilterValidator : AbstractValidator<LeadFilter>
 {

@@ -157,7 +157,15 @@ Domain event + outbox + Hangfire (timeline bunun üstüne kurulur), activity tim
 - Cari kartında hesap: döviz bazında bakiye, açık kalemler, avans, ekstre (yürüyen bakiye); zaman çizelgesinde finans olayları (yalnız finance.read görür).
 - 166 backend, 26 frontend testi; akış tarayıcıda uçtan uca doğrulandı.
 
-**Sırada:** sözleşme/retainer, lead hunisi. PayTR/iyzico ve SMS sonra değerlendirilecek; WhatsApp şirket hesabı olmadığı için beklemede.
+**Sözleşme, hatırlatma ve lead hunisi (9 Eki 2026):**
+
+- Sözleşme/retainer (SZL): aylık tutar, başlangıç/bitiş, aynı süreyle otomatik yenileme, bitişten önce sahibine bildirim, duraklat/devam/sonlandır; başlamış aylar saatlik zamanlayıcıyla Finance'a borç (BRC) olarak düşer, her ay bir kez.
+- Tahsilat hatırlatması: açık kalem için müşterinin birincil kişisine e-posta; tahsilatı yapan ekibe günde bir vade özeti bildirimi.
+- Lead hunisi: Yeni → Görüşüldü → Toplantı → Teklif verildi panosu, kazanıldı/kaybedildi (nedenle), müşteriye dönüştürme (kişisiyle), sonraki adım hatırlatması; carinin tek açık fırsatı teklif gönderilince "Teklif verildi"ye, teklif kabul edilince "Kazanıldı"ya geçer.
+- Web formu: sitenize yapıştırılan HTML form, gizli bot alanı, IP başına hız sınırı, kiracıya özel anahtar (yenilenebilir); gelen fırsat sorumlusuna bildirilir.
+- 182 backend, 29 frontend testi; akış tarayıcıda uçtan uca doğrulandı.
+
+**Sırada:** Faz 3 kapanışı (WhatsApp şablon bildirimi şirket hesabı gelince). PayTR/iyzico ve SMS sonra değerlendirilecek; WhatsApp şirket hesabı olmadığı için beklemede.
 
 ## Paralel idari işler
 

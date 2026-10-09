@@ -1,6 +1,6 @@
 "use client";
 
-import { HandCoins, ReceiptText, Wallet, XCircle } from "lucide-react";
+import { HandCoins, Mail, ReceiptText, Wallet, XCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/empty-state";
@@ -11,8 +11,8 @@ import { ApiError } from "@/lib/api/errors";
 import { formatCalendarDate, formatMoney } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
-import { useFinanceMutations, useStatement } from "./finance-api";
-import { ChargeDialog, DueLabel, ReceiptDialog } from "./money-dialogs";
+import { useFinanceMutations, useStatement, type OpenItemRow } from "./finance-api";
+import { ChargeDialog, DueLabel, ReceiptDialog, RemindDialog } from "./money-dialogs";
 
 /** A party's account on its CRM page: balance per currency, what is due, and the statement newest first. */
 export function PartyAccount({ partyId, partyName, canWrite }: { partyId: string; partyName: string; canWrite: boolean }) {
@@ -21,6 +21,7 @@ export function PartyAccount({ partyId, partyName, canWrite }: { partyId: string
   const { cancelCharge } = useFinanceMutations();
   const [dialog, setDialog] = useState<"receipt" | "charge" | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const [reminding, setReminding] = useState<OpenItemRow | null>(null);
   const party = { id: partyId, name: partyName };
 
   const actions = canWrite ? (
@@ -38,6 +39,7 @@ export function PartyAccount({ partyId, partyName, canWrite }: { partyId: string
     <>
       {dialog === "receipt" ? <ReceiptDialog open party={party} onOpenChange={(open) => setDialog(open ? "receipt" : null)} /> : null}
       {dialog === "charge" ? <ChargeDialog open party={party} onOpenChange={(open) => setDialog(open ? "charge" : null)} /> : null}
+      {reminding ? <RemindDialog item={reminding} onOpenChange={(open) => !open && setReminding(null)} /> : null}
     </>
   );
 
@@ -96,6 +98,11 @@ export function PartyAccount({ partyId, partyName, canWrite }: { partyId: string
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <span className="font-medium tabular-nums">{formatMoney(item.remaining, item.currency)}</span>
+                  {canWrite ? (
+                    <Button variant="ghost" size="icon-sm" aria-label={t("finance.remind.title")} title={t("finance.remind.title")} onClick={() => setReminding(item)}>
+                      <Mail />
+                    </Button>
+                  ) : null}
                   {canWrite && item.remaining === item.amount && item.sequence === 1 ? (
                     <Button variant="ghost" size="icon-sm" aria-label={t("finance.charge.cancel")} title={t("finance.charge.cancel")} onClick={() => cancel(item.chargeId, item.chargeNumber)}>
                       <XCircle />

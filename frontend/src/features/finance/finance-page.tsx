@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, ChevronLeft, ChevronRight, HandCoins, ReceiptText, Undo2, Wallet } from "lucide-react";
+import { AlertCircle, ChevronLeft, ChevronRight, HandCoins, Mail, ReceiptText, Undo2, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -18,8 +18,8 @@ import { formatCalendarDate, formatMoney } from "@/lib/format";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
 import { hasPermission, permissions } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
-import { useBalances, useFinanceMutations, useFinanceSummary, useOpenItems, useReceipts, useToInvoice, type FinanceSummary } from "./finance-api";
-import { ChargeDialog, DueLabel, methodLabels, ReceiptDialog } from "./money-dialogs";
+import { useBalances, useFinanceMutations, useFinanceSummary, useOpenItems, useReceipts, useToInvoice, type FinanceSummary, type OpenItemRow } from "./finance-api";
+import { ChargeDialog, DueLabel, methodLabels, ReceiptDialog, RemindDialog } from "./money-dialogs";
 
 type Tab = "due" | "balances" | "receipts" | "invoice";
 
@@ -98,9 +98,10 @@ function Loading() {
   );
 }
 
-function DueTab() {
+function DueTab({ canWrite }: { canWrite: boolean }) {
   const { t } = useI18n();
   const [overdue, setOverdue] = useState(false);
+  const [reminding, setReminding] = useState<OpenItemRow | null>(null);
   const items = useOpenItems({ overdue });
   return (
     <>
@@ -124,7 +125,12 @@ function DueTab() {
                 <TableHead className={cn(head, "pl-5")}>{t("finance.column.party")}</TableHead>
                 <TableHead className={cn(head, "hidden md:table-cell")}>{t("finance.description")}</TableHead>
                 <TableHead className={head}>{t("finance.column.due")}</TableHead>
-                <TableHead className={cn(head, "pr-5 text-right")}>{t("finance.column.remaining")}</TableHead>
+                <TableHead className={cn(head, "text-right", !canWrite && "pr-5")}>{t("finance.column.remaining")}</TableHead>
+                {canWrite ? (
+                  <TableHead className={cn(head, "w-10 pr-5")}>
+                    <span className="sr-only">{t("finance.column.actions")}</span>
+                  </TableHead>
+                ) : null}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -145,13 +151,21 @@ function DueTab() {
                   <TableCell className="tabular-nums">
                     <DueLabel dueDate={item.dueDate} overdue={item.isOverdue} days={item.daysOverdue} />
                   </TableCell>
-                  <TableCell className="pr-5 text-right font-medium tabular-nums">{formatMoney(item.remaining, item.currency)}</TableCell>
+                  <TableCell className={cn("text-right font-medium tabular-nums", !canWrite && "pr-5")}>{formatMoney(item.remaining, item.currency)}</TableCell>
+                  {canWrite ? (
+                    <TableCell className="relative z-10 pr-5">
+                      <Button variant="ghost" size="icon-sm" aria-label={t("finance.remind.title")} title={t("finance.remind.title")} onClick={() => setReminding(item)}>
+                        <Mail />
+                      </Button>
+                    </TableCell>
+                  ) : null}
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
       )}
+      {reminding ? <RemindDialog item={reminding} onOpenChange={(open) => !open && setReminding(null)} /> : null}
     </>
   );
 }
@@ -399,7 +413,7 @@ export function FinancePage() {
               ))}
             </div>
           </div>
-          {tab === "due" ? <DueTab /> : tab === "balances" ? <BalancesTab /> : tab === "receipts" ? <ReceiptsTab canWrite={canWrite} /> : <ToInvoiceTab canWrite={canWrite} />}
+          {tab === "due" ? <DueTab canWrite={canWrite} /> : tab === "balances" ? <BalancesTab /> : tab === "receipts" ? <ReceiptsTab canWrite={canWrite} /> : <ToInvoiceTab canWrite={canWrite} />}
         </CardContent>
       </Card>
 

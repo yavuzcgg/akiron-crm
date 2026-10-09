@@ -1,7 +1,7 @@
-import { Archive, Eye, HandCoins, ReceiptText, Undo2, XCircle, FileText, Send, BriefcaseBusiness, Building2, CircleDot, Contact, FileUp, MailPlus, MoveRight, Palmtree, PencilLine, StickyNote, UserPlus, UsersRound, type LucideIcon } from "lucide-react";
+import { Archive, Eye, FileSignature, HandCoins, Mail, ReceiptText, Target, Trophy, Undo2, UserPlus as UserCheck, XCircle, FileText, Send, BriefcaseBusiness, Building2, CircleDot, Contact, FileUp, MailPlus, MoveRight, Palmtree, PencilLine, StickyNote, UserPlus, UsersRound, type LucideIcon } from "lucide-react";
 import { roleLabel } from "@/features/identity/role-name";
 import { stageLabel } from "@/features/jobs/labels";
-import { formatMoney } from "@/lib/format";
+import { formatCalendarDate, formatMoney } from "@/lib/format";
 import type { TranslationKey } from "@/lib/i18n";
 import type { TranslationParams } from "@/lib/i18n/translate";
 import type { TimelineItem } from "./timeline-api";
@@ -23,6 +23,21 @@ interface EntryType {
 const text = (value: unknown) => (typeof value === "string" ? value : "");
 
 const money = (payload: Payload) => (typeof payload.amount === "number" ? formatMoney(payload.amount, text(payload.currency) || "TRY") : "");
+
+const leadHref = (payload: Payload) => (typeof payload.leadId === "string" ? `/crm/leads/${payload.leadId}` : undefined);
+
+const contractHref = (payload: Payload) => (typeof payload.contractId === "string" ? `/sales/contracts/${payload.contractId}` : undefined);
+
+const leadStageKeys: Record<string, TranslationKey> = {
+  new: "leads.stage.new",
+  contacted: "leads.stage.contacted",
+  meeting: "leads.stage.meeting",
+  proposal: "leads.stage.proposal",
+  won: "leads.stage.won",
+  lost: "leads.stage.lost",
+};
+
+const stage = (value: unknown, t: Translate) => t(leadStageKeys[text(value)] ?? "leads.stage.new");
 
 const quoteHref = (payload: Payload) => (typeof payload.quoteId === "string" ? `/sales/quotes/${payload.quoteId}` : undefined);
 
@@ -203,6 +218,59 @@ const entryTypes: Record<string, EntryType> = {
     headline: (payload, actor, t) => t("timeline.entry.receiptReversed", { actor, number: text(payload.number), amount: money(payload) }),
     body: (payload) => text(payload.reason) || undefined,
     href: (payload) => partyHref(payload),
+  },
+  "finance.reminder.sent": {
+    icon: Mail,
+    tone: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+    headline: (payload, actor, t) => t("timeline.entry.reminderSent", { actor, number: text(payload.number), amount: money(payload), email: text(payload.email) }),
+    href: (payload) => partyHref(payload),
+  },
+  "crm.lead.created": {
+    icon: Target,
+    tone: "bg-primary/10 text-primary",
+    headline: (payload, actor, t) =>
+      payload.source === "web_form"
+        ? t("timeline.entry.leadFromWeb", { actor, title: text(payload.title) })
+        : t("timeline.entry.leadCreated", { actor, title: text(payload.title) }),
+    href: (payload) => leadHref(payload),
+  },
+  "crm.lead.moved": {
+    icon: Target,
+    tone: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+    headline: (payload, actor, t) =>
+      payload.to === "won"
+        ? t("timeline.entry.leadWon", { actor, title: text(payload.title) })
+        : payload.to === "lost"
+          ? t("timeline.entry.leadLost", { actor, title: text(payload.title) })
+          : t("timeline.entry.leadMoved", { actor, title: text(payload.title), from: stage(payload.from, t), to: stage(payload.to, t) }),
+    body: (payload) => text(payload.lostReason) || undefined,
+    href: (payload) => leadHref(payload),
+  },
+  "crm.lead.converted": {
+    icon: UserCheck,
+    tone: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    headline: (payload, actor, t) => t("timeline.entry.leadConverted", { actor, title: text(payload.title), party: text(payload.partyName) }),
+    href: (payload) => leadHref(payload),
+  },
+  "sales.contract.started": {
+    icon: FileSignature,
+    tone: "bg-primary/10 text-primary",
+    headline: (payload, actor, t) => t("timeline.entry.contractStarted", { actor, number: text(payload.number), title: text(payload.title), amount: money(payload) }),
+    href: (payload) => contractHref(payload),
+  },
+  "sales.contract.renewed": {
+    icon: Trophy,
+    tone: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    headline: (payload, _actor, t) =>
+      t("timeline.entry.contractRenewed", { number: text(payload.number), date: typeof payload.newEndDate === "string" ? formatCalendarDate(payload.newEndDate) : "" }),
+    href: (payload) => contractHref(payload),
+  },
+  "sales.contract.ended": {
+    icon: XCircle,
+    tone: "bg-muted text-muted-foreground",
+    headline: (payload, actor, t) => t("timeline.entry.contractEnded", { actor, number: text(payload.number), title: text(payload.title) }),
+    body: (payload) => text(payload.reason) || undefined,
+    href: (payload) => contractHref(payload),
   },
   "timeline.note": {
     icon: StickyNote,

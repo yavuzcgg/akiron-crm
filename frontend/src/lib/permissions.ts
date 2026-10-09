@@ -21,6 +21,8 @@ export const permissions = {
     quotesRead: "sales.quotes.read",
     quotesWrite: "sales.quotes.write",
     catalogManage: "sales.catalog.manage",
+    contractsRead: "sales.contracts.read",
+    contractsWrite: "sales.contracts.write",
   },
   people: {
     read: "people.read",
@@ -42,6 +44,8 @@ export const permissions = {
     partiesRead: "crm.parties.read",
     partiesWrite: "crm.parties.write",
     customFieldsManage: "crm.custom_fields.manage",
+    leadsRead: "crm.leads.read",
+    leadsWrite: "crm.leads.write",
   },
   timeline: {
     read: "timeline.read",

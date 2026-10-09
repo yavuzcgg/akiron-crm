@@ -6,7 +6,9 @@ import {
   Contact,
   Package,
   Palmtree,
+  FileSignature,
   FileText,
+  Target,
   LayoutDashboard,
   UserRound,
   Users,
@@ -42,8 +44,10 @@ export const navigation: NavSection[] = [
   {
     label: "nav.section.sales",
     items: [
+      { label: "nav.leads", icon: Target, href: "/crm/leads", permission: permissions.crm.leadsRead },
       { label: "nav.customers", icon: UsersRound, href: "/crm/parties", permission: permissions.crm.partiesRead },
       { label: "nav.quotes", icon: FileText, href: "/sales/quotes", permission: permissions.sales.quotesRead },
+      { label: "nav.contracts", icon: FileSignature, href: "/sales/contracts", permission: permissions.sales.contractsRead },
       { label: "nav.catalog", icon: Package, href: "/sales/catalog", permission: permissions.sales.quotesRead },
     ],
   },

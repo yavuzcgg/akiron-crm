@@ -2,7 +2,7 @@
 
 import { HubConnectionBuilder, HubConnectionState, LogLevel } from "@microsoft/signalr";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AtSign, Bell, BriefcaseBusiness, CalendarCheck2, Eye, FileText, Palmtree, UserPlus, type LucideIcon } from "lucide-react";
+import { AtSign, Bell, BriefcaseBusiness, CalendarCheck2, CalendarClock, Eye, FileSignature, FileText, Palmtree, Target, UserPlus, Wallet, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 import { toast } from "sonner";
@@ -85,6 +85,39 @@ const notificationTypes: Record<string, NotificationType> = {
       }),
     href: (payload) => (typeof payload.quoteId === "string" ? `/sales/quotes/${payload.quoteId}` : undefined),
   },
+  "crm.lead.created": {
+    icon: Target,
+    message: (payload, t) =>
+      payload.webForm
+        ? t("notifications.leadFromWeb", { title: text(payload.title) })
+        : t("notifications.leadAssigned", { actor: text(payload.createdByName), title: text(payload.title) }),
+    href: (payload) => (typeof payload.leadId === "string" ? `/crm/leads/${payload.leadId}` : undefined),
+  },
+  "crm.lead.follow_up_due": {
+    icon: CalendarClock,
+    message: (payload, t) => t("notifications.leadFollowUp", { title: text(payload.title), step: text(payload.nextStep) || t("notifications.leadFollowUpDefault") }),
+    href: (payload) => (typeof payload.leadId === "string" ? `/crm/leads/${payload.leadId}` : undefined),
+  },
+  "sales.contract.ending": {
+    icon: FileSignature,
+    message: (payload, t) =>
+      t(payload.autoRenew ? "notifications.contractRenewing" : "notifications.contractEnding", {
+        number: text(payload.number),
+        party: text(payload.partyName),
+        date: calendar(payload.endDate),
+      }),
+    href: (payload) => (typeof payload.contractId === "string" ? `/sales/contracts/${payload.contractId}` : undefined),
+  },
+  "finance.payments.digest": {
+    icon: Wallet,
+    message: (payload, t) =>
+      t("notifications.paymentsDigest", {
+        overdue: formatNumber(Number(payload.overdue ?? 0)),
+        today: formatNumber(Number(payload.dueToday ?? 0)),
+        upcoming: formatNumber(Number(payload.upcoming ?? 0)),
+      }),
+    href: () => "/finance",
+  },
   "timeline.note.mentioned": {
     icon: AtSign,
     message: (payload, t) => t("notifications.mentioned", { actor: text(payload.authorName), excerpt: text(payload.excerpt) }),
@@ -99,6 +132,8 @@ function subjectHref(subjectType: string, subjectId: string): string | undefined
   if (subjectType === "work_order") return `/jobs/${subjectId}`;
   if (subjectType === "party") return `/crm/parties/${subjectId}`;
   if (subjectType === "quote") return `/sales/quotes/${subjectId}`;
+  if (subjectType === "contract") return `/sales/contracts/${subjectId}`;
+  if (subjectType === "lead") return `/crm/leads/${subjectId}`;
   if (subjectType === "workspace") return "/dashboard";
   return undefined;
 }

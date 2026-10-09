@@ -1816,6 +1816,491 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/crm/leads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Leads: view=open for the board (by stage and rank), view=closed for won and lost */
+        get: {
+            parameters: {
+                query?: {
+                    view?: string;
+                    search?: string;
+                    ownerId?: string;
+                    partyId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LeadResponse"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Add a lead to the first column */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["LeadCommand"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LeadResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crm/leads/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One lead */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LeadResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        /** Change a lead's details */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["LeadCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LeadResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        /** Remove a lead (archived, not erased) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crm/leads/{id}/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Move on the board: another stage, another place, won, or lost (with a reason) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["MoveLeadCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LeadResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crm/leads/{id}/convert": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a customer from the lead (or link an existing party) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ConvertLeadCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ConvertLeadResponse"];
+                    };
+                };
+                /** @description Unprocessable Entity */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crm/lead-form": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The web form's settings and embed key */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LeadFormResponse"];
+                    };
+                };
+            };
+        };
+        /** Turn the web form on or off, set where visitors land and who gets the leads */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["LeadFormCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LeadFormResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crm/lead-form/rotate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Issue a new key; embeds with the old one stop working */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LeadFormResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crm/public/forms/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Public: a website visitor leaves their details; a lead appears on the board */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    key: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["WebLead"];
+                    "application/x-www-form-urlencoded": components["schemas"]["WebLead"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Found */
+                302: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/jobs/stages": {
         parameters: {
             query?: never;
@@ -4223,6 +4708,335 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sales/contracts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Contracts: active first, newest first */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    status?: string;
+                    partyId?: string;
+                    search?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagedResultOfContractResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Start a contract; months already started are billed at once */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateContractCommand"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ContractResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/contracts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One contract */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ContractResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        /** Change the terms; billed months keep their amounts */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateContractCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ContractResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Unprocessable Entity */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/contracts/{id}/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Stop billing until resumed */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ContractResponse"];
+                    };
+                };
+                /** @description Unprocessable Entity */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/contracts/{id}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Bill again from the next month that starts today or later */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ContractResponse"];
+                    };
+                };
+                /** @description Unprocessable Entity */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/contracts/{id}/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** End the contract today; nothing more is billed */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["EndContractCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ContractResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Unprocessable Entity */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/finance/summary": {
         parameters: {
             query?: never;
@@ -4372,7 +5186,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/finance/charges": {
+    "/api/v1/finance/open-items/{id}/remind": {
         parameters: {
             query?: never;
             header?: never;
@@ -4380,6 +5194,80 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
+        put?: never;
+        /** E-mail the client a reminder about one open instalment */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RemindCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReminderResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/charges": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A contract's or a party's charges, newest first */
+        get: {
+            parameters: {
+                query?: {
+                    contractId?: string;
+                    partyId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ChargeResponse"][];
+                    };
+                };
+            };
+        };
         put?: never;
         /** Charge a client (manually or from an accepted quote), with a payment plan */
         post: {
@@ -4990,6 +5878,10 @@ export interface components {
             exchangeRate: number;
             /** Format: uuid */
             quoteId: null | string;
+            /** Format: uuid */
+            contractId: null | string;
+            /** Format: date */
+            period: null | string;
             invoiceNumber: null | string;
             /** Format: date */
             invoiceDate: null | string;
@@ -5002,6 +5894,86 @@ export interface components {
             phone?: null | string;
             /** @default false */
             isPrimary: boolean;
+        };
+        ContractResponse: {
+            /** Format: uuid */
+            id: string;
+            number: string;
+            title: string;
+            scope: null | string;
+            /** Format: uuid */
+            partyId: string;
+            partyName: string;
+            status: string;
+            /** Format: double */
+            amount: number;
+            currency: string;
+            /** Format: double */
+            exchangeRate: null | number;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: null | string;
+            autoRenew: boolean;
+            /** Format: int32 */
+            noticeDays: number;
+            /** Format: int32 */
+            paymentTermDays: number;
+            /** Format: date */
+            nextBillingDate: null | string;
+            /** Format: int32 */
+            billedPeriods: number;
+            /** Format: date */
+            lastBilledOn: null | string;
+            /** Format: uuid */
+            quoteId: null | string;
+            /** Format: date */
+            endedOn: null | string;
+            endReason: null | string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        ConvertLeadCommand: {
+            /** Format: uuid */
+            partyId?: null | string;
+        };
+        ConvertLeadResponse: {
+            lead: components["schemas"]["LeadResponse"];
+            /** Format: uuid */
+            partyId: string;
+            partyCreated: boolean;
+        };
+        CreateContractCommand: {
+            /** Format: uuid */
+            partyId: null | string;
+            title: string;
+            /** Format: double */
+            amount: number;
+            /** Format: date */
+            startDate: string;
+            /** @default TRY */
+            currency: string;
+            /** Format: double */
+            exchangeRate?: null | number;
+            /** Format: date */
+            endDate?: null | string;
+            /** @default false */
+            autoRenew: boolean;
+            /**
+             * Format: int32
+             * @default 30
+             */
+            noticeDays: number;
+            /**
+             * Format: int32
+             * @default 0
+             */
+            paymentTermDays: number;
+            scope?: null | string;
+            /** Format: uuid */
+            quoteId?: null | string;
+            /** Format: date */
+            firstBillingDate?: null | string;
         };
         CreateInvitationCommand: {
             email: string;
@@ -5095,6 +6067,9 @@ export interface components {
             annualLeaveDays: number;
             onLeaveToday: boolean;
         };
+        EndContractCommand: {
+            reason: string;
+        };
         ExchangeRateBulletinResponse: {
             /** Format: date */
             bulletinDate: string;
@@ -5168,6 +6143,79 @@ export interface components {
             invitedByName: string;
         };
         JsonElement: unknown;
+        LeadCommand: {
+            title: string;
+            companyName?: null | string;
+            contactName?: null | string;
+            email?: null | string;
+            phone?: null | string;
+            /** @default other */
+            source: string;
+            /** Format: uuid */
+            partyId?: null | string;
+            /** Format: double */
+            estimatedValue?: null | number;
+            /** @default TRY */
+            currency: string;
+            /** Format: date */
+            expectedCloseDate?: null | string;
+            /** Format: uuid */
+            ownerUserId?: null | string;
+            nextStep?: null | string;
+            /** Format: date */
+            nextStepDate?: null | string;
+            notes?: null | string;
+        };
+        LeadFormCommand: {
+            enabled: boolean;
+            redirectUrl?: null | string;
+            /** Format: uuid */
+            ownerUserId?: null | string;
+        };
+        LeadFormResponse: {
+            configured: boolean;
+            key: null | string;
+            enabled: boolean;
+            redirectUrl: null | string;
+            /** Format: uuid */
+            ownerUserId: null | string;
+            ownerName: null | string;
+        };
+        LeadResponse: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            companyName: null | string;
+            contactName: null | string;
+            email: null | string;
+            phone: null | string;
+            /** Format: uuid */
+            partyId: null | string;
+            partyName: null | string;
+            source: string;
+            stage: string;
+            /** Format: double */
+            rank: number;
+            /** Format: double */
+            estimatedValue: null | number;
+            currency: string;
+            /** Format: date */
+            expectedCloseDate: null | string;
+            /** Format: uuid */
+            ownerUserId: null | string;
+            ownerName: null | string;
+            nextStep: null | string;
+            /** Format: date */
+            nextStepDate: null | string;
+            notes: null | string;
+            lostReason: null | string;
+            /** Format: uuid */
+            quoteId: null | string;
+            /** Format: date-time */
+            closedAt: null | string;
+            /** Format: date-time */
+            createdAt: string;
+        };
         LeaveBalance: {
             /** Format: int32 */
             year: number;
@@ -5238,6 +6286,12 @@ export interface components {
             userId: string;
             fullName: string;
         };
+        MoveLeadCommand: {
+            stage: string;
+            /** Format: int32 */
+            index?: null | number;
+            lostReason?: null | string;
+        };
         MoveWorkOrderCommand: {
             /** Format: uuid */
             stageId: string;
@@ -5303,6 +6357,17 @@ export interface components {
             isOverdue: boolean;
             /** Format: int32 */
             daysOverdue: number;
+            /** Format: date-time */
+            lastRemindedAt: null | string;
+        };
+        PagedResultOfContractResponse: {
+            items: components["schemas"]["ContractResponse"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
         };
         PagedResultOfMemberResponse: {
             items: components["schemas"]["MemberResponse"][];
@@ -5680,6 +6745,16 @@ export interface components {
             email: string;
             password: string;
         };
+        RemindCommand: {
+            email?: null | string;
+        };
+        ReminderResponse: {
+            email: string;
+            /** Format: date-time */
+            sentAt: string;
+            /** Format: int32 */
+            remindersSent: number;
+        };
         RenameWorkspaceCommand: {
             name: string;
         };
@@ -5839,6 +6914,26 @@ export interface components {
             items: components["schemas"]["TimelineItemResponse"][];
             nextCursor: null | string;
         };
+        UpdateContractCommand: {
+            title: string;
+            /** Format: double */
+            amount: number;
+            /** Format: date */
+            endDate?: null | string;
+            /** @default false */
+            autoRenew: boolean;
+            /**
+             * Format: int32
+             * @default 30
+             */
+            noticeDays: number;
+            /**
+             * Format: int32
+             * @default 0
+             */
+            paymentTermDays: number;
+            scope?: null | string;
+        };
         UpdateEmployeeCommand: {
             jobTitle: null | string;
             department: null | string;
@@ -5886,6 +6981,14 @@ export interface components {
             /** Format: date */
             dueDate?: null | string;
             assigneeIds?: null | string[];
+        };
+        WebLead: {
+            name: null | string;
+            email: null | string;
+            phone: null | string;
+            company: null | string;
+            message: null | string;
+            honeypot: null | string;
         };
         WorkOrderCard: {
             /** Format: uuid */

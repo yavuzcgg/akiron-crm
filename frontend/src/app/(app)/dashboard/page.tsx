@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, FileText, UserRoundCheck, type LucideIcon } from "lucide-react";
+import { CalendarDays, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -14,8 +14,6 @@ import { hasPermission, permissions } from "@/lib/permissions";
 
 /** What comes next (docs/PLAN.md); shipped modules leave this list. */
 const roadmap: { icon: LucideIcon; label: TranslationKey; phase: number }[] = [
-  { icon: UserRoundCheck, label: "dashboard.roadmap.people", phase: 2 },
-  { icon: FileText, label: "dashboard.roadmap.leads", phase: 3 },
   { icon: CalendarDays, label: "nav.content", phase: 4 },
 ];
 
