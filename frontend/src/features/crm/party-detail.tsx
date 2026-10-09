@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Skeleton } from "@/components/ui/skeleton";
 import { FileList } from "@/features/files/file-list";
 import { useSession } from "@/features/identity/session";
+import { PartyAccount } from "@/features/finance/party-account";
 import { PartyWorkOrders } from "@/features/jobs/party-work-orders";
 import { PartyQuotes } from "@/features/sales/party-quotes";
 import { TimelineFeed } from "@/features/timeline/timeline-feed";
@@ -179,6 +180,18 @@ export function PartyDetail({ id }: { id: string }) {
               </div>
             </CardContent>
           </Card>
+
+          {hasPermission(session?.permissions, permissions.finance.read) ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("finance.party.title")}</CardTitle>
+                <CardDescription>{t("finance.party.description")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PartyAccount partyId={data.id} partyName={data.name} canWrite={hasPermission(session?.permissions, permissions.finance.write)} />
+              </CardContent>
+            </Card>
+          ) : null}
 
           {hasPermission(session?.permissions, permissions.sales.quotesRead) ? (
             <Card>

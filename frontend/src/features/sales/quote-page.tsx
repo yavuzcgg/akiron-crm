@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, ArrowLeft, BriefcaseBusiness, Building2, CircleCheck, CircleX, Eye, FileDown, PencilLine, Send } from "lucide-react";
+import { AlertCircle, ArrowLeft, BriefcaseBusiness, Building2, CircleCheck, CircleX, Eye, FileDown, HandCoins, PencilLine, Send } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useSession } from "@/features/identity/session";
+import { ChargeDialog } from "@/features/finance/money-dialogs";
 import { useSaveWorkOrder } from "@/features/jobs/jobs-api";
 import { TimelineFeed } from "@/features/timeline/timeline-feed";
 import { ApiError } from "@/lib/api/errors";
@@ -32,6 +33,8 @@ function QuoteView({ quote }: { quote: Quote }) {
   const workOrder = useSaveWorkOrder();
   const canWrite = hasPermission(session?.permissions, permissions.sales.quotesWrite);
   const canOpenJobs = hasPermission(session?.permissions, permissions.jobs.workOrdersWrite);
+  const canCharge = hasPermission(session?.permissions, permissions.finance.write);
+  const [chargeOpen, setChargeOpen] = useState(false);
   const money = (value: number) => formatMoney(value, quote.currency);
   const fail = (failure: unknown) => toast.error(tError(failure instanceof ApiError ? failure.code : "common.network"));
 
@@ -83,6 +86,11 @@ function QuoteView({ quote }: { quote: Quote }) {
               <PencilLine /> {t("sales.quote.revise")}
             </Button>
           ) : null}
+          {quote.status === "accepted" && canCharge ? (
+            <Button variant="outline" onClick={() => setChargeOpen(true)}>
+              <HandCoins /> {t("finance.charge.fromQuote")}
+            </Button>
+          ) : null}
           {quote.status === "accepted" && canOpenJobs ? (
             <Button
               onClick={() =>
@@ -98,6 +106,14 @@ function QuoteView({ quote }: { quote: Quote }) {
           ) : null}
         </div>
       </div>
+
+      {chargeOpen ? (
+        <ChargeDialog
+          open
+          onOpenChange={setChargeOpen}
+          quote={{ id: quote.id, number: quote.number, title: quote.title, total: quote.totals.grand, currency: quote.currency }}
+        />
+      ) : null}
 
       {quote.status === "rejected" && quote.decisionNote ? (
         <Alert variant="destructive">

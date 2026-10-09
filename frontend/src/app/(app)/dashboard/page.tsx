@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, FileText, UserRoundCheck, Wallet, type LucideIcon } from "lucide-react";
+import { CalendarDays, FileText, UserRoundCheck, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +16,6 @@ import { hasPermission, permissions } from "@/lib/permissions";
 const roadmap: { icon: LucideIcon; label: TranslationKey; phase: number }[] = [
   { icon: UserRoundCheck, label: "dashboard.roadmap.people", phase: 2 },
   { icon: FileText, label: "dashboard.roadmap.leads", phase: 3 },
-  { icon: Wallet, label: "nav.finance", phase: 3 },
   { icon: CalendarDays, label: "nav.content", phase: 4 },
 ];
 

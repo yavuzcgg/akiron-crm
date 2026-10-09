@@ -4223,6 +4223,647 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/finance/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Receivable, overdue and collected this month, per currency */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FinanceSummary"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/balances": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Parties with a balance, overdue first */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PartyBalanceRow"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/parties/{partyId}/statement": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A party's account: balances, ledger lines (newest first), open items, advances */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    partyId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StatementResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/open-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Instalments still to collect, earliest due first */
+        get: {
+            parameters: {
+                query?: {
+                    partyId?: string;
+                    overdue?: boolean;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OpenItemRow"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/charges": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Charge a client (manually or from an accepted quote), with a payment plan */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RecordChargeCommand"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ChargeResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/charges/to-invoice": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Sales not yet invoiced (for the accountant) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ChargeResponse"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/charges/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One charge with its instalments */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ChargeResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/charges/{id}/invoiced": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Note the invoice number the accountant issued for this charge */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["MarkInvoicedCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ChargeResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/charges/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel a charge nothing was collected against (a reversing ledger line is posted) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CancelCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ChargeResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Unprocessable Entity */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/receipts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Collections, newest first */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    partyId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagedResultOfReceiptResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Record money received and allocate it (oldest due first unless told otherwise) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RecordReceiptCommand"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReceiptResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/receipts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One collection with its allocations */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReceiptResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/receipts/{id}/allocate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Allocate the unallocated part (an advance) to open items */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AllocateCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReceiptResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/receipts/{id}/reverse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reverse a collection and its allocations (a reversing ledger line is posted) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CancelCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReceiptResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Unprocessable Entity */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -4239,6 +4880,39 @@ export interface components {
         AddTaskCommand: {
             title: string;
         };
+        AdvanceRow: {
+            /** Format: uuid */
+            receiptId: string;
+            number: string;
+            /** Format: date */
+            date: string;
+            /** Format: double */
+            unallocated: number;
+            currency: string;
+        };
+        AllocateCommand: {
+            allocations?: null | components["schemas"]["AllocationCommand"][];
+            /** @default true */
+            autoAllocate: boolean;
+        };
+        AllocationCommand: {
+            /** Format: uuid */
+            openItemId: string;
+            /** Format: double */
+            amount: number;
+        };
+        AllocationResponse: {
+            /** Format: uuid */
+            openItemId: string;
+            chargeNumber: string;
+            /** Format: int32 */
+            sequence: number;
+            /** Format: date */
+            dueDate: string;
+            /** Format: double */
+            amount: number;
+            isReversed: boolean;
+        };
         AssigneeResponse: {
             /** Format: uuid */
             userId: string;
@@ -4247,6 +4921,9 @@ export interface components {
         BoardResponse: {
             stages: components["schemas"]["StageResponse"][];
             workOrders: components["schemas"]["WorkOrderCard"][];
+        };
+        CancelCommand: {
+            reason: string;
         };
         CatalogItemCommand: {
             name: string;
@@ -4291,6 +4968,32 @@ export interface components {
         ChangePasswordCommand: {
             currentPassword: string;
             newPassword: string;
+        };
+        ChargeResponse: {
+            /** Format: uuid */
+            id: string;
+            number: string;
+            kind: string;
+            status: string;
+            /** Format: uuid */
+            partyId: string;
+            partyName: string;
+            /** Format: date */
+            date: string;
+            description: string;
+            /** Format: double */
+            amount: number;
+            /** Format: double */
+            collected: number;
+            currency: string;
+            /** Format: double */
+            exchangeRate: number;
+            /** Format: uuid */
+            quoteId: null | string;
+            invoiceNumber: null | string;
+            /** Format: date */
+            invoiceDate: null | string;
+            instalments: components["schemas"]["OpenItemResponse"][];
         };
         ContactCommand: {
             fullName: string;
@@ -4337,6 +5040,19 @@ export interface components {
             templateId?: null | string;
             /** Format: uuid */
             quoteId?: null | string;
+        };
+        CurrencyBalance: {
+            currency: string;
+            /** Format: double */
+            debit: number;
+            /** Format: double */
+            credit: number;
+            /** Format: double */
+            balance: number;
+            /** Format: double */
+            overdue: number;
+            /** Format: double */
+            advance: number;
         };
         CustomFieldCommand: {
             label: string;
@@ -4410,11 +5126,26 @@ export interface components {
             /** Format: uuid */
             uploadedBy: null | string;
         };
+        FinanceSummary: {
+            receivable: components["schemas"]["SummaryAmount"][];
+            overdue: components["schemas"]["SummaryAmount"][];
+            collectedThisMonth: components["schemas"]["SummaryAmount"][];
+            /** Format: int32 */
+            overdueCount: number;
+            /** Format: int32 */
+            toInvoiceCount: number;
+        };
         ForgotPasswordCommand: {
             email: string;
         };
         /** Format: binary */
         IFormFile: string;
+        InstalmentCommand: {
+            /** Format: date */
+            dueDate: string;
+            /** Format: double */
+            amount: number;
+        };
         InvitationPreviewResponse: {
             workspaceName: string;
             email: string;
@@ -4487,6 +5218,11 @@ export interface components {
             /** @default true */
             isBillable: boolean;
         };
+        MarkInvoicedCommand: {
+            invoiceNumber: string;
+            /** Format: date */
+            invoiceDate: string;
+        };
         MemberResponse: {
             /** Format: uuid */
             userId: string;
@@ -4527,6 +5263,47 @@ export interface components {
             /** Format: date-time */
             readAt: null | string;
         };
+        OpenItemResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            sequence: number;
+            /** Format: date */
+            dueDate: string;
+            /** Format: double */
+            amount: number;
+            /** Format: double */
+            allocated: number;
+            /** Format: double */
+            remaining: number;
+            isOpen: boolean;
+            isOverdue: boolean;
+        };
+        OpenItemRow: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            chargeId: string;
+            chargeNumber: string;
+            description: string;
+            /** Format: uuid */
+            partyId: string;
+            partyName: string;
+            /** Format: int32 */
+            sequence: number;
+            /** Format: int32 */
+            instalmentCount: number;
+            /** Format: date */
+            dueDate: string;
+            /** Format: double */
+            amount: number;
+            /** Format: double */
+            remaining: number;
+            currency: string;
+            isOverdue: boolean;
+            /** Format: int32 */
+            daysOverdue: number;
+        };
         PagedResultOfMemberResponse: {
             items: components["schemas"]["MemberResponse"][];
             /** Format: int32 */
@@ -4554,6 +5331,15 @@ export interface components {
             /** Format: int32 */
             totalCount: number;
         };
+        PagedResultOfReceiptResponse: {
+            items: components["schemas"]["ReceiptResponse"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+        };
         PagedResultOfWorkOrderCard: {
             items: components["schemas"]["WorkOrderCard"][];
             /** Format: int32 */
@@ -4562,6 +5348,18 @@ export interface components {
             pageSize: number;
             /** Format: int32 */
             totalCount: number;
+        };
+        PartyBalanceRow: {
+            /** Format: uuid */
+            partyId: string;
+            partyName: string;
+            currency: string;
+            /** Format: double */
+            balance: number;
+            /** Format: double */
+            overdue: number;
+            /** Format: date */
+            oldestDue: null | string;
         };
         PartyContactResponse: {
             /** Format: uuid */
@@ -4812,6 +5610,70 @@ export interface components {
             /** Format: double */
             netTry: number;
         };
+        ReceiptResponse: {
+            /** Format: uuid */
+            id: string;
+            number: string;
+            status: string;
+            /** Format: uuid */
+            partyId: string;
+            partyName: string;
+            /** Format: date */
+            date: string;
+            /** Format: double */
+            amount: number;
+            /** Format: double */
+            unallocated: number;
+            currency: string;
+            /** Format: double */
+            exchangeRate: number;
+            method: string;
+            account: null | string;
+            reference: null | string;
+            note: null | string;
+            reversalReason: null | string;
+            allocations: components["schemas"]["AllocationResponse"][];
+        };
+        RecordChargeCommand: {
+            /** Format: uuid */
+            partyId?: null | string;
+            description?: null | string;
+            /** Format: double */
+            amount?: null | number;
+            /** @default TRY */
+            currency: string;
+            /** Format: double */
+            exchangeRate?: null | number;
+            /** Format: date */
+            date?: null | string;
+            /** Format: date */
+            dueDate?: null | string;
+            instalments?: null | components["schemas"]["InstalmentCommand"][];
+            /** Format: uuid */
+            quoteId?: null | string;
+            /** @default sale */
+            kind: string;
+            invoiceNumber?: null | string;
+        };
+        RecordReceiptCommand: {
+            /** Format: uuid */
+            partyId: string;
+            /** Format: double */
+            amount: number;
+            method: string;
+            /** @default TRY */
+            currency: string;
+            /** Format: double */
+            exchangeRate?: null | number;
+            /** Format: date */
+            date?: null | string;
+            account?: null | string;
+            reference?: null | string;
+            note?: null | string;
+            allocations?: null | components["schemas"]["AllocationCommand"][];
+            /** @default true */
+            autoAllocate: boolean;
+        };
         RegisterCommand: {
             organizationName: string;
             fullName: string;
@@ -4875,6 +5737,33 @@ export interface components {
             /** @default true */
             isBillable: boolean;
         };
+        StatementLine: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            date: string;
+            source: string;
+            /** Format: uuid */
+            sourceId: string;
+            documentNumber: null | string;
+            description: string;
+            /** Format: double */
+            debit: number;
+            /** Format: double */
+            credit: number;
+            /** Format: double */
+            balance: number;
+            currency: string;
+            isReversal: boolean;
+        };
+        StatementResponse: {
+            /** Format: uuid */
+            partyId: string;
+            balances: components["schemas"]["CurrencyBalance"][];
+            lines: components["schemas"]["StatementLine"][];
+            openItems: components["schemas"]["OpenItemRow"][];
+            advances: components["schemas"]["AdvanceRow"][];
+        };
         SubmitLeaveCommand: {
             type: string;
             /** Format: date */
@@ -4884,6 +5773,11 @@ export interface components {
             /** @default false */
             halfDay: boolean;
             note?: null | string;
+        };
+        SummaryAmount: {
+            currency: string;
+            /** Format: double */
+            amount: number;
         };
         TemplateCommand: {
             name: string;

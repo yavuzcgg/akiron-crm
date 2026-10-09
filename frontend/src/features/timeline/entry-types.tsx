@@ -1,6 +1,7 @@
-import { Archive, Eye, FileText, Send, BriefcaseBusiness, Building2, CircleDot, Contact, FileUp, MailPlus, MoveRight, Palmtree, PencilLine, StickyNote, UserPlus, UsersRound, type LucideIcon } from "lucide-react";
+import { Archive, Eye, HandCoins, ReceiptText, Undo2, XCircle, FileText, Send, BriefcaseBusiness, Building2, CircleDot, Contact, FileUp, MailPlus, MoveRight, Palmtree, PencilLine, StickyNote, UserPlus, UsersRound, type LucideIcon } from "lucide-react";
 import { roleLabel } from "@/features/identity/role-name";
 import { stageLabel } from "@/features/jobs/labels";
+import { formatMoney } from "@/lib/format";
 import type { TranslationKey } from "@/lib/i18n";
 import type { TranslationParams } from "@/lib/i18n/translate";
 import type { TimelineItem } from "./timeline-api";
@@ -20,6 +21,8 @@ interface EntryType {
 }
 
 const text = (value: unknown) => (typeof value === "string" ? value : "");
+
+const money = (payload: Payload) => (typeof payload.amount === "number" ? formatMoney(payload.amount, text(payload.currency) || "TRY") : "");
 
 const quoteHref = (payload: Payload) => (typeof payload.quoteId === "string" ? `/sales/quotes/${payload.quoteId}` : undefined);
 
@@ -167,6 +170,39 @@ const entryTypes: Record<string, EntryType> = {
       }),
     body: (payload) => text(payload.note) || undefined,
     href: (payload) => quoteHref(payload),
+  },
+  "finance.charge.recorded": {
+    icon: ReceiptText,
+    tone: "bg-primary/10 text-primary",
+    headline: (payload, actor, t) =>
+      t(Number(payload.instalments) > 1 ? "timeline.entry.chargeRecordedPlan" : "timeline.entry.chargeRecorded", {
+        actor,
+        number: text(payload.number),
+        amount: money(payload),
+        count: String(payload.instalments ?? ""),
+      }),
+    body: (payload) => text(payload.description) || undefined,
+    href: (payload) => partyHref(payload),
+  },
+  "finance.charge.cancelled": {
+    icon: XCircle,
+    tone: "bg-muted text-muted-foreground",
+    headline: (payload, actor, t) => t("timeline.entry.chargeCancelled", { actor, number: text(payload.number), amount: money(payload) }),
+    body: (payload) => text(payload.reason) || undefined,
+    href: (payload) => partyHref(payload),
+  },
+  "finance.receipt.recorded": {
+    icon: HandCoins,
+    tone: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    headline: (payload, actor, t) => t("timeline.entry.receiptRecorded", { actor, party: text(payload.partyName), amount: money(payload) }),
+    href: (payload) => partyHref(payload),
+  },
+  "finance.receipt.reversed": {
+    icon: Undo2,
+    tone: "bg-muted text-muted-foreground",
+    headline: (payload, actor, t) => t("timeline.entry.receiptReversed", { actor, number: text(payload.number), amount: money(payload) }),
+    body: (payload) => text(payload.reason) || undefined,
+    href: (payload) => partyHref(payload),
   },
   "timeline.note": {
     icon: StickyNote,

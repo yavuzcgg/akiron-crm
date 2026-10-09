@@ -59,7 +59,7 @@ export const navigation: NavSection[] = [
   },
   {
     label: "nav.section.finance",
-    items: [{ label: "nav.finance", icon: Wallet }],
+    items: [{ label: "nav.finance", icon: Wallet, href: "/finance", permission: permissions.finance.read }],
   },
   {
     label: "nav.section.settings",

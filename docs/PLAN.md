@@ -148,7 +148,16 @@ Domain event + outbox + Hangfire (timeline bunun üstüne kurulur), activity tim
 - Kur senkronu penceresi düzeltildi (cuma/cumartesi önceki cumanın bülteni eksik kalıyordu).
 - 158 backend, 24 frontend testi; akış tarayıcıda uçtan uca doğrulandı.
 
-**Sırada:** lead hunisi, sözleşme/retainer, Finance Lite (cari defter, tahsilat ve eşleştirme). PayTR/iyzico ve SMS sonra değerlendirilecek; WhatsApp şirket hesabı olmadığı için beklemede.
+**Finance Lite (9 Eki 2026):**
+
+- Finance modülü: değiştirilemez cari defter (borç/alacak satırları, iptal = ters kayıt), borç kaydı (BRC) tek ödeme ya da aylık taksitli ödeme planıyla, açılış bakiyesi türü.
+- Kabul edilen tekliften ödeme planı; aynı teklif iki kez borçlandırılamaz.
+- Tahsilat (TAH): havale, nakit, kart, çek, senet; en eski vadeden otomatik eşleştirme, artan avans olarak kalır; tahsilat iptali eşleşmeleri geri açar.
+- Tahsilat ekranı: toplam/gecikmiş/bu ay tahsil edilen, vadesi gelenler, cari bakiyeler, tahsilatlar, fatura bekleyenler (muhasebecinin kestiği fatura numarası işlenir).
+- Cari kartında hesap: döviz bazında bakiye, açık kalemler, avans, ekstre (yürüyen bakiye); zaman çizelgesinde finans olayları (yalnız finance.read görür).
+- 166 backend, 26 frontend testi; akış tarayıcıda uçtan uca doğrulandı.
+
+**Sırada:** sözleşme/retainer, lead hunisi. PayTR/iyzico ve SMS sonra değerlendirilecek; WhatsApp şirket hesabı olmadığı için beklemede.
 
 ## Paralel idari işler
 
