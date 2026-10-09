@@ -158,7 +158,7 @@ Kod değil ama bekleme süreleri uzun; Faz 1'de başlatılır. Liste ve takip: [
 
 | # | Karar | Neden şimdi | Öneri |
 | --- | --- | --- | --- |
-| 1 | **Repo lisansı.** Repo public ve MIT; MIT'te herkes tüm modülleri bedava kurar, bayrakları siler. Modül satışıyla çelişir. | MIT ile yayımlanan her commit MIT kalır; kod gelmeden karar verilmeli. | Tek repo + source-available lisans (BSL 1.1 veya FSL): kaynak görünür, rakip olarak üretimde kullanılamaz, süre sonunda açık kaynak olur. Alternatif: AGPL-3.0 + ticari lisans (dual). Open-core (çekirdek MIT, premium modüller private repo) tek geliştirici için fazla yük. |
+| 1 | **Repo lisansı. Karar verildi (9 Eki 2026):** tescilli yazılım, tüm hakları saklı; repo private. | İlk scaffold commit'i MIT, sonrakiler BSL 1.1 ile public yayımlandı; o sürümleri daha önce kopyalayanların hakları geri alınamaz, yeni kod korumalı. | Ticari dağıtım ve müşteri kurulumları ayrı yazılı sözleşmeyle. |
 | 2 | **Ortak platform paketi** (`akiron-platform`: BuildingBlocks + auth + test kiti + frontend istemci/i18n/token). | Üç üründe aynı altyapı üç kez yazılıyor. | Faz 1 sonunda BuildingBlocks stabilleşince NuGet/npm paketi olarak çıkar; önce CRM tüketir, sonra Commerce'in henüz yazılmamış Identity servisi, en son Seo. Faz 1'den önce çıkarma: ihtiyaç daha netleşmedi. |
 | 3 | **B2B projesi kodu** (USD bayi hesapları, Logo terimleri). | akiron-commerce devlog'u kur/cari tasarımının oradan geleceğini yazıyor. | Varsa Faz 5'te cari/Logo için kullanılır. |
 

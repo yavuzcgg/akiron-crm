@@ -56,4 +56,4 @@ npm run dev
 
 ## Lisans
 
-[Business Source License 1.1](LICENSE). Kaynak kod görünürdür; kişisel, eğitim ve değerlendirme amaçlı kullanım serbesttir. Barındırılan hizmet olarak sunmak veya ticari olarak dağıtmak için lisans gerekir. Her sürüm 4 yıl sonra Apache 2.0 lisansına geçer.
+Tescilli yazılım, tüm hakları saklıdır ([LICENSE](LICENSE)). Yazılı izin olmadan kopyalanamaz, dağıtılamaz, hizmet olarak sunulamaz.

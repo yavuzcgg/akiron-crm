@@ -493,3 +493,6 @@ docs/vendor/
 
 # Design tooling, installed per machine: npm i -g ui-ux-pro-max-cli && uipro init --ai claude --offline
 .claude/skills/
+
+# Third-party agent skill files installed by design tooling (not ours to version)
+.agents/
