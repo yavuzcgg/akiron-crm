@@ -13,4 +13,7 @@ public interface IPartyDirectory
     /// optional), for pickers in other modules; names only, no contact details.
     /// </summary>
     Task<IReadOnlyList<PartySummary>> SearchCustomersAsync(string? search, int limit, CancellationToken cancellationToken);
+
+    /// <summary>Where payment reminders go: the primary contact's e-mail, else the party's own; null when neither is known.</summary>
+    Task<string?> BillingEmailAsync(Guid partyId, CancellationToken cancellationToken);
 }

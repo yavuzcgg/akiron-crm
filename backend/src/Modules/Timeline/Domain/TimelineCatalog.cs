@@ -15,6 +15,10 @@ public static class TimelineSubjects
 
     public const string Quote = Subjects.Quote;
 
+    public const string Contract = Subjects.Contract;
+
+    public const string Lead = Subjects.Lead;
+
     public static IReadOnlySet<string> All => Subjects.All;
 }
 
@@ -45,6 +49,13 @@ public static class TimelineEntryTypes
     public const string ChargeCancelled = "finance.charge.cancelled";
     public const string ReceiptRecorded = "finance.receipt.recorded";
     public const string ReceiptReversed = "finance.receipt.reversed";
+    public const string PaymentReminderSent = "finance.reminder.sent";
+    public const string LeadCreated = "crm.lead.created";
+    public const string LeadMoved = "crm.lead.moved";
+    public const string LeadConverted = "crm.lead.converted";
+    public const string ContractStarted = "sales.contract.started";
+    public const string ContractRenewed = "sales.contract.renewed";
+    public const string ContractEnded = "sales.contract.ended";
 
     private const string PartiesRead = "crm.parties.read";
     private const string WorkOrdersRead = "jobs.work_orders.read";
@@ -76,5 +87,14 @@ public static class TimelineEntryTypes
         [ChargeCancelled] = "finance.read",
         [ReceiptRecorded] = "finance.read",
         [ReceiptReversed] = "finance.read",
+        [PaymentReminderSent] = "finance.read",
+
+        // The funnel and contract terms are sales information.
+        [LeadCreated] = "crm.leads.read",
+        [LeadMoved] = "crm.leads.read",
+        [LeadConverted] = "crm.leads.read",
+        [ContractStarted] = "sales.contracts.read",
+        [ContractRenewed] = "sales.contracts.read",
+        [ContractEnded] = "sales.contracts.read",
     };
 }

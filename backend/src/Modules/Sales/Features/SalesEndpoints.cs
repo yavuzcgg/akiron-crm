@@ -3,6 +3,7 @@ using Akiron.BuildingBlocks.Security;
 using Akiron.BuildingBlocks.Tenancy;
 using Akiron.BuildingBlocks.Web;
 using Akiron.Modules.Sales.Features.Catalog;
+using Akiron.Modules.Sales.Features.Contracts;
 using Akiron.Modules.Sales.Features.PublicQuotes;
 using Akiron.Modules.Sales.Features.Quotes;
 using Microsoft.AspNetCore.Builder;
@@ -18,6 +19,66 @@ internal static class SalesEndpoints
         MapCatalog(endpoints.MapGroup("/catalog"));
         MapQuotes(endpoints.MapGroup("/quotes"));
         MapPublic(endpoints.MapGroup("/public/quotes"));
+        MapContracts(endpoints.MapGroup("/contracts"));
+    }
+
+    private static void MapContracts(RouteGroupBuilder contracts)
+    {
+        contracts.MapGet("/", async ([AsParameters] PageRequest page, [AsParameters] ContractFilter filter, ContractsHandler handler, CancellationToken cancellationToken) =>
+                TypedResults.Ok(await handler.ListAsync(page, filter, cancellationToken)))
+            .RequirePermission(SalesPermissions.ContractsRead)
+            .Validate<PageRequest>()
+            .Validate<ContractFilter>()
+            .Produces<PagedResult<ContractResponse>>()
+            .WithSummary("Contracts: active first, newest first");
+
+        contracts.MapGet("/{id:guid}", async (Guid id, ContractsHandler handler, CancellationToken cancellationToken) =>
+                Ok(await handler.GetAsync(id, cancellationToken)))
+            .RequirePermission(SalesPermissions.ContractsRead)
+            .Produces<ContractResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithSummary("One contract");
+
+        contracts.MapPost("/", async (CreateContractCommand command, ContractsHandler handler, CancellationToken cancellationToken) =>
+            {
+                var result = await handler.CreateAsync(command, cancellationToken);
+                return result.IsSuccess ? Results.Created($"/api/v1/sales/contracts/{result.Value.Id}", result.Value) : result.Error.ToProblem();
+            })
+            .RequirePermission(SalesPermissions.ContractsWrite)
+            .Validate<CreateContractCommand>()
+            .Produces<ContractResponse>(StatusCodes.Status201Created)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .WithSummary("Start a contract; months already started are billed at once");
+
+        contracts.MapPut("/{id:guid}", async (Guid id, UpdateContractCommand command, ContractsHandler handler, CancellationToken cancellationToken) =>
+                Ok(await handler.UpdateAsync(id, command, cancellationToken)))
+            .RequirePermission(SalesPermissions.ContractsWrite)
+            .Validate<UpdateContractCommand>()
+            .Produces<ContractResponse>()
+            .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+            .WithSummary("Change the terms; billed months keep their amounts");
+
+        contracts.MapPost("/{id:guid}/pause", async (Guid id, ContractsHandler handler, CancellationToken cancellationToken) =>
+                Ok(await handler.PauseAsync(id, cancellationToken)))
+            .RequirePermission(SalesPermissions.ContractsWrite)
+            .Produces<ContractResponse>()
+            .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+            .WithSummary("Stop billing until resumed");
+
+        contracts.MapPost("/{id:guid}/resume", async (Guid id, ContractsHandler handler, CancellationToken cancellationToken) =>
+                Ok(await handler.ResumeAsync(id, cancellationToken)))
+            .RequirePermission(SalesPermissions.ContractsWrite)
+            .Produces<ContractResponse>()
+            .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+            .WithSummary("Bill again from the next month that starts today or later");
+
+        contracts.MapPost("/{id:guid}/end", async (Guid id, EndContractCommand command, ContractsHandler handler, CancellationToken cancellationToken) =>
+                Ok(await handler.EndAsync(id, command, cancellationToken)))
+            .RequirePermission(SalesPermissions.ContractsWrite)
+            .Validate<EndContractCommand>()
+            .Produces<ContractResponse>()
+            .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+            .WithSummary("End the contract today; nothing more is billed");
     }
 
     private static void MapCatalog(RouteGroupBuilder catalog)

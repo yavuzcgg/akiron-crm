@@ -20,5 +20,11 @@ public static class Subjects
     /// <summary>A quote (teklif) in the Sales module.</summary>
     public const string Quote = "quote";
 
-    public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal) { Workspace, User, Party, WorkOrder, Quote };
+    /// <summary>A contract or retainer (sözleşme) in the Sales module.</summary>
+    public const string Contract = "contract";
+
+    /// <summary>A sales lead (fırsat) in the CRM module.</summary>
+    public const string Lead = "lead";
+
+    public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal) { Workspace, User, Party, WorkOrder, Quote, Contract, Lead };
 }

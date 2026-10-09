@@ -215,6 +215,10 @@ namespace Akiron.Modules.Finance.Persistence.Migrations
                         .HasColumnType("character varying(500)")
                         .HasColumnName("cancellation_reason");
 
+                    b.Property<Guid?>("ContractId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("contract_id");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -275,6 +279,10 @@ namespace Akiron.Modules.Finance.Persistence.Migrations
                         .HasColumnType("character varying(250)")
                         .HasColumnName("party_name");
 
+                    b.Property<DateOnly?>("Period")
+                        .HasColumnType("date")
+                        .HasColumnName("period");
+
                     b.Property<Guid?>("QuoteId")
                         .HasColumnType("uuid")
                         .HasColumnName("quote_id");
@@ -306,6 +314,11 @@ namespace Akiron.Modules.Finance.Persistence.Migrations
 
                     b.HasIndex("TenantId", "QuoteId")
                         .HasDatabaseName("ix_charges_tenant_id_quote_id");
+
+                    b.HasIndex("TenantId", "ContractId", "Period")
+                        .IsUnique()
+                        .HasDatabaseName("ix_charges_tenant_id_contract_id_period")
+                        .HasFilter("contract_id IS NOT NULL");
 
                     b.HasIndex("TenantId", "PartyId", "Date")
                         .HasDatabaseName("ix_charges_tenant_id_party_id_date");
@@ -434,9 +447,17 @@ namespace Akiron.Modules.Finance.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_open");
 
+                    b.Property<DateTimeOffset?>("LastRemindedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_reminded_at");
+
                     b.Property<Guid>("PartyId")
                         .HasColumnType("uuid")
                         .HasColumnName("party_id");
+
+                    b.Property<int>("RemindersSent")
+                        .HasColumnType("integer")
+                        .HasColumnName("reminders_sent");
 
                     b.Property<int>("Sequence")
                         .HasColumnType("integer")

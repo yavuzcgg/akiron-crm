@@ -36,7 +36,8 @@ internal sealed record OpenItemRow(
     decimal Remaining,
     string Currency,
     bool IsOverdue,
-    int DaysOverdue);
+    int DaysOverdue,
+    DateTimeOffset? LastRemindedAt);
 
 internal sealed record AdvanceRow(Guid ReceiptId, string Number, DateOnly Date, decimal Unallocated, string Currency);
 
@@ -197,7 +198,8 @@ internal sealed class StatementsHandler(FinanceDbContext db, FinanceContext cont
                 row.item.Amount - row.item.Allocated,
                 row.item.Currency.Code,
                 row.item.DueDate < today,
-                Math.Max(0, today.DayNumber - row.item.DueDate.DayNumber)))
+                Math.Max(0, today.DayNumber - row.item.DueDate.DayNumber),
+                row.item.LastRemindedAt))
             .ToList();
     }
 }

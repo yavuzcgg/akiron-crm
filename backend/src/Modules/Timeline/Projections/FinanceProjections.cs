@@ -16,12 +16,17 @@ internal sealed class ChargeRecordedProjection(TimelineWriter writer) : IIntegra
             subjects.Add(new TimelineSubject(TimelineSubjects.Quote, quoteId));
         }
 
+        if (integrationEvent.ContractId is { } contractId)
+        {
+            subjects.Add(new TimelineSubject(TimelineSubjects.Contract, contractId));
+        }
+
         return writer.WriteAsync(
             TimelineEntry.Create(
                 integrationEvent.TenantId,
                 TimelineEntryTypes.ChargeRecorded,
                 integrationEvent.OccurredAt,
-                TimelineActor.User(integrationEvent.RecordedByUserId, integrationEvent.RecordedByName),
+                integrationEvent.RecordedByUserId is { } userId ? TimelineActor.User(userId, integrationEvent.RecordedByName) : TimelineActor.SystemActor,
                 Payload.Of(new
                 {
                     chargeId = integrationEvent.ChargeId,
@@ -31,6 +36,7 @@ internal sealed class ChargeRecordedProjection(TimelineWriter writer) : IIntegra
                     currency = integrationEvent.Currency,
                     instalments = integrationEvent.Instalments,
                     partyId = integrationEvent.PartyId,
+                    contractId = integrationEvent.ContractId,
                 }),
                 integrationEvent.EventId.ToString(),
                 subjects),

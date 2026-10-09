@@ -3,6 +3,7 @@ using Akiron.BuildingBlocks.Security;
 using Akiron.BuildingBlocks.Web;
 using Akiron.Modules.Finance.Features.Charges;
 using Akiron.Modules.Finance.Features.Receipts;
+using Akiron.Modules.Finance.Features.Reminders;
 using Akiron.Modules.Finance.Features.Statements;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -51,6 +52,23 @@ internal static class FinanceEndpoints
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status409Conflict)
             .WithSummary("Charge a client (manually or from an accepted quote), with a payment plan");
+
+        charges.MapGet("/", async (Guid? contractId, Guid? partyId, ChargeActionsHandler handler, CancellationToken cancellationToken) =>
+                TypedResults.Ok(await handler.ListAsync(contractId, partyId, cancellationToken)))
+            .RequirePermission(FinancePermissions.Read)
+            .Produces<IReadOnlyList<ChargeResponse>>()
+            .WithSummary("A contract's or a party's charges, newest first");
+
+        endpoints.MapPost("/open-items/{id:guid}/remind", async (Guid id, RemindCommand command, RemindersHandler handler, CancellationToken cancellationToken) =>
+            {
+                var result = await handler.SendAsync(id, command, cancellationToken);
+                return result.IsSuccess ? Results.Ok(result.Value) : result.Error.ToProblem();
+            })
+            .RequirePermission(FinancePermissions.Write)
+            .Validate<RemindCommand>()
+            .Produces<ReminderResponse>()
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .WithSummary("E-mail the client a reminder about one open instalment");
 
         charges.MapGet("/to-invoice", async (ChargeActionsHandler handler, CancellationToken cancellationToken) =>
                 TypedResults.Ok(await handler.ToInvoiceAsync(cancellationToken)))

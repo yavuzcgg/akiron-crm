@@ -77,6 +77,8 @@ internal sealed record ChargeResponse(
     string Currency,
     decimal ExchangeRate,
     Guid? QuoteId,
+    Guid? ContractId,
+    DateOnly? Period,
     string? InvoiceNumber,
     DateOnly? InvoiceDate,
     IReadOnlyList<OpenItemResponse> Instalments);
@@ -97,6 +99,8 @@ internal static class ChargeViews
         charge.Currency.Code,
         charge.ExchangeRate,
         charge.QuoteId,
+        charge.ContractId,
+        charge.Period,
         charge.InvoiceNumber,
         charge.InvoiceDate,
         charge.Items.OrderBy(item => item.Sequence)
@@ -238,6 +242,24 @@ internal sealed class ChargeActionsHandler(FinanceDbContext db, FinanceContext c
             .OrderBy(charge => charge.Date)
             .Take(500)
             .ToListAsync(cancellationToken);
+        return charges.Select(charge => ChargeViews.ToResponse(charge, context.Today)).ToList();
+    }
+
+    /// <summary>A contract's or a party's charges, newest first (what a retainer has billed so far).</summary>
+    public async Task<IReadOnlyList<ChargeResponse>> ListAsync(Guid? contractId, Guid? partyId, CancellationToken cancellationToken)
+    {
+        var query = db.Charges.AsNoTracking().Include(charge => charge.Items).AsQueryable();
+        if (contractId is { } contract)
+        {
+            query = query.Where(charge => charge.ContractId == contract);
+        }
+
+        if (partyId is { } party)
+        {
+            query = query.Where(charge => charge.PartyId == party);
+        }
+
+        var charges = await query.OrderByDescending(charge => charge.Date).ThenByDescending(charge => charge.Number).Take(200).ToListAsync(cancellationToken);
         return charges.Select(charge => ChargeViews.ToResponse(charge, context.Today)).ToList();
     }
 

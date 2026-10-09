@@ -21,12 +21,61 @@ internal sealed class CrmDbContext(DbContextOptions<CrmDbContext> options, ITena
     public DbSet<PartyContact> Contacts => Set<PartyContact>();
 
     public DbSet<CustomField> CustomFields => Set<CustomField>();
+
+    public DbSet<Lead> Leads => Set<Lead>();
+
+    public DbSet<LeadForm> LeadForms => Set<LeadForm>();
 }
 
 internal static class CrmConstraints
 {
     public const string PartyCodeUnique = "ix_parties_tenant_id_code";
     public const string CustomFieldKeyUnique = "ix_custom_fields_tenant_id_key";
+}
+
+internal sealed class LeadConfiguration : IEntityTypeConfiguration<Lead>
+{
+    public void Configure(EntityTypeBuilder<Lead> builder)
+    {
+        builder.ToTable("leads");
+        builder.HasKey(lead => lead.Id);
+        builder.Property(lead => lead.Id).ValueGeneratedNever();
+        builder.Property(lead => lead.Title).HasMaxLength(Lead.TitleMaxLength);
+        builder.Property(lead => lead.CompanyName).HasMaxLength(200);
+        builder.Property(lead => lead.ContactName).HasMaxLength(200);
+        builder.Property(lead => lead.Email).HasMaxLength(254);
+        builder.Property(lead => lead.Phone).HasMaxLength(30);
+        builder.Property(lead => lead.Source).HasConversion<string>().HasMaxLength(20);
+        builder.Property(lead => lead.Stage).HasConversion<string>().HasMaxLength(20);
+        builder.Property(lead => lead.EstimatedValue).HasPrecision(18, 2);
+        builder.Property(lead => lead.Currency).HasConversion(currency => currency.Code, code => Akiron.BuildingBlocks.Domain.Currency.From(code)).HasMaxLength(3);
+        builder.Property(lead => lead.OwnerName).HasMaxLength(200);
+        builder.Property(lead => lead.NextStep).HasMaxLength(300);
+        builder.Property(lead => lead.Notes).HasMaxLength(Lead.NotesMaxLength);
+        builder.Property(lead => lead.LostReason).HasMaxLength(500);
+        builder.Ignore(lead => lead.IsOpen);
+        builder.Property<uint>("xmin").HasColumnName("xmin").HasColumnType("xid").IsRowVersion();
+        builder.HasIndex(lead => new { lead.TenantId, lead.Stage, lead.Rank });
+        builder.HasIndex(lead => new { lead.TenantId, lead.PartyId });
+        builder.HasIndex(lead => new { lead.NextStepDate, lead.FollowUpSentFor });
+    }
+}
+
+internal sealed class LeadFormConfiguration : IEntityTypeConfiguration<LeadForm>
+{
+    public void Configure(EntityTypeBuilder<LeadForm> builder)
+    {
+        builder.ToTable("lead_forms");
+        builder.HasKey(form => form.Id);
+        builder.Property(form => form.Id).ValueGeneratedNever();
+        builder.Property(form => form.Key).HasMaxLength(64);
+        builder.Property(form => form.RedirectUrl).HasMaxLength(500);
+        builder.Property(form => form.OwnerName).HasMaxLength(200);
+
+        // Found by key across tenants (the public form); one form per tenant.
+        builder.HasIndex(form => form.Key).IsUnique();
+        builder.HasIndex(form => form.TenantId).IsUnique();
+    }
 }
 
 internal sealed class PartyConfiguration : IEntityTypeConfiguration<Party>

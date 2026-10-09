@@ -26,6 +26,11 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
     public DbSet<Allocation> Allocations => Set<Allocation>();
 }
 
+internal static class FinanceConstraints
+{
+    public const string ContractPeriodUnique = "ix_charges_tenant_id_contract_id_period";
+}
+
 internal static class FinanceMapping
 {
     public static PropertyBuilder<Currency> AsCurrency(this PropertyBuilder<Currency> property) =>
@@ -74,6 +79,12 @@ internal sealed class ChargeConfiguration : IEntityTypeConfiguration<Charge>
         builder.HasIndex(charge => new { charge.TenantId, charge.Number }).IsUnique();
         builder.HasIndex(charge => new { charge.TenantId, charge.PartyId, charge.Date });
         builder.HasIndex(charge => new { charge.TenantId, charge.QuoteId });
+
+        // A contract's month is charged once, however often its event is delivered.
+        builder.HasIndex(charge => new { charge.TenantId, charge.ContractId, charge.Period })
+            .IsUnique()
+            .HasFilter("contract_id IS NOT NULL")
+            .HasDatabaseName(FinanceConstraints.ContractPeriodUnique);
     }
 }
 

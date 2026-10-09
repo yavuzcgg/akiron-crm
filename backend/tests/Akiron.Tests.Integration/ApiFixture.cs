@@ -63,6 +63,7 @@ public sealed partial class ApiFixture : IAsyncLifetime
             // Tests deliver the outbox themselves (DeliverOutboxAsync) so they never race a timer.
             builder.UseSetting("Outbox:Enabled", "false");
             builder.UseSetting("ExchangeRates:SyncEnabled", "false");
+            builder.UseSetting("Scheduler:Enabled", "false");
             builder.UseSetting("Storage:S3:ServiceUrl", _minio.GetConnectionString());
             builder.UseSetting("Storage:S3:AccessKey", _minio.GetAccessKey());
             builder.UseSetting("Storage:S3:SecretKey", _minio.GetSecretKey());
@@ -102,6 +103,14 @@ public sealed partial class ApiFixture : IAsyncLifetime
             }
         }
     }
+
+    /// <summary>Runs one scheduled job for the given business day, as the hourly runner would.</summary>
+    public Task RunJobAsync<TJob>(DateOnly today)
+        where TJob : Akiron.BuildingBlocks.Scheduling.IScheduledJob =>
+        Services.GetServices<Akiron.BuildingBlocks.Scheduling.IScheduledJob>().OfType<TJob>().Single().RunAsync(today, CancellationToken.None);
+
+    /// <summary>E-mails sent so far to <paramref name="email"/>, oldest first.</summary>
+    public IReadOnlyList<EmailMessage> EmailsTo(string email) => _emails.Sent.Where(message => message.To == email).ToList();
 
     /// <summary>The invitation token from the last e-mail sent to <paramref name="email"/>.</summary>
     public string InvitationTokenFor(string email)

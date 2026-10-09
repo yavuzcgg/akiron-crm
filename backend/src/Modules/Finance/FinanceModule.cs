@@ -1,4 +1,6 @@
 using Akiron.BuildingBlocks.Domain;
+using Akiron.BuildingBlocks.Events;
+using Akiron.BuildingBlocks.Scheduling;
 using Akiron.BuildingBlocks.Modules;
 using Akiron.BuildingBlocks.Persistence;
 using Akiron.Modules.Finance.Features;
@@ -59,6 +61,8 @@ public sealed class FinanceModule : IModule
         services.AddHandlersFromAssembly(typeof(FinanceModule).Assembly);
         services.AddValidatorsFromAssemblyContaining<FinanceModule>(includeInternalTypes: true);
         services.AddScoped<FinanceContext>();
+        services.AddIntegrationEventConsumersFromAssembly(typeof(FinanceModule).Assembly);
+        services.AddScheduledJob<Features.Reminders.PaymentDigestJob>(configuration);
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints) => FinanceEndpoints.Map(endpoints);

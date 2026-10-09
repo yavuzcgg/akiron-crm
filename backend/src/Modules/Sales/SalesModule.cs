@@ -1,6 +1,7 @@
 using Akiron.BuildingBlocks.Domain;
 using Akiron.BuildingBlocks.Modules;
 using Akiron.BuildingBlocks.Persistence;
+using Akiron.BuildingBlocks.Scheduling;
 using Akiron.Contracts.Sales;
 using Akiron.Modules.Sales.Features;
 using Akiron.Modules.Sales.Features.Quotes;
@@ -18,7 +19,13 @@ public static class SalesPermissions
     public const string QuotesWrite = "sales.quotes.write";
     public const string CatalogManage = "sales.catalog.manage";
 
-    public static IReadOnlyCollection<string> All { get; } = [QuotesRead, QuotesWrite, CatalogManage];
+    /// <summary>Contracts and retainers, with what each bills monthly.</summary>
+    public const string ContractsRead = "sales.contracts.read";
+
+    /// <summary>Starting, changing, pausing and ending contracts; each start can bill right away.</summary>
+    public const string ContractsWrite = "sales.contracts.write";
+
+    public static IReadOnlyCollection<string> All { get; } = [QuotesRead, QuotesWrite, CatalogManage, ContractsRead, ContractsWrite];
 }
 
 internal static class SalesErrors
@@ -46,7 +53,7 @@ internal static class SalesErrors
     public static readonly Error AlreadyDecided = Error.Rule("sales.quote.already_decided", "The quote was already answered.");
 }
 
-/// <summary>Selling (Phase 3): the catalog of services and products, and quotes with a public approval link.</summary>
+/// <summary>Selling (Phase 3): the catalog, quotes with a public approval link, and contracts that bill monthly.</summary>
 public sealed class SalesModule : IModule
 {
     public string Name => SalesDbContext.SchemaName;
@@ -63,6 +70,7 @@ public sealed class SalesModule : IModule
         services.AddScoped<QuoteReader>();
         services.AddScoped<QuoteDetailsBuilder>();
         services.AddScoped<IAcceptedQuotes, AcceptedQuotes>();
+        services.AddScheduledJob<Features.Contracts.ContractScheduler>(configuration);
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints) => SalesEndpoints.Map(endpoints);

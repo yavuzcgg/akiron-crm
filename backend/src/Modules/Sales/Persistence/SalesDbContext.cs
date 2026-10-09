@@ -22,6 +22,8 @@ internal sealed class SalesDbContext(DbContextOptions<SalesDbContext> options, I
     public DbSet<QuoteLine> QuoteLines => Set<QuoteLine>();
 
     public DbSet<QuoteSnapshot> QuoteSnapshots => Set<QuoteSnapshot>();
+
+    public DbSet<Contract> Contracts => Set<Contract>();
 }
 
 /// <summary>What a revision looked like when it was sent: the record behind "what did we offer them?".</summary>
@@ -52,6 +54,32 @@ internal sealed class QuoteSnapshot : ITenantScoped
 internal static class SalesConstraints
 {
     public const string QuoteNumberRevisionUnique = "ix_quotes_tenant_id_number";
+}
+
+internal sealed class ContractConfiguration : IEntityTypeConfiguration<Contract>
+{
+    public void Configure(EntityTypeBuilder<Contract> builder)
+    {
+        builder.ToTable("contracts");
+        builder.HasKey(contract => contract.Id);
+        builder.Property(contract => contract.Id).ValueGeneratedNever();
+        builder.Property(contract => contract.Number).HasMaxLength(30);
+        builder.Property(contract => contract.PartyName).HasMaxLength(250);
+        builder.Property(contract => contract.Title).HasMaxLength(Contract.TitleMaxLength);
+        builder.Property(contract => contract.Scope).HasMaxLength(Contract.ScopeMaxLength);
+        builder.Property(contract => contract.Currency).HasConversion(currency => currency.Code, code => Currency.From(code)).HasMaxLength(3);
+        builder.Property(contract => contract.Amount).HasPrecision(18, 2);
+        builder.Property(contract => contract.ExchangeRate).HasPrecision(18, 6);
+        builder.Property(contract => contract.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(contract => contract.EndReason).HasMaxLength(500);
+        builder.Ignore(contract => contract.NextBillingDate);
+
+        // The scheduler and a person may touch the same contract at once; the later save loses.
+        builder.Property<uint>("xmin").HasColumnName("xmin").HasColumnType("xid").IsRowVersion();
+        builder.HasIndex(contract => new { contract.TenantId, contract.Number }).IsUnique();
+        builder.HasIndex(contract => new { contract.TenantId, contract.PartyId });
+        builder.HasIndex(contract => contract.Status);
+    }
 }
 
 internal sealed class CatalogItemConfiguration : IEntityTypeConfiguration<CatalogItem>

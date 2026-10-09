@@ -242,6 +242,156 @@ namespace Akiron.Modules.Sales.Persistence.Migrations
                     b.ToTable("catalog_items", "sales");
                 });
 
+            modelBuilder.Entity("Akiron.Modules.Sales.Domain.Contract", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<bool>("AutoRenew")
+                        .HasColumnType("boolean")
+                        .HasColumnName("auto_renew");
+
+                    b.Property<int>("BilledPeriods")
+                        .HasColumnType("integer")
+                        .HasColumnName("billed_periods");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<DateOnly?>("EndDate")
+                        .HasColumnType("date")
+                        .HasColumnName("end_date");
+
+                    b.Property<string>("EndReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("end_reason");
+
+                    b.Property<DateOnly?>("EndedOn")
+                        .HasColumnType("date")
+                        .HasColumnName("ended_on");
+
+                    b.Property<decimal?>("ExchangeRate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("exchange_rate");
+
+                    b.Property<DateOnly?>("LastBilledOn")
+                        .HasColumnType("date")
+                        .HasColumnName("last_billed_on");
+
+                    b.Property<int>("NextPeriodIndex")
+                        .HasColumnType("integer")
+                        .HasColumnName("next_period_index");
+
+                    b.Property<int>("NoticeDays")
+                        .HasColumnType("integer")
+                        .HasColumnName("notice_days");
+
+                    b.Property<DateOnly?>("NoticeSentFor")
+                        .HasColumnType("date")
+                        .HasColumnName("notice_sent_for");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("number");
+
+                    b.Property<Guid>("PartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("party_id");
+
+                    b.Property<string>("PartyName")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)")
+                        .HasColumnName("party_name");
+
+                    b.Property<int>("PaymentTermDays")
+                        .HasColumnType("integer")
+                        .HasColumnName("payment_term_days");
+
+                    b.Property<Guid?>("QuoteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("quote_id");
+
+                    b.Property<int>("RenewalMonths")
+                        .HasColumnType("integer")
+                        .HasColumnName("renewal_months");
+
+                    b.Property<string>("Scope")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("scope");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date")
+                        .HasColumnName("start_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_contracts");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_contracts_status");
+
+                    b.HasIndex("TenantId", "Number")
+                        .IsUnique()
+                        .HasDatabaseName("ix_contracts_tenant_id_number");
+
+                    b.HasIndex("TenantId", "PartyId")
+                        .HasDatabaseName("ix_contracts_tenant_id_party_id");
+
+                    b.ToTable("contracts", "sales");
+                });
+
             modelBuilder.Entity("Akiron.Modules.Sales.Domain.Quote", b =>
                 {
                     b.Property<Guid>("Id")

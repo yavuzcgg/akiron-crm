@@ -81,6 +81,12 @@ public sealed class Charge : Entity<ChargeId>, ITenantScoped, IAuditable
     /// <summary>The accepted quote this charge bills, if any.</summary>
     public Guid? QuoteId { get; private set; }
 
+    /// <summary>The contract whose month this charge bills (with <see cref="Period"/>), if any.</summary>
+    public Guid? ContractId { get; private set; }
+
+    /// <summary>First day of the contract month billed.</summary>
+    public DateOnly? Period { get; private set; }
+
     public string? InvoiceNumber { get; private set; }
 
     public DateOnly? InvoiceDate { get; private set; }
@@ -99,7 +105,8 @@ public sealed class Charge : Entity<ChargeId>, ITenantScoped, IAuditable
 
     public static Charge Record(
         string number, ChargeKind kind, Guid partyId, string partyName, DateOnly date, string description,
-        Currency currency, decimal exchangeRate, IReadOnlyList<Instalment> instalments, Guid? quoteId)
+        Currency currency, decimal exchangeRate, IReadOnlyList<Instalment> instalments, Guid? quoteId,
+        Guid? contractId = null, DateOnly? period = null)
     {
         var charge = new Charge(ChargeId.New(), number)
         {
@@ -111,6 +118,8 @@ public sealed class Charge : Entity<ChargeId>, ITenantScoped, IAuditable
             Currency = currency,
             ExchangeRate = currency == Currency.Try ? 1m : exchangeRate,
             QuoteId = quoteId,
+            ContractId = contractId,
+            Period = period,
             Amount = instalments.Sum(instalment => instalment.Amount),
         };
         charge._items.AddRange(instalments
@@ -171,6 +180,10 @@ public sealed class OpenItem : Entity<OpenItemId>, ITenantScoped
 
     public decimal Remaining => Amount - Allocated;
 
+    public DateTimeOffset? LastRemindedAt { get; private set; }
+
+    public int RemindersSent { get; private set; }
+
     internal static OpenItem Create(Charge charge, int sequence, Instalment instalment) =>
         new(OpenItemId.New())
         {
@@ -204,4 +217,10 @@ public sealed class OpenItem : Entity<OpenItemId>, ITenantScoped
     }
 
     internal void Close() => IsOpen = false;
+
+    public void Reminded(DateTimeOffset now)
+    {
+        LastRemindedAt = now;
+        RemindersSent++;
+    }
 }
