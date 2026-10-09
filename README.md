@@ -56,4 +56,4 @@ npm run dev
 
 ## Lisans
 
-Tescilli yazılım, tüm hakları saklıdır ([LICENSE](LICENSE)). Yazılı izin olmadan kopyalanamaz, dağıtılamaz, hizmet olarak sunulamaz.
+Not yet licensed. All rights reserved.
