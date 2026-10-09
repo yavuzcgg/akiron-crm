@@ -160,6 +160,9 @@ internal sealed class AcceptedQuotes(SalesDbContext db) : IAcceptedQuotes
                 quote.PartyId,
                 quote.PartyName,
                 quote.NetTotalTry,
-                quote.Lines.OrderBy(line => line.Position).Select(line => line.Name).ToList());
+                quote.Lines.OrderBy(line => line.Position).Select(line => line.Name).ToList(),
+                quote.GrandTotal,
+                quote.Currency.Code,
+                quote.ExchangeRate);
     }
 }

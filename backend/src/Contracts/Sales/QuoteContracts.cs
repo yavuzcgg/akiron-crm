@@ -49,7 +49,18 @@ public sealed record QuoteDecided(
     string Currency,
     Guid? OwnerUserId) : IntegrationEvent(TenantId, OccurredAt);
 
-public sealed record AcceptedQuote(Guid QuoteId, string Number, string Title, Guid PartyId, string PartyName, decimal NetTotalTry, IReadOnlyList<string> LineNames);
+/// <param name="GrandTotal">What the client pays, VAT included and withholding deducted, in <paramref name="Currency"/>.</param>
+public sealed record AcceptedQuote(
+    Guid QuoteId,
+    string Number,
+    string Title,
+    Guid PartyId,
+    string PartyName,
+    decimal NetTotalTry,
+    IReadOnlyList<string> LineNames,
+    decimal GrandTotal,
+    string Currency,
+    decimal? ExchangeRate);
 
 /// <summary>Read side of Sales for Jobs: an accepted quote a work order can be opened from.</summary>
 public interface IAcceptedQuotes

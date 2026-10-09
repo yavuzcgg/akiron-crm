@@ -41,6 +41,10 @@ public static class TimelineEntryTypes
     public const string QuoteSent = "sales.quote.sent";
     public const string QuoteViewed = "sales.quote.viewed";
     public const string QuoteDecided = "sales.quote.decided";
+    public const string ChargeRecorded = "finance.charge.recorded";
+    public const string ChargeCancelled = "finance.charge.cancelled";
+    public const string ReceiptRecorded = "finance.receipt.recorded";
+    public const string ReceiptReversed = "finance.receipt.reversed";
 
     private const string PartiesRead = "crm.parties.read";
     private const string WorkOrdersRead = "jobs.work_orders.read";
@@ -66,5 +70,11 @@ public static class TimelineEntryTypes
         [QuoteSent] = "sales.quotes.read",
         [QuoteViewed] = "sales.quotes.read",
         [QuoteDecided] = "sales.quotes.read",
+
+        // Money lines are for people who see the books.
+        [ChargeRecorded] = "finance.read",
+        [ChargeCancelled] = "finance.read",
+        [ReceiptRecorded] = "finance.read",
+        [ReceiptReversed] = "finance.read",
     };
 }
