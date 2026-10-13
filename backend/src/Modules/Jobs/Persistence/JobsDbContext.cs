@@ -25,6 +25,8 @@ internal sealed class JobsDbContext(DbContextOptions<JobsDbContext> options, ITe
     public DbSet<TimeEntry> TimeEntries => Set<TimeEntry>();
 
     public DbSet<WorkOrderTemplate> Templates => Set<WorkOrderTemplate>();
+
+    public DbSet<Ticket> Tickets => Set<Ticket>();
 }
 
 internal static class JobsConstraints
@@ -130,6 +132,28 @@ internal sealed class WorkOrderTemplateConfiguration : IEntityTypeConfiguration<
         builder.Property(template => template.Priority).HasConversion<string>().HasMaxLength(20);
         builder.Property(template => template.Tasks).HasColumnType("text[]");
         builder.HasIndex(template => new { template.TenantId, template.Name });
+    }
+}
+
+internal sealed class TicketConfiguration : IEntityTypeConfiguration<Ticket>
+{
+    public void Configure(EntityTypeBuilder<Ticket> builder)
+    {
+        builder.ToTable("tickets");
+        builder.HasKey(ticket => ticket.Id);
+        builder.Property(ticket => ticket.Id).ValueGeneratedNever();
+        builder.Property(ticket => ticket.Number).HasMaxLength(30);
+        builder.Property(ticket => ticket.PartyName).HasMaxLength(250);
+        builder.Property(ticket => ticket.Subject).HasMaxLength(Ticket.SubjectMaxLength);
+        builder.Property(ticket => ticket.Description).HasMaxLength(Ticket.DescriptionMaxLength);
+        builder.Property(ticket => ticket.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(ticket => ticket.RequesterName).HasMaxLength(200);
+        builder.Property(ticket => ticket.AssigneeName).HasMaxLength(200);
+        builder.Ignore(ticket => ticket.IsOpen);
+        builder.HasIndex(ticket => new { ticket.TenantId, ticket.Number }).IsUnique();
+        builder.HasIndex(ticket => new { ticket.TenantId, ticket.Status, ticket.Priority });
+        builder.HasIndex(ticket => new { ticket.TenantId, ticket.PartyId });
+        builder.HasIndex(ticket => new { ticket.FirstResponseAt, ticket.ResponseDueAt });
     }
 }
 

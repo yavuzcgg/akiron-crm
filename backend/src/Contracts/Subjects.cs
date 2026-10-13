@@ -29,5 +29,8 @@ public static class Subjects
     /// <summary>A planned social media post (içerik) in the Social module.</summary>
     public const string ContentPost = "content_post";
 
-    public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal) { Workspace, User, Party, WorkOrder, Quote, Contract, Lead, ContentPost };
+    /// <summary>A support ticket (destek talebi) in the Jobs module.</summary>
+    public const string Ticket = "ticket";
+
+    public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal) { Workspace, User, Party, WorkOrder, Quote, Contract, Lead, ContentPost, Ticket };
 }

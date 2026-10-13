@@ -148,8 +148,20 @@ internal sealed class PortalAccessHandler(
 /// identical e-mail is the accepted cost, as with every e-mail here).
 /// </summary>
 internal sealed class ClientMessageEmail(PortalDbContext db, IWorkspaceDirectory workspace, PortalLinks links, IEmailSender emailSender)
-    : IIntegrationEventConsumer<ClientMessagePosted>, IIntegrationEventConsumer<FileSharedWithClient>, IIntegrationEventConsumer<Akiron.Contracts.Social.ContentSentToClient>
+    : IIntegrationEventConsumer<ClientMessagePosted>, IIntegrationEventConsumer<FileSharedWithClient>, IIntegrationEventConsumer<Akiron.Contracts.Social.ContentSentToClient>,
+        IIntegrationEventConsumer<Akiron.Contracts.Jobs.TicketStatusChanged>
 {
+    public Task HandleAsync(Akiron.Contracts.Jobs.TicketStatusChanged integrationEvent, CancellationToken cancellationToken) =>
+        integrationEvent.ToStatus != "resolved" || integrationEvent.ByClient
+            ? Task.CompletedTask
+            : SendAsync(
+                integrationEvent.PartyId,
+                Subjects.Ticket,
+                integrationEvent.TicketId,
+                name => $"{name}: talebiniz çözüldü — {integrationEvent.Number}",
+                $"\"{integrationEvent.Subject}\" talebiniz çözüldü olarak işaretlendi. Sorun sürüyorsa portaldan yanıt yazmanız yeterli; talep yeniden açılır.",
+                cancellationToken);
+
     public Task HandleAsync(Akiron.Contracts.Social.ContentSentToClient integrationEvent, CancellationToken cancellationToken)
     {
         var listed = integrationEvent.Posts.Take(10).Select(post => $"- {post.PlannedDate:dd.MM.yyyy} · {post.Title}");
@@ -197,7 +209,9 @@ internal sealed class ClientMessageEmail(PortalDbContext db, IWorkspaceDirectory
         }
 
         var workspaceName = await workspace.CurrentNameAsync(cancellationToken);
-        var page = subjectType == Subjects.WorkOrder
+        var page = subjectType == Subjects.Ticket
+            ? $"{links.WebUrl}/portal/support/{subjectId}"
+            : subjectType == Subjects.WorkOrder
             ? $"{links.WebUrl}/portal/jobs/{subjectId}"
             : subjectType == Subjects.ContentPost
                 ? subjectId == Guid.Empty ? $"{links.WebUrl}/portal/content" : $"{links.WebUrl}/portal/content/{subjectId}"

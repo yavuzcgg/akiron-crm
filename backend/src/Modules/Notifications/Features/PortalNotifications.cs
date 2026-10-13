@@ -68,7 +68,7 @@ internal sealed class ClientActivityNotification(NotificationSender sender, IMem
             return current;
         }
 
-        var permission = subjectType == Subjects.Party ? "finance.write" : "jobs.work_orders.write";
+        var permission = subjectType == Subjects.Party ? "finance.write" : subjectType == Subjects.Ticket ? "jobs.tickets.write" : "jobs.work_orders.write";
         return (await members.WithPermissionAsync(permission, cancellationToken)).Select(member => member.UserId).ToList();
     }
 }

@@ -29,9 +29,15 @@ public static class JobsPermissions
 
     public const string TemplatesManage = "jobs.templates.manage";
 
-    public static IReadOnlyCollection<string> All { get; } = [WorkOrdersRead, WorkOrdersWrite, StagesManage, TimeWrite, TimeReadAll, Financials, TemplatesManage];
+    /// <summary>Seeing clients' support tickets.</summary>
+    public const string TicketsRead = "jobs.tickets.read";
 
-    public static IReadOnlyCollection<string> Member { get; } = [WorkOrdersRead, WorkOrdersWrite, TimeWrite];
+    /// <summary>Opening, answering, assigning and closing support tickets.</summary>
+    public const string TicketsWrite = "jobs.tickets.write";
+
+    public static IReadOnlyCollection<string> All { get; } = [WorkOrdersRead, WorkOrdersWrite, StagesManage, TimeWrite, TimeReadAll, Financials, TemplatesManage, TicketsRead, TicketsWrite];
+
+    public static IReadOnlyCollection<string> Member { get; } = [WorkOrdersRead, WorkOrdersWrite, TimeWrite, TicketsRead, TicketsWrite];
 }
 
 internal static class JobsErrors
@@ -79,6 +85,8 @@ public sealed class JobsModule : IModule
         services.AddScoped<StageBoard>();
         services.AddScoped<WorkOrderReader>();
         services.AddScoped<Akiron.Contracts.Portal.IPortalSubject, Features.ClientPortal.WorkOrderPortalSubject>();
+        services.AddScoped<Akiron.Contracts.Portal.IPortalSubject, Features.ClientPortal.TicketPortalSubject>();
+        Akiron.BuildingBlocks.Scheduling.SchedulingRegistration.AddScheduledJob<Features.ClientPortal.TicketResponseJob>(services, configuration);
         services.AddScoped<Features.CreateWorkOrder.WorkOrderReferences>();
         services.Configure<ConstraintErrorMap>(map => map
             .Add(JobsConstraints.OneRunningTimer, JobsErrors.TimerAlreadyRunning)

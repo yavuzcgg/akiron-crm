@@ -29,6 +29,7 @@ internal static class JobsEndpoints
         MapWorkOrders(endpoints.MapGroup("/work-orders"));
         MapTime(endpoints.MapGroup("/time"));
         ClientPortal.ClientWorkOrderEndpoints.Map(endpoints);
+        Tickets.TicketEndpoints.Map(endpoints);
         MapTemplates(endpoints.MapGroup("/templates"));
 
         // Who can be put on a work order: the people of this organisation, names only.

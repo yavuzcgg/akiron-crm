@@ -21,6 +21,8 @@ public static class TimelineSubjects
 
     public const string ContentPost = Subjects.ContentPost;
 
+    public const string Ticket = Subjects.Ticket;
+
     public static IReadOnlySet<string> All => Subjects.All;
 }
 
@@ -66,6 +68,9 @@ public static class TimelineEntryTypes
     public const string ContentBatchSent = "social.content.batch_sent";
     public const string ContentDecided = "social.content.decided";
     public const string ContentPublished = "social.content.published";
+    public const string TicketOpened = "jobs.ticket.opened";
+    public const string TicketStatusChanged = "jobs.ticket.status_changed";
+    public const string TicketConverted = "jobs.ticket.converted";
 
     private const string PartiesRead = "crm.parties.read";
     private const string WorkOrdersRead = "jobs.work_orders.read";
@@ -116,5 +121,9 @@ public static class TimelineEntryTypes
         [ContentBatchSent] = "social.content.read",
         [ContentDecided] = "social.content.read",
         [ContentPublished] = "social.content.read",
+
+        [TicketOpened] = "jobs.tickets.read",
+        [TicketStatusChanged] = "jobs.tickets.read",
+        [TicketConverted] = "jobs.tickets.read",
     };
 }
