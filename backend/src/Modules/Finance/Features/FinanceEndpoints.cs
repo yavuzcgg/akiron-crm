@@ -15,6 +15,8 @@ internal static class FinanceEndpoints
 {
     public static void Map(IEndpointRouteBuilder endpoints)
     {
+        ClientPortal.ClientAccountEndpoints.Map(endpoints);
+
         endpoints.MapGet("/summary", async (StatementsHandler handler, CancellationToken cancellationToken) =>
                 TypedResults.Ok(await handler.SummaryAsync(cancellationToken)))
             .RequirePermission(FinancePermissions.Read)

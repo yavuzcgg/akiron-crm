@@ -1,5 +1,6 @@
 using Akiron.BuildingBlocks.Domain;
 using Akiron.BuildingBlocks.Security;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -12,22 +13,40 @@ namespace Akiron.BuildingBlocks.Tenancy;
 /// </summary>
 public sealed class TenantResolutionMiddleware(RequestDelegate next)
 {
-    public Task InvokeAsync(HttpContext context, ITenantContext tenantContext)
+    public async Task InvokeAsync(HttpContext context, ITenantContext tenantContext)
     {
+        var endpoint = context.GetEndpoint();
+
         // Public links name their own tenant; a signed-in visitor's workspace must not take over.
-        if (context.GetEndpoint()?.Metadata.GetMetadata<PublicLinkMetadata>() is not null)
+        if (endpoint?.Metadata.GetMetadata<PublicLinkMetadata>() is not null)
         {
-            return next(context);
+            await next(context);
+            return;
         }
 
-        var claim = context.User.FindFirst(AkironClaimTypes.TenantId)?.Value;
+        // Portal endpoints belong to the client's session; a staff session open in the same
+        // browser must not decide the tenant (ADR-0011).
+        var principal = context.User;
+        if (endpoint?.Metadata.GetMetadata<PortalEndpointMetadata>() is not null)
+        {
+            var portal = await context.AuthenticateAsync(PortalAuth.Scheme);
+            if (portal.Principal is null)
+            {
+                await next(context);
+                return;
+            }
+
+            principal = portal.Principal;
+        }
+
+        var claim = principal.FindFirst(AkironClaimTypes.TenantId)?.Value;
 
         if (Guid.TryParse(claim, out var tenantId) && tenantId != Guid.Empty)
         {
             tenantContext.Bind(TenantId.From(tenantId));
         }
 
-        return next(context);
+        await next(context);
     }
 }
 

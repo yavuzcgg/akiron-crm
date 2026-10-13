@@ -49,6 +49,7 @@ public sealed class CrmModule : IModule
         services.AddHandlersFromAssembly(typeof(CrmModule).Assembly);
         services.AddValidatorsFromAssemblyContaining<CrmModule>(includeInternalTypes: true);
         services.AddScoped<IPartyDirectory, PartyDirectory>();
+        services.AddScoped<Akiron.Contracts.Portal.IPortalSubject, Features.PartyDirectory.PartyPortalSubject>();
         services.AddScoped<Features.CustomFields.CustomValuesCheck>();
         services.AddIntegrationEventConsumersFromAssembly(typeof(CrmModule).Assembly);
         services.AddScheduledJob<Features.Leads.LeadFollowUpJob>(configuration);

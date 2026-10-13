@@ -16,6 +16,7 @@
     <ProjectReference Include="..\Modules\People\Akiron.Modules.People.csproj" />
     <ProjectReference Include="..\Modules\Sales\Akiron.Modules.Sales.csproj" />
     <ProjectReference Include="..\Modules\Finance\Akiron.Modules.Finance.csproj" />
+    <ProjectReference Include="..\Modules\Portal\Akiron.Modules.Portal.csproj" />
   </ItemGroup>
 
   <ItemGroup>

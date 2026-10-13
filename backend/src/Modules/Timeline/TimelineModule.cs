@@ -34,6 +34,7 @@ public sealed class TimelineModule : IModule
         services.AddValidatorsFromAssemblyContaining<TimelineModule>(includeInternalTypes: true);
         services.AddIntegrationEventConsumersFromAssembly(typeof(TimelineModule).Assembly);
         services.AddScoped<TimelineWriter>();
+        services.AddScoped<Features.PortalSubjects>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints) => TimelineEndpoints.Map(endpoints);

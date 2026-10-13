@@ -131,7 +131,7 @@ internal sealed class PublicQuoteHandler(
         return quote;
     }
 
-    private async Task<PublicQuoteResponse> ToResponseAsync(Quote quote, CancellationToken cancellationToken) => new(
+    internal async Task<PublicQuoteResponse> ToResponseAsync(Quote quote, CancellationToken cancellationToken) => new(
         await workspace.CurrentNameAsync(cancellationToken),
         quote.Number,
         quote.Revision,

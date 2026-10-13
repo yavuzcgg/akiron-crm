@@ -7,6 +7,7 @@ using Akiron.BuildingBlocks.Security;
 using Akiron.BuildingBlocks.Tenancy;
 using Akiron.BuildingBlocks.Web;
 using Akiron.Contracts.Identity;
+using Akiron.Contracts.Portal;
 using Akiron.Contracts.Timeline;
 using Akiron.Modules.Timeline.Domain;
 using Akiron.Modules.Timeline.Persistence;
@@ -36,6 +37,9 @@ internal static class TimelineErrors
 {
     public static readonly Error UnknownSubject =
         Error.NotFound("timeline.subject.unknown", "No timeline exists for this kind of record.");
+
+    public static readonly Error NotShareable =
+        Error.Validation("timeline.note.not_shareable", "Only records that belong to a client can carry a note the client sees.");
 
     public static readonly Error InvalidCursor =
         Error.Validation("timeline.cursor.invalid", "The paging cursor is not valid; start from the first page.");
@@ -158,7 +162,8 @@ internal sealed class GetTimelineHandler(TimelineDbContext db)
 }
 
 /// <param name="MentionedUserIds">People @mentioned in the text; each is notified.</param>
-internal sealed record AddNoteCommand(string Text, IReadOnlyList<Guid>? MentionedUserIds = null);
+/// <param name="VisibleToClient">Show the note in the client portal and e-mail the client's portal users.</param>
+internal sealed record AddNoteCommand(string Text, IReadOnlyList<Guid>? MentionedUserIds = null, bool VisibleToClient = false);
 
 internal sealed class AddNoteValidator : AbstractValidator<AddNoteCommand>
 {
@@ -176,6 +181,7 @@ internal sealed class AddNoteValidator : AbstractValidator<AddNoteCommand>
 internal sealed class AddNoteHandler(
     TimelineWriter writer,
     TimelineDbContext db,
+    PortalSubjects portalSubjects,
     IMemberDirectory members,
     ICurrentUser currentUser,
     ITenantContext tenantContext,
@@ -194,6 +200,23 @@ internal sealed class AddNoteHandler(
         var mentioned = await members.FindAsync(command.MentionedUserIds ?? [], cancellationToken);
         var text = command.Text.Trim();
 
+        // A note for the client also lands on the party's stream, where the portal looks for it.
+        PortalSubjectInfo? shared = null;
+        if (command.VisibleToClient)
+        {
+            shared = await portalSubjects.FindAsync(subjectType, subjectId, cancellationToken);
+            if (shared is null)
+            {
+                return TimelineErrors.NotShareable;
+            }
+        }
+
+        List<TimelineSubject> subjects = [new(subjectType, subjectId)];
+        if (shared is not null)
+        {
+            subjects.Add(new TimelineSubject(TimelineSubjects.Party, shared.PartyId));
+        }
+
         var userId = currentUser.UserId ?? throw new InvalidOperationException("Notes need a signed-in user.");
         var now = timeProvider.GetUtcNow();
         var entry = TimelineEntry.Create(
@@ -205,7 +228,15 @@ internal sealed class AddNoteHandler(
                 new { text, mentions = mentioned.Values.Select(member => new { userId = member.UserId, name = member.FullName }) },
                 JsonSerializerOptions.Web),
             Guid.CreateVersion7().ToString(),
-            [new TimelineSubject(subjectType, subjectId)]);
+            subjects,
+            shared is null ? TimelineVisibility.Internal : TimelineVisibility.Portal);
+
+        if (shared is not null)
+        {
+            db.Publish(new ClientMessagePosted(
+                tenantContext.TenantId, now, entry.Id.Value, subjectType, subjectId, shared.PartyId, shared.Title,
+                PortalSubjects.Excerpt(text), FromClient: false, currentUser.DisplayName, userId.Value, shared.StaffUserIds));
+        }
 
         if (mentioned.Count > 0)
         {
@@ -254,6 +285,8 @@ internal static class TimelineEndpoints
             .Validate<AddNoteCommand>()
             .Produces<TimelineItemResponse>(StatusCodes.Status201Created)
             .WithSummary("Add a note to a record's history");
+
+        ClientThreadEndpoints.Map(endpoints);
 
         // For the @mention picker: whoever can write notes can name any teammate.
         endpoints.MapGet("/mentionable", async (IMemberDirectory members, CancellationToken cancellationToken) =>

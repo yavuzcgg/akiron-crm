@@ -78,6 +78,7 @@ public sealed class JobsModule : IModule
         services.AddIntegrationEventConsumersFromAssembly(typeof(JobsModule).Assembly);
         services.AddScoped<StageBoard>();
         services.AddScoped<WorkOrderReader>();
+        services.AddScoped<Akiron.Contracts.Portal.IPortalSubject, Features.ClientPortal.WorkOrderPortalSubject>();
         services.AddScoped<Features.CreateWorkOrder.WorkOrderReferences>();
         services.Configure<ConstraintErrorMap>(map => map
             .Add(JobsConstraints.OneRunningTimer, JobsErrors.TimerAlreadyRunning)

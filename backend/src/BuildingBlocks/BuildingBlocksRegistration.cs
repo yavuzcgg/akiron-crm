@@ -22,6 +22,7 @@ public static class BuildingBlocksRegistration
 
         services.AddScoped<ITenantContext, TenantContext>();
         services.AddScoped<ICurrentUser, HttpCurrentUser>();
+        services.AddScoped<IPortalVisitor, HttpPortalVisitor>();
         services.AddScoped<TenantAuditInterceptor>();
 
         // A configured SMTP relay sends for real; without one, e-mails are written to the log.
@@ -67,7 +68,11 @@ public static class BuildingBlocksRegistration
 
         // Endpoints must opt out of authentication explicitly (AllowAnonymous), never opt in.
         services.AddAuthorizationBuilder()
-            .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+            .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build())
+            .AddPolicy(PortalAuth.Policy, policy => policy
+                .AddAuthenticationSchemes(PortalAuth.Scheme)
+                .RequireAuthenticatedUser()
+                .RequireClaim(PortalAuth.PartyIdClaim));
 
         return services;
     }

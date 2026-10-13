@@ -14,6 +14,7 @@ using Akiron.Modules.Identity;
 using Akiron.Modules.Jobs;
 using Akiron.Modules.Notifications;
 using Akiron.Modules.People;
+using Akiron.Modules.Portal;
 using Akiron.Modules.Reference;
 using Akiron.Modules.Sales;
 using Akiron.Modules.Timeline;
@@ -36,7 +37,7 @@ builder.Services.AddSerilog((services, logger) => logger
         formatProvider: System.Globalization.CultureInfo.InvariantCulture));
 
 // The explicit module list is the product's composition: adding a module is one line here (ADR-0001).
-IModule[] modules = [new IdentityModule(), new TimelineModule(), new ReferenceModule(), new FilesModule(), new NotificationsModule(), new CrmModule(), new JobsModule(), new PeopleModule(), new SalesModule(), new FinanceModule()];
+IModule[] modules = [new IdentityModule(), new TimelineModule(), new ReferenceModule(), new FilesModule(), new NotificationsModule(), new CrmModule(), new JobsModule(), new PeopleModule(), new SalesModule(), new FinanceModule(), new PortalModule()];
 
 builder.Services.AddBuildingBlocks(modules, builder.Configuration);
 builder.Services.AddOutbox(builder.Configuration, typeof(WorkspaceCreated).Assembly);

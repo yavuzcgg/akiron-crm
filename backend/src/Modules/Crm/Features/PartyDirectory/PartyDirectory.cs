@@ -5,6 +5,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Akiron.Modules.Crm.Features.PartyDirectory;
 
+/// <summary>A party is itself something its client may write on or send files to (a payment receipt, say).</summary>
+internal sealed class PartyPortalSubject(CrmDbContext db) : Akiron.Contracts.Portal.IPortalSubject
+{
+    public string SubjectType => Akiron.Contracts.Subjects.Party;
+
+    public async Task<Akiron.Contracts.Portal.PortalSubjectInfo?> FindAsync(Guid subjectId, CancellationToken cancellationToken)
+    {
+        var id = PartyId.From(subjectId);
+        var name = await db.Parties.Where(party => party.Id == id).Select(party => party.Name).FirstOrDefaultAsync(cancellationToken);
+
+        // No particular member of staff: whoever handles the kind of thing the client sent is told.
+        return name is null ? null : new Akiron.Contracts.Portal.PortalSubjectInfo(subjectId, name, []);
+    }
+}
+
 /// <summary>Implements <see cref="IPartyDirectory"/> on the tenant-filtered, archive-filtered parties.</summary>
 internal sealed class PartyDirectory(CrmDbContext db) : IPartyDirectory
 {

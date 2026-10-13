@@ -56,6 +56,10 @@ public static class TimelineEntryTypes
     public const string ContractStarted = "sales.contract.started";
     public const string ContractRenewed = "sales.contract.renewed";
     public const string ContractEnded = "sales.contract.ended";
+    public const string PortalUserInvited = "portal.user.invited";
+    public const string PortalAccessChanged = "portal.user.access_changed";
+    public const string ClientFileUploaded = "portal.file.uploaded";
+    public const string FileSharedWithClient = "portal.file.shared";
 
     private const string PartiesRead = "crm.parties.read";
     private const string WorkOrdersRead = "jobs.work_orders.read";
@@ -96,5 +100,9 @@ public static class TimelineEntryTypes
         [ContractStarted] = "sales.contracts.read",
         [ContractRenewed] = "sales.contracts.read",
         [ContractEnded] = "sales.contracts.read",
+
+        // Who of a client's people can sign in is client information.
+        [PortalUserInvited] = PartiesRead,
+        [PortalAccessChanged] = PartiesRead,
     };
 }

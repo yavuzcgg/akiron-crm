@@ -159,6 +159,10 @@ namespace Akiron.Modules.Files.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("ClientUploaderName")
+                        .HasColumnType("text")
+                        .HasColumnName("client_uploader_name");
+
                     b.Property<string>("ContentType")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -186,6 +190,10 @@ namespace Akiron.Modules.Files.Persistence.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
+
+                    b.Property<bool>("SharedWithClient")
+                        .HasColumnType("boolean")
+                        .HasColumnName("shared_with_client");
 
                     b.Property<long>("SizeBytes")
                         .HasColumnType("bigint")

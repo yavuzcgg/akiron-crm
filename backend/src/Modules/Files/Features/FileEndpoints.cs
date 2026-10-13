@@ -23,7 +23,9 @@ internal sealed record FileResponse(
     string SubjectType,
     Guid SubjectId,
     DateTimeOffset UploadedAt,
-    Guid? UploadedBy);
+    Guid? UploadedBy,
+    bool SharedWithClient,
+    string? ClientUploaderName);
 
 internal static class FileErrors
 {
@@ -43,6 +45,9 @@ internal static class FileErrors
 
     public static readonly Error ExecutableRefused =
         Error.Validation("files.file.type_refused", "Executable and script files are not accepted.");
+
+    public static readonly Error NotShareable =
+        Error.Validation("files.file.not_shareable", "Only files on a client's records can be shared with the client.");
 
     public static readonly Error NotFound = Error.NotFound("files.file.not_found", "No such file in this organisation.");
 }
@@ -70,28 +75,13 @@ internal sealed class UploadFileHandler(
             return FileErrors.UnknownSubject;
         }
 
-        if (upload is null)
+        if (Check(upload) is { } refused)
         {
-            return FileErrors.Missing;
-        }
-
-        if (upload.Length == 0)
-        {
-            return FileErrors.Empty;
-        }
-
-        if (upload.Length > MaxBytes)
-        {
-            return FileErrors.TooLarge(MaxBytes);
-        }
-
-        if (RefusedExtensions.Contains(Path.GetExtension(upload.FileName)))
-        {
-            return FileErrors.ExecutableRefused;
+            return refused;
         }
 
         var now = timeProvider.GetUtcNow();
-        var contentType = string.IsNullOrWhiteSpace(upload.ContentType) ? "application/octet-stream" : upload.ContentType;
+        var contentType = string.IsNullOrWhiteSpace(upload!.ContentType) ? "application/octet-stream" : upload.ContentType;
         var file = StoredFile.Create(tenantContext.TenantId, subjectType, subjectId, upload.FileName, contentType, upload.Length, now);
 
         // Bytes first, row second: a failed upload leaves no row pointing at nothing. An orphaned
@@ -109,8 +99,30 @@ internal sealed class UploadFileHandler(
         return ToResponse(file);
     }
 
+    /// <summary>Why an upload is refused, or null when it may be stored; the same rules for staff and clients.</summary>
+    internal static Error? Check(IFormFile? upload)
+    {
+        if (upload is null)
+        {
+            return FileErrors.Missing;
+        }
+
+        if (upload.Length == 0)
+        {
+            return FileErrors.Empty;
+        }
+
+        if (upload.Length > MaxBytes)
+        {
+            return FileErrors.TooLarge(MaxBytes);
+        }
+
+        return RefusedExtensions.Contains(Path.GetExtension(upload.FileName)) ? FileErrors.ExecutableRefused : null;
+    }
+
     internal static FileResponse ToResponse(StoredFile file) => new(
-        file.Id.Value, file.FileName, file.ContentType, file.SizeBytes, file.SubjectType, file.SubjectId, file.CreatedAt, file.CreatedBy?.Value);
+        file.Id.Value, file.FileName, file.ContentType, file.SizeBytes, file.SubjectType, file.SubjectId, file.CreatedAt, file.CreatedBy?.Value,
+        file.SharedWithClient, file.ClientUploaderName);
 }
 
 internal static class FileEndpoints
@@ -160,6 +172,18 @@ internal static class FileEndpoints
             .RequirePermission(FilesPermissions.Read)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .WithSummary("Download a file");
+
+        endpoints.MapPost("/{id:guid}/share", async (Guid id, ShareFileCommand command, ClientFilesHandler handler, CancellationToken cancellationToken) =>
+            {
+                var result = await handler.ShareAsync(id, command.Shared, cancellationToken);
+                return result.IsSuccess ? Results.Ok(result.Value) : result.Error.ToProblem();
+            })
+            .RequirePermission(FilesPermissions.Write)
+            .Produces<FileResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithSummary("Show a file to the client in their portal, or take it back");
+
+        ClientFileEndpoints.Map(endpoints);
 
         endpoints.MapDelete("/{id:guid}", async (Guid id, FilesDbContext db, CancellationToken cancellationToken) =>
             {

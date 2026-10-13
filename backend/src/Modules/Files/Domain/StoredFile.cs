@@ -44,6 +44,12 @@ public sealed class StoredFile : Entity<StoredFileId>, ITenantScoped, ISoftDelet
 
     public string StorageKey { get; private set; }
 
+    /// <summary>Whether the client sees this file in their portal (a deliverable, or something they sent).</summary>
+    public bool SharedWithClient { get; private set; }
+
+    /// <summary>The portal user who uploaded it, as they are named; null for files staff uploaded.</summary>
+    public string? ClientUploaderName { get; private set; }
+
     public bool IsDeleted { get; private set; }
 
     public DateTimeOffset? DeletedAt { get; private set; }
@@ -63,6 +69,27 @@ public sealed class StoredFile : Entity<StoredFileId>, ITenantScoped, ISoftDelet
         // Tenant and month in the key keep buckets browsable and make per-tenant export or deletion a prefix operation.
         var key = $"{tenantId.Value:N}/{now:yyyy}/{now:MM}/{id.Value:N}";
         return new StoredFile(id, tenantId, subjectType, subjectId, SafeName(fileName), contentType, sizeBytes, key);
+    }
+
+    /// <summary>A file the client sent through the portal: theirs to see from the start.</summary>
+    public static StoredFile CreateFromClient(TenantId tenantId, string subjectType, Guid subjectId, string fileName, string contentType, long sizeBytes, DateTimeOffset now, string clientName)
+    {
+        var file = Create(tenantId, subjectType, subjectId, fileName, contentType, sizeBytes, now);
+        file.SharedWithClient = true;
+        file.ClientUploaderName = clientName;
+        return file;
+    }
+
+    /// <summary>Shows the file to the client or takes it back; returns whether anything changed.</summary>
+    public bool Share(bool shared)
+    {
+        if (SharedWithClient == shared)
+        {
+            return false;
+        }
+
+        SharedWithClient = shared;
+        return true;
     }
 
     /// <summary>Keeps only the last path segment and drops control characters; the name is shown and sent back in a header.</summary>

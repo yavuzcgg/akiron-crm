@@ -20,6 +20,7 @@ internal static class SalesEndpoints
         MapQuotes(endpoints.MapGroup("/quotes"));
         MapPublic(endpoints.MapGroup("/public/quotes"));
         MapContracts(endpoints.MapGroup("/contracts"));
+        ClientPortal.ClientSalesEndpoints.Map(endpoints);
     }
 
     private static void MapContracts(RouteGroupBuilder contracts)
