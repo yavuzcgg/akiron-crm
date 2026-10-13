@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, FileText, FolderOpen, Trash2, Upload } from "lucide-react";
+import { Download, Eye, EyeOff, FileText, FolderOpen, Trash2, Upload } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { useRef, type ChangeEvent } from "react";
 import { toast } from "sonner";
@@ -17,10 +17,12 @@ interface FileListProps {
   subjectType: "workspace" | "user" | "party" | "work_order";
   subjectId: string;
   canWrite: boolean;
+  /** The record belongs to a client: each file can be shown in their portal. */
+  shareable?: boolean;
 }
 
 /** Files attached to one record, with upload and removal. Downloads go straight to the API as attachments. */
-export function FileList({ subjectType, subjectId, canWrite }: FileListProps) {
+export function FileList({ subjectType, subjectId, canWrite, shareable = false }: FileListProps) {
   const { t, tError } = useI18n();
   const queryClient = useQueryClient();
   const input = useRef<HTMLInputElement>(null);
@@ -59,6 +61,16 @@ export function FileList({ subjectType, subjectId, canWrite }: FileListProps) {
     },
   });
 
+  const share = useMutation({
+    mutationFn: async ({ id, shared }: { id: string; shared: boolean }) => unwrap(await api.POST("/api/v1/files/{id}/share", { params: { path: { id } }, body: { shared } })),
+    onSuccess: (file) => {
+      toast.success(t(file.sharedWithClient ? "files.shared" : "files.unshared"));
+      void queryClient.invalidateQueries({ queryKey: filesKey });
+      refreshTimelineSoon(queryClient);
+    },
+    onError: (error) => toast.error(tError(error instanceof ApiError ? error.code : "common.network")),
+  });
+
   const onPick = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -91,6 +103,7 @@ export function FileList({ subjectType, subjectId, canWrite }: FileListProps) {
                 <span className="truncate text-sm font-medium">{file.fileName}</span>
                 <span className="text-muted-foreground text-xs">
                   {formatFileSize(file.sizeBytes)} · {formatDate(file.uploadedAt)}
+                  {file.clientUploaderName ? ` · ${t("files.fromClient", { name: file.clientUploaderName })}` : file.sharedWithClient ? ` · ${t("files.sharedBadge")}` : ""}
                 </span>
               </div>
               <a
@@ -100,6 +113,19 @@ export function FileList({ subjectType, subjectId, canWrite }: FileListProps) {
               >
                 <Download />
               </a>
+              {canWrite && shareable && !file.clientUploaderName ? (
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  title={t(file.sharedWithClient ? "files.unshare" : "files.share")}
+                  aria-label={t(file.sharedWithClient ? "files.unshare" : "files.share")}
+                  aria-pressed={file.sharedWithClient}
+                  className={file.sharedWithClient ? "text-primary" : undefined}
+                  onClick={() => share.mutate({ id: file.id, shared: !file.sharedWithClient })}
+                >
+                  {file.sharedWithClient ? <Eye /> : <EyeOff />}
+                </Button>
+              ) : null}
               {canWrite ? (
                 <Button variant="ghost" size="icon-sm" onClick={() => remove.mutate(file.id)} aria-label={t("files.delete")}>
                   <Trash2 />

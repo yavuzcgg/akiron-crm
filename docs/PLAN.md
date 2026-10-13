@@ -165,7 +165,20 @@ Domain event + outbox + Hangfire (timeline bunun üstüne kurulur), activity tim
 - Web formu: sitenize yapıştırılan HTML form, gizli bot alanı, IP başına hız sınırı, kiracıya özel anahtar (yenilenebilir); gelen fırsat sorumlusuna bildirilir.
 - 182 backend, 29 frontend testi; akış tarayıcıda uçtan uca doğrulandı.
 
-**Sırada:** Faz 3 kapanışı (WhatsApp şablon bildirimi şirket hesabı gelince). PayTR/iyzico ve SMS sonra değerlendirilecek; WhatsApp şirket hesabı olmadığı için beklemede.
+**Sırada (Faz 3'ten kalan):** PayTR/iyzico ödeme linki ve WhatsApp şablon bildirimi şirket hesabı açılınca; SMS sağlayıcı arayüzü Faz 4'te.
+
+## Faz 4 — Portal, İletişim & SMM onayı
+
+**Müşteri portalı (13 Eki 2026):** [ADR-0011](adr/0011-client-portal.md)
+
+- Portal kullanıcısı ayrı kimlik tipi: cari kartından kişi kişi erişim verilir, parolasız tek kullanımlık e-posta bağlantısıyla girilir, erişim kapatılınca oturum anında biter. Portal oturumu personel uçlarını, personel oturumu portal uçlarını açmaz.
+- Müşteri yalnızca kendi carisini görür: işlerin aşaması, teslim tarihi ve ilerlemesi; gönderilmiş teklifler (portaldan kabul/ret, PDF) ve sözleşmeler; ödenecekler, ödemeler ve hesap dökümü.
+- İş üzerinde mesajlaşma: müşterinin yazdığı ekibe bildirim olarak düşer; ekibin "müşteri de görsün" diye işaretlediği not portalda ve e-postada görünür, diğer notlar iç kalır.
+- Dosyalar tek tek paylaşılır; müşteri de dosya ve ödeme dekontu gönderir.
+- Ajansın karşılama notu ve ödeme bilgileri (IBAN) ayarlardan girilir. Kartla ödeme, ödeme sağlayıcısı gelince aynı sayfaya eklenecek.
+- 191 backend, 32 frontend testi; akış tarayıcıda (masaüstü + telefon) uçtan uca doğrulandı.
+
+**Sırada:** içerik takvimi + müşteri onayı, destek talebi, otomasyon v1, SMS.
 
 ## Paralel idari işler
 

@@ -32,11 +32,11 @@ export function useTimeline(subjectType: TimelineSubjectType, subjectId: string,
 export function useAddNote(subjectType: TimelineSubjectType, subjectId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ text, mentionedUserIds }: { text: string; mentionedUserIds: string[] }) =>
+    mutationFn: async ({ text, mentionedUserIds, visibleToClient }: { text: string; mentionedUserIds: string[]; visibleToClient?: boolean }) =>
       unwrap(
         await api.POST("/api/v1/timeline/{subjectType}/{subjectId}/notes", {
           params: { path: { subjectType, subjectId } },
-          body: { text, mentionedUserIds },
+          body: { text, mentionedUserIds, visibleToClient: visibleToClient ?? false },
         }),
       ),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: timelineQueryKey(subjectType, subjectId) }),

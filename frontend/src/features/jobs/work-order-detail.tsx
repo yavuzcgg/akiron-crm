@@ -188,7 +188,7 @@ export function WorkOrderDetail({ id }: { id: string }) {
               <CardDescription>{t("jobs.detail.discussionHint")}</CardDescription>
             </CardHeader>
             <CardContent>
-              <TimelineFeed subjectType="work_order" subjectId={data.id} canWriteNotes={hasPermission(granted, permissions.timeline.notesWrite)} />
+              <TimelineFeed subjectType="work_order" subjectId={data.id} canWriteNotes={hasPermission(granted, permissions.timeline.notesWrite)} clientThread={!!data.partyId} />
             </CardContent>
           </Card>
         </div>
@@ -257,7 +257,7 @@ export function WorkOrderDetail({ id }: { id: string }) {
                 <CardDescription>{t("jobs.detail.files")}</CardDescription>
               </CardHeader>
               <CardContent>
-                <FileList subjectType="work_order" subjectId={data.id} canWrite={hasPermission(granted, permissions.files.write)} />
+                <FileList subjectType="work_order" subjectId={data.id} canWrite={hasPermission(granted, permissions.files.write)} shareable={!!data.partyId} />
               </CardContent>
             </Card>
           ) : null}

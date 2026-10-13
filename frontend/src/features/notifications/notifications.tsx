@@ -2,7 +2,7 @@
 
 import { HubConnectionBuilder, HubConnectionState, LogLevel } from "@microsoft/signalr";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AtSign, Bell, BriefcaseBusiness, CalendarCheck2, CalendarClock, Eye, FileSignature, FileText, Palmtree, Target, UserPlus, Wallet, type LucideIcon } from "lucide-react";
+import { AtSign, Bell, MessageSquareText, Paperclip, BriefcaseBusiness, CalendarCheck2, CalendarClock, Eye, FileSignature, FileText, Palmtree, Target, UserPlus, Wallet, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 import { toast } from "sonner";
@@ -117,6 +117,16 @@ const notificationTypes: Record<string, NotificationType> = {
         upcoming: formatNumber(Number(payload.upcoming ?? 0)),
       }),
     href: () => "/finance",
+  },
+  "portal.message.posted": {
+    icon: MessageSquareText,
+    message: (payload, t) => t("notifications.clientMessage", { client: text(payload.clientName), title: text(payload.title), excerpt: text(payload.excerpt) }),
+    href: (payload) => subjectHref(text(payload.subjectType), text(payload.subjectId)),
+  },
+  "portal.file.uploaded": {
+    icon: Paperclip,
+    message: (payload, t) => t("notifications.clientFile", { client: text(payload.clientName), title: text(payload.title), fileName: text(payload.fileName) }),
+    href: (payload) => subjectHref(text(payload.subjectType), text(payload.subjectId)),
   },
   "timeline.note.mentioned": {
     icon: AtSign,

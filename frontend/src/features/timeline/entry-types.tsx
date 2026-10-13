@@ -1,4 +1,4 @@
-import { Archive, Eye, FileSignature, HandCoins, Mail, ReceiptText, Target, Trophy, Undo2, UserPlus as UserCheck, XCircle, FileText, Send, BriefcaseBusiness, Building2, CircleDot, Contact, FileUp, MailPlus, MoveRight, Palmtree, PencilLine, StickyNote, UserPlus, UsersRound, type LucideIcon } from "lucide-react";
+import { Archive, Eye, KeyRound, Paperclip, FileSignature, HandCoins, Mail, ReceiptText, Target, Trophy, Undo2, UserPlus as UserCheck, XCircle, FileText, Send, BriefcaseBusiness, Building2, CircleDot, Contact, FileUp, MailPlus, MoveRight, Palmtree, PencilLine, StickyNote, UserPlus, UsersRound, type LucideIcon } from "lucide-react";
 import { roleLabel } from "@/features/identity/role-name";
 import { stageLabel } from "@/features/jobs/labels";
 import { formatCalendarDate, formatMoney } from "@/lib/format";
@@ -271,6 +271,28 @@ const entryTypes: Record<string, EntryType> = {
     headline: (payload, actor, t) => t("timeline.entry.contractEnded", { actor, number: text(payload.number), title: text(payload.title) }),
     body: (payload) => text(payload.reason) || undefined,
     href: (payload) => contractHref(payload),
+  },
+  "portal.user.invited": {
+    icon: KeyRound,
+    tone: "bg-primary/10 text-primary",
+    headline: (payload, actor, t) => t("timeline.entry.portalInvited", { actor, name: text(payload.name) }),
+    href: (payload) => partyHref(payload),
+  },
+  "portal.user.access_changed": {
+    icon: KeyRound,
+    tone: "bg-muted text-muted-foreground",
+    headline: (payload, actor, t) => t(payload.enabled ? "timeline.entry.portalEnabled" : "timeline.entry.portalDisabled", { actor, name: text(payload.name) }),
+    href: (payload) => partyHref(payload),
+  },
+  "portal.file.uploaded": {
+    icon: Paperclip,
+    tone: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+    headline: (payload, actor, t) => t("timeline.entry.clientFile", { actor, fileName: text(payload.fileName) }),
+  },
+  "portal.file.shared": {
+    icon: Paperclip,
+    tone: "bg-primary/10 text-primary",
+    headline: (payload, actor, t) => t("timeline.entry.fileShared", { actor, fileName: text(payload.fileName) }),
   },
   "timeline.note": {
     icon: StickyNote,

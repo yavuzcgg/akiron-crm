@@ -14,6 +14,7 @@ import { FileList } from "@/features/files/file-list";
 import { useSession } from "@/features/identity/session";
 import { PartyContracts } from "@/features/contracts/party-contracts";
 import { PartyAccount } from "@/features/finance/party-account";
+import { PortalAccess } from "@/features/portal/portal-access";
 import { PartyWorkOrders } from "@/features/jobs/party-work-orders";
 import { PartyQuotes } from "@/features/sales/party-quotes";
 import { TimelineFeed } from "@/features/timeline/timeline-feed";
@@ -240,7 +241,7 @@ export function PartyDetail({ id }: { id: string }) {
               <CardDescription>{t("crm.detail.timeline")}</CardDescription>
             </CardHeader>
             <CardContent>
-              <TimelineFeed subjectType="party" subjectId={data.id} canWriteNotes={canNote} />
+              <TimelineFeed subjectType="party" subjectId={data.id} canWriteNotes={canNote} clientThread />
             </CardContent>
           </Card>
         </div>
@@ -256,6 +257,18 @@ export function PartyDetail({ id }: { id: string }) {
             </CardContent>
           </Card>
 
+          {hasPermission(session?.permissions, permissions.portal.read) ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("portal.access.title")}</CardTitle>
+                <CardDescription>{t("portal.access.description")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PortalAccess partyId={data.id} contacts={data.contacts} canManage={hasPermission(session?.permissions, permissions.portal.manage)} />
+              </CardContent>
+            </Card>
+          ) : null}
+
           {canReadFiles ? (
             <Card>
               <CardHeader>
@@ -263,7 +276,7 @@ export function PartyDetail({ id }: { id: string }) {
                 <CardDescription>{t("crm.detail.files")}</CardDescription>
               </CardHeader>
               <CardContent>
-                <FileList subjectType="party" subjectId={data.id} canWrite={canWriteFiles} />
+                <FileList subjectType="party" subjectId={data.id} canWrite={canWriteFiles} shareable />
               </CardContent>
             </Card>
           ) : null}

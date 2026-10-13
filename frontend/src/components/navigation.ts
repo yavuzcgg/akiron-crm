@@ -8,6 +8,7 @@ import {
   Palmtree,
   FileSignature,
   FileText,
+  KeyRound,
   Target,
   LayoutDashboard,
   UserRound,
@@ -71,6 +72,7 @@ export const navigation: NavSection[] = [
       { label: "nav.account", icon: UserRound, href: "/settings/account" },
       { label: "nav.workspace", icon: Building2, href: "/settings/workspace", permission: permissions.identity.tenantManage },
       { label: "nav.team", icon: Users, href: "/settings/team", permission: permissions.identity.membersRead },
+      { label: "nav.portal", icon: KeyRound, href: "/settings/portal", permission: permissions.portal.read },
     ],
   },
 ];

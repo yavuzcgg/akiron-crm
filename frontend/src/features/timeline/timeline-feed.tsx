@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, AlertCircle } from "lucide-react";
+import { Eye, Activity, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { useRef, useState, type FormEvent } from "react";
@@ -20,10 +20,12 @@ interface TimelineFeedProps {
   subjectType: TimelineSubjectType;
   subjectId: string;
   canWriteNotes: boolean;
+  /** The record belongs to a client with portal access in mind: notes can be marked visible to them. */
+  clientThread?: boolean;
 }
 
 /** A record's history grouped by day, newest first, with an optional note composer (ADR-0009). */
-export function TimelineFeed({ subjectType, subjectId, canWriteNotes }: TimelineFeedProps) {
+export function TimelineFeed({ subjectType, subjectId, canWriteNotes, clientThread = false }: TimelineFeedProps) {
   const { t, tError } = useI18n();
   const timeline = useTimeline(subjectType, subjectId);
   // Read once per mount: "today" must not change between renders of the same list.
@@ -55,7 +57,7 @@ export function TimelineFeed({ subjectType, subjectId, canWriteNotes }: Timeline
 
   return (
     <div className="grid gap-6">
-      {canWriteNotes ? <NoteComposer subjectType={subjectType} subjectId={subjectId} /> : null}
+      {canWriteNotes ? <NoteComposer subjectType={subjectType} subjectId={subjectId} clientThread={clientThread} /> : null}
 
       {items.length === 0 ? (
         <EmptyState icon={Activity} title={t("timeline.empty")} className="py-6" />
@@ -112,7 +114,14 @@ function TimelineRow({ item }: { item: TimelineItem }) {
         </time>
       </div>
       {entry.body ? (
-        <p className="bg-muted/50 mt-2 rounded-md px-3 py-2 text-sm whitespace-pre-wrap">{highlightMentions(entry.body, entry.mentions)}</p>
+        <p className={cn("mt-2 rounded-md px-3 py-2 text-sm whitespace-pre-wrap", item.visibility === "portal" ? "bg-primary-soft" : "bg-muted/50")}>
+          {highlightMentions(entry.body, entry.mentions)}
+        </p>
+      ) : null}
+      {item.visibility === "portal" ? (
+        <p className="text-muted-foreground mt-1 flex items-center gap-1 text-xs">
+          <Eye className="size-3" aria-hidden /> {t(item.actor.kind === "portal_contact" ? "timeline.fromClient" : "timeline.visibleToClient")}
+        </p>
       ) : null}
     </li>
   );
@@ -131,7 +140,7 @@ function DayHeading({ day, sample, now }: { day: string; sample: string; now: nu
  * The note box. Typing "@" opens a list of teammates (arrows and Enter pick one); the people whose
  * "@Name" is still in the text when it is sent get notified.
  */
-function NoteComposer({ subjectType, subjectId }: { subjectType: TimelineSubjectType; subjectId: string }) {
+function NoteComposer({ subjectType, subjectId, clientThread }: { subjectType: TimelineSubjectType; subjectId: string; clientThread: boolean }) {
   const { t, tError } = useI18n();
   const addNote = useAddNote(subjectType, subjectId);
   const textarea = useRef<HTMLTextAreaElement>(null);
@@ -140,6 +149,7 @@ function NoteComposer({ subjectType, subjectId }: { subjectType: TimelineSubject
   const [query, setQuery] = useState<{ query: string; start: number } | null>(null);
   const [active, setActive] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [forClient, setForClient] = useState(false);
   const people = useMentionable(true);
 
   const options = query
@@ -166,7 +176,7 @@ function NoteComposer({ subjectType, subjectId }: { subjectType: TimelineSubject
 
     setError(null);
     try {
-      await addNote.mutateAsync({ text, mentionedUserIds: mentionsIn(text, picked).map((mention) => mention.userId) });
+      await addNote.mutateAsync({ text, mentionedUserIds: mentionsIn(text, picked).map((mention) => mention.userId), visibleToClient: forClient });
       setText("");
       setPicked([]);
     } catch (failure) {
@@ -226,9 +236,17 @@ function NoteComposer({ subjectType, subjectId }: { subjectType: TimelineSubject
         </ul>
       ) : null}
       {error ? <p className="text-destructive text-sm">{error}</p> : null}
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between gap-3">
+        {clientThread ? (
+          <label className="text-muted-foreground flex cursor-pointer items-center gap-2 px-1 text-[13px]">
+            <input type="checkbox" className="accent-primary size-4" checked={forClient} onChange={(event) => setForClient(event.target.checked)} />
+            {t("timeline.note.forClient")}
+          </label>
+        ) : (
+          <span />
+        )}
         <Button type="submit" size="sm" disabled={addNote.isPending || !text.trim()}>
-          {t("timeline.note.submit")}
+          {t(forClient ? "timeline.note.submitToClient" : "timeline.note.submit")}
         </Button>
       </div>
     </form>

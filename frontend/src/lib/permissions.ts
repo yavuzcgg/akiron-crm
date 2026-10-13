@@ -13,6 +13,10 @@ export const permissions = {
     read: "files.read",
     write: "files.write",
   },
+  portal: {
+    read: "portal.read",
+    manage: "portal.manage",
+  },
   finance: {
     read: "finance.read",
     write: "finance.write",
