@@ -63,13 +63,15 @@ internal sealed class ClientFilesHandler(
 
     public async Task<Result<IReadOnlyList<ClientFileResponse>>> ListAsync(string subjectType, Guid subjectId, CancellationToken cancellationToken)
     {
-        if (await OwnAsync(subjectType, subjectId, cancellationToken) is null)
+        var subject = await OwnAsync(subjectType, subjectId, cancellationToken);
+        if (subject is null)
         {
             return FileErrors.UnknownSubject;
         }
 
+        var all = subject.SharesAllFiles;
         var files = await db.Files.AsNoTracking()
-            .Where(file => file.SubjectType == subjectType && file.SubjectId == subjectId && file.SharedWithClient)
+            .Where(file => file.SubjectType == subjectType && file.SubjectId == subjectId && (all || file.SharedWithClient))
             .OrderByDescending(file => file.CreatedAt)
             .ToListAsync(cancellationToken);
         return files.Select(ToClient).ToList();
@@ -79,8 +81,14 @@ internal sealed class ClientFilesHandler(
     public async Task<StoredFile?> FindSharedAsync(Guid id, CancellationToken cancellationToken)
     {
         var fileId = StoredFileId.From(id);
-        var file = await db.Files.AsNoTracking().FirstOrDefaultAsync(candidate => candidate.Id == fileId && candidate.SharedWithClient, cancellationToken);
-        return file is not null && await OwnAsync(file.SubjectType, file.SubjectId, cancellationToken) is not null ? file : null;
+        var file = await db.Files.AsNoTracking().FirstOrDefaultAsync(candidate => candidate.Id == fileId, cancellationToken);
+        if (file is null)
+        {
+            return null;
+        }
+
+        var subject = await OwnAsync(file.SubjectType, file.SubjectId, cancellationToken);
+        return subject is not null && (file.SharedWithClient || subject.SharesAllFiles) ? file : null;
     }
 
     public async Task<Result<ClientFileResponse>> UploadAsync(IFormFile? upload, string? subjectType, Guid subjectId, CancellationToken cancellationToken)

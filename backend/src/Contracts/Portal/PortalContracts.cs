@@ -7,7 +7,8 @@ namespace Akiron.Contracts.Portal;
 /// What the portal needs to know about a record a client may open: whose it is, how to name it, and
 /// which members of staff hear about it when the client writes or uploads.
 /// </summary>
-public sealed record PortalSubjectInfo(Guid PartyId, string Title, IReadOnlyList<Guid> StaffUserIds);
+/// <param name="SharesAllFiles">Every file on the record is the client's to see (a post's media); otherwise files are shared one by one.</param>
+public sealed record PortalSubjectInfo(Guid PartyId, string Title, IReadOnlyList<Guid> StaffUserIds, bool SharesAllFiles = false);
 
 /// <summary>
 /// Implemented by the module that owns a kind of record (<see cref="Subjects"/>) clients can see.

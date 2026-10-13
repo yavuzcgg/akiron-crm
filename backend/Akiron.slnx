@@ -13,6 +13,7 @@
     <Project Path="src/Modules/Portal/Akiron.Modules.Portal.csproj" />
     <Project Path="src/Modules/Reference/Akiron.Modules.Reference.csproj" />
     <Project Path="src/Modules/Sales/Akiron.Modules.Sales.csproj" />
+    <Project Path="src/Modules/Social/Akiron.Modules.Social.csproj" />
     <Project Path="src/Modules/Timeline/Akiron.Modules.Timeline.csproj" />
   </Folder>
   <Folder Name="/tests/">

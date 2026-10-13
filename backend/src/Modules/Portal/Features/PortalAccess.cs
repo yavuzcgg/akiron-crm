@@ -148,8 +148,23 @@ internal sealed class PortalAccessHandler(
 /// identical e-mail is the accepted cost, as with every e-mail here).
 /// </summary>
 internal sealed class ClientMessageEmail(PortalDbContext db, IWorkspaceDirectory workspace, PortalLinks links, IEmailSender emailSender)
-    : IIntegrationEventConsumer<ClientMessagePosted>, IIntegrationEventConsumer<FileSharedWithClient>
+    : IIntegrationEventConsumer<ClientMessagePosted>, IIntegrationEventConsumer<FileSharedWithClient>, IIntegrationEventConsumer<Akiron.Contracts.Social.ContentSentToClient>
 {
+    public Task HandleAsync(Akiron.Contracts.Social.ContentSentToClient integrationEvent, CancellationToken cancellationToken)
+    {
+        var listed = integrationEvent.Posts.Take(10).Select(post => $"- {post.PlannedDate:dd.MM.yyyy} · {post.Title}");
+        var more = integrationEvent.Posts.Count > 10 ? $"\n… ve {integrationEvent.Posts.Count - 10} içerik daha" : string.Empty;
+        return SendAsync(
+            integrationEvent.PartyId,
+            Subjects.ContentPost,
+            Guid.Empty,
+            name => integrationEvent.Posts.Count == 1
+                ? $"{name}: bir içerik onayınızı bekliyor"
+                : $"{name}: {integrationEvent.Posts.Count} içerik onayınızı bekliyor",
+            $"Onayınızı bekleyen içerikler:\n{string.Join("\n", listed)}{more}",
+            cancellationToken);
+    }
+
     public Task HandleAsync(ClientMessagePosted integrationEvent, CancellationToken cancellationToken) =>
         integrationEvent.FromClient
             ? Task.CompletedTask
@@ -181,7 +196,11 @@ internal sealed class ClientMessageEmail(PortalDbContext db, IWorkspaceDirectory
         }
 
         var workspaceName = await workspace.CurrentNameAsync(cancellationToken);
-        var page = subjectType == Subjects.WorkOrder ? $"{links.WebUrl}/portal/jobs/{subjectId}" : $"{links.WebUrl}/portal";
+        var page = subjectType == Subjects.WorkOrder
+            ? $"{links.WebUrl}/portal/jobs/{subjectId}"
+            : subjectType == Subjects.ContentPost
+                ? subjectId == Guid.Empty ? $"{links.WebUrl}/portal/content" : $"{links.WebUrl}/portal/content/{subjectId}"
+                : $"{links.WebUrl}/portal";
         foreach (var user in recipients)
         {
             await emailSender.SendAsync(

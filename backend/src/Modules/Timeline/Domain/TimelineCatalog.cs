@@ -19,6 +19,8 @@ public static class TimelineSubjects
 
     public const string Lead = Subjects.Lead;
 
+    public const string ContentPost = Subjects.ContentPost;
+
     public static IReadOnlySet<string> All => Subjects.All;
 }
 
@@ -60,6 +62,10 @@ public static class TimelineEntryTypes
     public const string PortalAccessChanged = "portal.user.access_changed";
     public const string ClientFileUploaded = "portal.file.uploaded";
     public const string FileSharedWithClient = "portal.file.shared";
+    public const string ContentSent = "social.content.sent";
+    public const string ContentBatchSent = "social.content.batch_sent";
+    public const string ContentDecided = "social.content.decided";
+    public const string ContentPublished = "social.content.published";
 
     private const string PartiesRead = "crm.parties.read";
     private const string WorkOrdersRead = "jobs.work_orders.read";
@@ -104,5 +110,11 @@ public static class TimelineEntryTypes
         // Who of a client's people can sign in is client information.
         [PortalUserInvited] = PartiesRead,
         [PortalAccessChanged] = PartiesRead,
+
+        // What is planned for a client's channels is the content team's.
+        [ContentSent] = "social.content.read",
+        [ContentBatchSent] = "social.content.read",
+        [ContentDecided] = "social.content.read",
+        [ContentPublished] = "social.content.read",
     };
 }

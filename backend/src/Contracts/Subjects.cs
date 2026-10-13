@@ -26,5 +26,8 @@ public static class Subjects
     /// <summary>A sales lead (fırsat) in the CRM module.</summary>
     public const string Lead = "lead";
 
-    public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal) { Workspace, User, Party, WorkOrder, Quote, Contract, Lead };
+    /// <summary>A planned social media post (içerik) in the Social module.</summary>
+    public const string ContentPost = "content_post";
+
+    public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal) { Workspace, User, Party, WorkOrder, Quote, Contract, Lead, ContentPost };
 }
