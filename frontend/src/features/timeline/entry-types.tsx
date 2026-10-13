@@ -1,4 +1,4 @@
-import { Archive, CalendarCheck2, Eye, KeyRound, Paperclip, Rocket, FileSignature, HandCoins, Mail, ReceiptText, Target, Trophy, Undo2, UserPlus as UserCheck, XCircle, FileText, Send, BriefcaseBusiness, Building2, CircleDot, Contact, FileUp, MailPlus, MoveRight, Palmtree, PencilLine, StickyNote, UserPlus, UsersRound, type LucideIcon } from "lucide-react";
+import { Archive, LifeBuoy, Zap, CalendarCheck2, Eye, KeyRound, Paperclip, Rocket, FileSignature, HandCoins, Mail, ReceiptText, Target, Trophy, Undo2, UserPlus as UserCheck, XCircle, FileText, Send, BriefcaseBusiness, Building2, CircleDot, Contact, FileUp, MailPlus, MoveRight, Palmtree, PencilLine, StickyNote, UserPlus, UsersRound, type LucideIcon } from "lucide-react";
 import { roleLabel } from "@/features/identity/role-name";
 import { stageLabel } from "@/features/jobs/labels";
 import { formatCalendarDate, formatMoney } from "@/lib/format";
@@ -40,6 +40,16 @@ const leadStageKeys: Record<string, TranslationKey> = {
 const stage = (value: unknown, t: Translate) => t(leadStageKeys[text(value)] ?? "leads.stage.new");
 
 const postHref = (payload: Payload) => (typeof payload.postId === "string" ? `/content/${payload.postId}` : undefined);
+
+const ticketHref = (payload: Payload) => (typeof payload.ticketId === "string" ? `/support/${payload.ticketId}` : undefined);
+
+const ticketStatusKeys: Record<string, TranslationKey> = {
+  open: "support.status.open",
+  in_progress: "support.status.in_progress",
+  waiting_client: "support.status.waiting_client",
+  resolved: "support.status.resolved",
+  closed: "support.status.closed",
+};
 
 const quoteHref = (payload: Payload) => (typeof payload.quoteId === "string" ? `/sales/quotes/${payload.quoteId}` : undefined);
 
@@ -320,6 +330,31 @@ const entryTypes: Record<string, EntryType> = {
     tone: "bg-primary/10 text-primary",
     headline: (payload, actor, t) => t("timeline.entry.contentPublished", { actor, title: text(payload.title) }),
     href: (payload) => postHref(payload),
+  },
+  "jobs.ticket.opened": {
+    icon: LifeBuoy,
+    tone: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+    headline: (payload, actor, t) => t("timeline.entry.ticketOpened", { actor, number: text(payload.number), subject: text(payload.subject) }),
+    href: (payload) => ticketHref(payload),
+  },
+  "jobs.ticket.status_changed": {
+    icon: LifeBuoy,
+    tone: "bg-muted text-muted-foreground",
+    headline: (payload, actor, t) =>
+      t("timeline.entry.ticketStatus", { actor, number: text(payload.number), status: t(ticketStatusKeys[text(payload.to)] ?? "support.status.open") }),
+    href: (payload) => ticketHref(payload),
+  },
+  "jobs.ticket.converted": {
+    icon: BriefcaseBusiness,
+    tone: "bg-primary/10 text-primary",
+    headline: (payload, actor, t) => t("timeline.entry.ticketConverted", { actor, number: text(payload.number), workOrder: text(payload.workOrderNumber) }),
+    href: (payload) => workOrderHref(payload),
+  },
+  "automation.message.sent": {
+    icon: Zap,
+    tone: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    headline: (payload, _actor, t) =>
+      t(payload.channel === "sms" ? "timeline.entry.automationSms" : "timeline.entry.automationEmail", { rule: text(payload.ruleName), recipient: text(payload.recipient) }),
   },
   "timeline.note": {
     icon: StickyNote,

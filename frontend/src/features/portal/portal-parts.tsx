@@ -9,6 +9,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { stageLabel } from "@/features/jobs/labels";
+import { ticketStatusLabels } from "@/features/support/support";
 import { ApiError } from "@/lib/api/errors";
 import { formatDateTime, formatFileSize } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
@@ -69,6 +70,16 @@ function Message({ item }: { item: ThreadItem }) {
   const mine = item.actor.kind === "portal_contact";
   const payload = (item.payload ?? {}) as Record<string, unknown>;
   const who = item.actor.name ?? t("portal.thread.team");
+
+  if (item.type.startsWith("jobs.ticket.")) {
+    const status = ticketStatusLabels[text(payload.to)];
+    const line = item.type === "jobs.ticket.opened" ? t("portal.thread.ticketOpened", { name: who }) : status ? t("portal.thread.ticketStatus", { status: t(status.label) }) : "";
+    return (
+      <li className="text-muted-foreground text-center text-xs">
+        {line} · <time dateTime={item.occurredAt}>{formatDateTime(item.occurredAt)}</time>
+      </li>
+    );
+  }
 
   if (item.type.startsWith("social.content.")) {
     const line =

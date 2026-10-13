@@ -187,7 +187,14 @@ Domain event + outbox + Hangfire (timeline bunun üstüne kurulur), activity tim
 - Genel onay motoru çıkarılmadı: müşteri onayı personel onay zinciriyle aynı şekil değil; motor ikinci personel onayı (gider) geldiğinde izin akışından çıkarılacak.
 - 196 backend, 36 frontend testi; akış tarayıcıda uçtan uca doğrulandı.
 
-**Sırada:** destek talebi, otomasyon v1, SMS.
+**Destek talebi, otomasyon v1 ve SMS arayüzü (13 Eki 2026):**
+
+- Destek talebi (DST): müşteri portaldan açar ya da ekip onun adına açar; önceliğe göre ilk yanıt süresi (acil 4, yüksek 8, normal 24, düşük 72 saat) ve gecikince bir kez hatırlatma. Yazışma talebi yürütür: ekibin müşteriye ilk mesajı ilk yanıttır, müşterinin mesajı bekleyen ya da çözülmüş talebi yeniden açar, çözülen talep müşteriye e-postayla bildirilir. Talep tek tıkla iş emrine dönüşür.
+- Otomasyon v1: "şu olunca şunu yap" kuralları (teklif kabul/ret, iş tamamlandı, tahsilat girildi, yeni fırsat, destek talebi, içerik onayı → müşteriye e-posta/SMS, bir adrese e-posta, kişiye ya da ekibe bildirim), değişkenli mesaj, kural başına çalışma geçmişi. Bir kural bir olay için bir kez çalışır.
+- SMS: ISmsSender arayüzü ve kayda yazan sahte sağlayıcı; gerçek sağlayıcı (Netgsm) kiracıya özel şifreli kimlik bilgileriyle birlikte, hesap açılınca eklenecek. O zamana kadar SMS kuralları gönderim yapmaz, arayüz bunu söyler.
+- 220 backend, 36 frontend testi; akış tarayıcıda uçtan uca doğrulandı.
+
+**Sırada:** Faz 4'ten kalan: WhatsApp gelen kutusu (hesap bekliyor), e-posta BCC eşleme, kiracıya özel entegrasyon kimlik bilgileri (SMS/PayTR için ön koşul).
 
 ## Paralel idari işler
 

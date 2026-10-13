@@ -9,6 +9,8 @@ import {
   FileSignature,
   FileText,
   KeyRound,
+  LifeBuoy,
+  Zap,
   Target,
   LayoutDashboard,
   UserRound,
@@ -60,6 +62,7 @@ export const navigation: NavSection[] = [
       { label: "nav.people", icon: Contact, href: "/people", permission: permissions.people.read },
       { label: "nav.leave", icon: Palmtree, href: "/people/leave", permission: permissions.people.leaveRequest },
       { label: "nav.content", icon: CalendarDays, href: "/content", permission: permissions.social.contentRead },
+      { label: "nav.support", icon: LifeBuoy, href: "/support", permission: permissions.jobs.ticketsRead },
     ],
   },
   {
@@ -73,6 +76,7 @@ export const navigation: NavSection[] = [
       { label: "nav.workspace", icon: Building2, href: "/settings/workspace", permission: permissions.identity.tenantManage },
       { label: "nav.team", icon: Users, href: "/settings/team", permission: permissions.identity.membersRead },
       { label: "nav.portal", icon: KeyRound, href: "/settings/portal", permission: permissions.portal.read },
+      { label: "nav.automation", icon: Zap, href: "/settings/automation", permission: permissions.automation.manage },
     ],
   },
 ];

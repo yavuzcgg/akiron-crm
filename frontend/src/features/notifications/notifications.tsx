@@ -2,7 +2,7 @@
 
 import { HubConnectionBuilder, HubConnectionState, LogLevel } from "@microsoft/signalr";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AtSign, Bell, CalendarDays, MessageSquareText, Paperclip, BriefcaseBusiness, CalendarCheck2, CalendarClock, Eye, FileSignature, FileText, Palmtree, Target, UserPlus, Wallet, type LucideIcon } from "lucide-react";
+import { AtSign, Bell, LifeBuoy, Zap, CalendarDays, MessageSquareText, Paperclip, BriefcaseBusiness, CalendarCheck2, CalendarClock, Eye, FileSignature, FileText, Palmtree, Target, UserPlus, Wallet, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 import { toast } from "sonner";
@@ -151,6 +151,37 @@ const notificationTypes: Record<string, NotificationType> = {
     message: (payload, t) => t("notifications.contentPublishDue", { title: text(payload.title), party: text(payload.partyName) }),
     href: (payload) => contentHref(payload),
   },
+  "jobs.ticket.opened": {
+    icon: LifeBuoy,
+    message: (payload, t) =>
+      t(payload.fromClient ? "notifications.ticketOpened" : "notifications.ticketAssigned", {
+        client: text(payload.requesterName),
+        party: text(payload.partyName),
+        number: text(payload.number),
+        subject: text(payload.subject),
+      }),
+    href: (payload) => ticketHref(payload),
+  },
+  "jobs.ticket.assigned": {
+    icon: LifeBuoy,
+    message: (payload, t) => t("notifications.ticketAssigned", { party: text(payload.partyName), number: text(payload.number), subject: text(payload.subject) }),
+    href: (payload) => ticketHref(payload),
+  },
+  "jobs.ticket.response_overdue": {
+    icon: LifeBuoy,
+    message: (payload, t) => t("notifications.ticketOverdue", { party: text(payload.partyName), number: text(payload.number), subject: text(payload.subject) }),
+    href: (payload) => ticketHref(payload),
+  },
+  "jobs.ticket.closed_by_client": {
+    icon: LifeBuoy,
+    message: (payload, t) => t("notifications.ticketClosed", { client: text(payload.clientName), number: text(payload.number), subject: text(payload.subject) }),
+    href: (payload) => ticketHref(payload),
+  },
+  "automation.notice": {
+    icon: Zap,
+    message: (payload) => text(payload.text),
+    href: (payload) => subjectHref(text(payload.subjectType), text(payload.subjectId)),
+  },
   "timeline.note.mentioned": {
     icon: AtSign,
     message: (payload, t) => t("notifications.mentioned", { actor: text(payload.authorName), excerpt: text(payload.excerpt) }),
@@ -159,6 +190,8 @@ const notificationTypes: Record<string, NotificationType> = {
 };
 
 const contentHref = (payload: Record<string, unknown>) => (typeof payload.postId === "string" ? `/content/${payload.postId}` : undefined);
+
+const ticketHref = (payload: Record<string, unknown>) => (typeof payload.ticketId === "string" ? `/support/${payload.ticketId}` : undefined);
 
 const calendar = (value: unknown) => (typeof value === "string" && value ? formatCalendarDate(value) : "");
 
@@ -170,6 +203,7 @@ function subjectHref(subjectType: string, subjectId: string): string | undefined
   if (subjectType === "contract") return `/sales/contracts/${subjectId}`;
   if (subjectType === "lead") return `/crm/leads/${subjectId}`;
   if (subjectType === "content_post") return `/content/${subjectId}`;
+  if (subjectType === "ticket") return `/support/${subjectId}`;
   if (subjectType === "workspace") return "/dashboard";
   return undefined;
 }

@@ -13,6 +13,9 @@ export const permissions = {
     read: "files.read",
     write: "files.write",
   },
+  automation: {
+    manage: "automation.manage",
+  },
   social: {
     contentRead: "social.content.read",
     contentWrite: "social.content.write",
@@ -48,6 +51,8 @@ export const permissions = {
     timeReadAll: "jobs.time.read_all",
     financials: "jobs.financials",
     templatesManage: "jobs.templates.manage",
+    ticketsRead: "jobs.tickets.read",
+    ticketsWrite: "jobs.tickets.write",
   },
   crm: {
     partiesRead: "crm.parties.read",

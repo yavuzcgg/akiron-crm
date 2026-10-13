@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { BriefcaseBusiness, CalendarDays, FileText, House, LogOut, Wallet, type LucideIcon } from "lucide-react";
+import { BriefcaseBusiness, CalendarDays, FileText, LifeBuoy, House, LogOut, Wallet, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
@@ -16,6 +16,7 @@ const destinations: { href: string; label: TranslationKey; icon: LucideIcon }[] 
   { href: "/portal", label: "portal.nav.home", icon: House },
   { href: "/portal/jobs", label: "portal.nav.jobs", icon: BriefcaseBusiness },
   { href: "/portal/content", label: "portal.nav.content", icon: CalendarDays },
+  { href: "/portal/support", label: "portal.nav.support", icon: LifeBuoy },
   { href: "/portal/quotes", label: "portal.nav.quotes", icon: FileText },
   { href: "/portal/account", label: "portal.nav.account", icon: Wallet },
 ];
@@ -87,14 +88,14 @@ export function PortalShell({ children }: { children: ReactNode }) {
 
       <footer className="text-muted-foreground hidden pb-6 text-center text-xs md:block">{t("portal.poweredBy")}</footer>
 
-      <nav aria-label={t("portal.nav.label")} className="bg-card fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t md:hidden">
+      <nav aria-label={t("portal.nav.label")} className="bg-card fixed inset-x-0 bottom-0 z-20 grid grid-cols-6 border-t md:hidden">
         {destinations.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             aria-current={isActive(pathname, item.href) ? "page" : undefined}
             className={cn(
-              "flex h-14 flex-col items-center justify-center gap-0.5 text-[11px] focus-visible:outline-none",
+              "flex h-14 min-w-0 flex-col items-center justify-center gap-0.5 text-[10px] focus-visible:outline-none",
               isActive(pathname, item.href) ? "text-primary font-medium" : "text-muted-foreground",
             )}
           >
