@@ -1,4 +1,4 @@
-import { Archive, Eye, KeyRound, Paperclip, FileSignature, HandCoins, Mail, ReceiptText, Target, Trophy, Undo2, UserPlus as UserCheck, XCircle, FileText, Send, BriefcaseBusiness, Building2, CircleDot, Contact, FileUp, MailPlus, MoveRight, Palmtree, PencilLine, StickyNote, UserPlus, UsersRound, type LucideIcon } from "lucide-react";
+import { Archive, CalendarCheck2, Eye, KeyRound, Paperclip, Rocket, FileSignature, HandCoins, Mail, ReceiptText, Target, Trophy, Undo2, UserPlus as UserCheck, XCircle, FileText, Send, BriefcaseBusiness, Building2, CircleDot, Contact, FileUp, MailPlus, MoveRight, Palmtree, PencilLine, StickyNote, UserPlus, UsersRound, type LucideIcon } from "lucide-react";
 import { roleLabel } from "@/features/identity/role-name";
 import { stageLabel } from "@/features/jobs/labels";
 import { formatCalendarDate, formatMoney } from "@/lib/format";
@@ -38,6 +38,8 @@ const leadStageKeys: Record<string, TranslationKey> = {
 };
 
 const stage = (value: unknown, t: Translate) => t(leadStageKeys[text(value)] ?? "leads.stage.new");
+
+const postHref = (payload: Payload) => (typeof payload.postId === "string" ? `/content/${payload.postId}` : undefined);
 
 const quoteHref = (payload: Payload) => (typeof payload.quoteId === "string" ? `/sales/quotes/${payload.quoteId}` : undefined);
 
@@ -293,6 +295,31 @@ const entryTypes: Record<string, EntryType> = {
     icon: Paperclip,
     tone: "bg-primary/10 text-primary",
     headline: (payload, actor, t) => t("timeline.entry.fileShared", { actor, fileName: text(payload.fileName) }),
+  },
+  "social.content.sent": {
+    icon: Send,
+    tone: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+    headline: (payload, actor, t) => t("timeline.entry.contentSent", { actor, title: text(payload.title) }),
+    href: (payload) => postHref(payload),
+  },
+  "social.content.batch_sent": {
+    icon: Send,
+    tone: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+    headline: (payload, actor, t) => t("timeline.entry.contentBatchSent", { actor, count: String(payload.count ?? "") }),
+  },
+  "social.content.decided": {
+    icon: CalendarCheck2,
+    tone: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    headline: (payload, actor, t) =>
+      t(payload.approved ? "timeline.entry.contentApproved" : "timeline.entry.contentChanges", { actor, title: text(payload.title) }),
+    body: (payload) => text(payload.note) || undefined,
+    href: (payload) => postHref(payload),
+  },
+  "social.content.published": {
+    icon: Rocket,
+    tone: "bg-primary/10 text-primary",
+    headline: (payload, actor, t) => t("timeline.entry.contentPublished", { actor, title: text(payload.title) }),
+    href: (payload) => postHref(payload),
   },
   "timeline.note": {
     icon: StickyNote,

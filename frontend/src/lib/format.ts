@@ -91,3 +91,16 @@ export function formatWeekday(value: string | Date): string {
 export function formatCalendarDate(value: string): string {
   return formatDate(new Date(`${value}T00:00:00`));
 }
+
+/** "Ekim 2026": a calendar month as a heading. */
+export function formatMonth(year: number, monthIndex: number): string {
+  return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(new Date(year, monthIndex, 1));
+}
+
+/** "Pzt", "Sal" … starting on Monday, as weeks do in Türkiye. */
+export function weekdayNames(): string[] {
+  const monday = new Date(2024, 0, 1);
+  return Array.from({ length: 7 }, (_, index) =>
+    new Intl.DateTimeFormat(locale, { weekday: "short" }).format(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + index)),
+  );
+}

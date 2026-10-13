@@ -177,6 +177,8 @@ public sealed class ContentTests(ApiFixture api)
 
         await PlanAsync(owner, partyId, "Sonraki ay", monthStart.AddMonths(1).AddDays(3));
         await PlanAsync(owner, otherParty, "Başka müşteri", monthStart.AddDays(4));
+        var notYetIn = ApiClientExtensions.UniqueEmail();
+        using var invited = await owner.PostAsJsonAsync("/api/v1/portal/users", new { partyId, fullName = "Ece Tan", email = notYetIn }, Cancel);
         var before = api.EmailsTo(email).Count;
 
         using var batch = await ActAsync(owner, $"{Posts}/send-batch", new { partyId, from = monthStart, to = monthStart.AddMonths(1).AddDays(-1) });
@@ -192,6 +194,10 @@ public sealed class ContentTests(ApiFixture api)
         var message = Assert.Single(emails);
         Assert.Contains("3 içerik", message.Subject, StringComparison.Ordinal);
         Assert.Contains("/portal/content", message.TextBody, StringComparison.Ordinal);
+
+        // Someone invited who has not opened the portal yet is told as well.
+        Assert.Equal(HttpStatusCode.OK, invited.StatusCode);
+        Assert.Contains(api.EmailsTo(notYetIn), mail => mail.Subject.Contains("3 içerik", StringComparison.Ordinal));
     }
 
     [Fact]

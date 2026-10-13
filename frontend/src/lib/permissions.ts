@@ -13,6 +13,11 @@ export const permissions = {
     read: "files.read",
     write: "files.write",
   },
+  social: {
+    contentRead: "social.content.read",
+    contentWrite: "social.content.write",
+    contentApprove: "social.content.approve",
+  },
   portal: {
     read: "portal.read",
     manage: "portal.manage",

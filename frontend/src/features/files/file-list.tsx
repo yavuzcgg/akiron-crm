@@ -14,7 +14,7 @@ import { formatDate, formatFileSize } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 
 interface FileListProps {
-  subjectType: "workspace" | "user" | "party" | "work_order";
+  subjectType: "workspace" | "user" | "party" | "work_order" | "content_post";
   subjectId: string;
   canWrite: boolean;
   /** The record belongs to a client: each file can be shown in their portal. */

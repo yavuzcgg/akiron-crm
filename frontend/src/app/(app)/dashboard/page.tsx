@@ -1,9 +1,7 @@
 "use client";
 
-import { CalendarDays, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import { PageHeader } from "@/components/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SetupChecklist } from "@/features/dashboard/setup-checklist";
 import { FileList } from "@/features/files/file-list";
@@ -11,11 +9,6 @@ import { useSession } from "@/features/identity/session";
 import { TimelineFeed } from "@/features/timeline/timeline-feed";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
 import { hasPermission, permissions } from "@/lib/permissions";
-
-/** What comes next (docs/PLAN.md); shipped modules leave this list. */
-const roadmap: { icon: LucideIcon; label: TranslationKey; phase: number }[] = [
-  { icon: CalendarDays, label: "nav.content", phase: 4 },
-];
 
 function greetingKey(hour: number): TranslationKey {
   if (hour < 12) return "dashboard.greeting.morning";
@@ -69,28 +62,6 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           ) : null}
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("dashboard.roadmap.title")}</CardTitle>
-              <CardDescription>{t("dashboard.roadmap.description")}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="grid gap-1">
-                {roadmap.map((item) => (
-                  <li key={item.label} className="flex items-center gap-3 rounded-lg py-1.5">
-                    <span className="bg-muted text-muted-foreground flex size-8 items-center justify-center rounded-lg">
-                      <item.icon className="size-4" aria-hidden />
-                    </span>
-                    <span className="flex-1 font-medium">{t(item.label)}</span>
-                    <Badge variant="outline" className="tabular">
-                      {t("dashboard.roadmap.phase", { phase: item.phase })}
-                    </Badge>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>

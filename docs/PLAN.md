@@ -178,7 +178,16 @@ Domain event + outbox + Hangfire (timeline bunun üstüne kurulur), activity tim
 - Ajansın karşılama notu ve ödeme bilgileri (IBAN) ayarlardan girilir. Kartla ödeme, ödeme sağlayıcısı gelince aynı sayfaya eklenecek.
 - 191 backend, 32 frontend testi; akış tarayıcıda (masaüstü + telefon) uçtan uca doğrulandı.
 
-**Sırada:** içerik takvimi + müşteri onayı, destek talebi, otomasyon v1, SMS.
+**İçerik takvimi ve müşteri onayı (13 Eki 2026):**
+
+- Social modülü: müşteri bazlı gönderi planı (kanallar, biçim, gün/saat, metin, etiketler, görseller); aylık takvim (sürükleyerek gün değiştirme) ve liste görünümü.
+- Akış: taslak → iç onay → müşteri onayı → revizyon istendi / onaylandı → yayınlandı. Müşteriye yalnız onay yetkisi olan gönderir; gün değişikliği onayı bozmaz, içerik değişikliği için revize gerekir.
+- Ay planı tek tıkla, tek e-postayla müşteriye gider. Müşteri portalda görseli ve metni görür, onaylar ya da ne değişeceğini yazar; "hepsini onayla" var. Onay elden alındıysa ekip işaretler.
+- Yayın şimdilik elle işaretlenir (Meta API Faz 6); yayın günü hazırlayana hatırlatma gider.
+- Genel onay motoru çıkarılmadı: müşteri onayı personel onay zinciriyle aynı şekil değil; motor ikinci personel onayı (gider) geldiğinde izin akışından çıkarılacak.
+- 196 backend, 36 frontend testi; akış tarayıcıda uçtan uca doğrulandı.
+
+**Sırada:** destek talebi, otomasyon v1, SMS.
 
 ## Paralel idari işler
 

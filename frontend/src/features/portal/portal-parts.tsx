@@ -70,6 +70,25 @@ function Message({ item }: { item: ThreadItem }) {
   const payload = (item.payload ?? {}) as Record<string, unknown>;
   const who = item.actor.name ?? t("portal.thread.team");
 
+  if (item.type.startsWith("social.content.")) {
+    const line =
+      item.type === "social.content.sent"
+        ? t("portal.thread.contentSent")
+        : item.type === "social.content.published"
+          ? t("portal.thread.contentPublished")
+          : payload.approved
+            ? t("portal.thread.contentApproved", { name: who })
+            : t("portal.thread.contentChanges", { name: who });
+    return (
+      <li className="text-muted-foreground grid justify-items-center gap-1 text-center text-xs">
+        <span>
+          {line} · <time dateTime={item.occurredAt}>{formatDateTime(item.occurredAt)}</time>
+        </span>
+        {text(payload.note) ? <span className="bg-muted text-foreground max-w-[85%] rounded-lg px-3 py-1.5 text-sm">{text(payload.note)}</span> : null}
+      </li>
+    );
+  }
+
   if (item.type !== "timeline.note") {
     // A file crossed the line: one quiet row, not a bubble.
     const fileName = text(payload.fileName);

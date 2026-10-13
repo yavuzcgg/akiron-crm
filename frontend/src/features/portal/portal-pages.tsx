@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowLeft, BriefcaseBusiness, ChevronRight, CircleCheck, CircleX, FileDown, FileText, Wallet } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft, BriefcaseBusiness, CalendarDays, ChevronRight, CircleCheck, CircleX, FileDown, FileText, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { EmptyState } from "@/components/empty-state";
@@ -14,7 +15,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { methodLabels } from "@/features/finance/money-dialogs";
 import { statusBadges, unitLabels } from "@/features/sales/labels";
 import { TotalRow } from "@/features/sales/quote-editor";
-import { ApiError } from "@/lib/api/errors";
+import { ApiError, unwrap } from "@/lib/api/errors";
+import { portalApi } from "@/lib/api/portal-client";
 import { formatCalendarDate, formatDateTime, formatMoney, formatNumber } from "@/lib/format";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -100,6 +102,29 @@ function QuoteRow({ quote }: { quote: ClientQuoteRow }) {
   );
 }
 
+/** How many posts wait for the client's answer; the portal's most frequent reason for a visit. */
+function ContentWaiting() {
+  const { t } = useI18n();
+  const posts = useQuery({ queryKey: ["portal", "content"], queryFn: async () => unwrap(await portalApi.GET("/api/v1/social/portal/posts")) });
+  const waiting = (posts.data ?? []).filter((post) => post.status === "client_review").length;
+  if (waiting === 0) return null;
+  return (
+    <Link href="/portal/content" className="focus-visible:ring-ring/40 rounded-xl focus-visible:ring-2 focus-visible:outline-none">
+      <Card>
+        <CardContent className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="bg-primary-soft text-primary flex size-10 shrink-0 items-center justify-center rounded-full">
+              <CalendarDays className="size-5" aria-hidden />
+            </span>
+            <p className="font-medium">{t("portal.home.contentWaiting", { count: waiting })}</p>
+          </div>
+          <span className={buttonVariants({ size: "sm" })}>{t("portal.home.review")}</span>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
 function ListCard({ children }: { children: ReactNode }) {
   return (
     <Card className="py-0">
@@ -130,6 +155,8 @@ export function PortalHome() {
     <div className="grid gap-6">
       <Title title={me.data ? t("portal.home.greeting", { name: firstName }) : "…"} description={me.data ? t("portal.home.intro", { party: me.data.partyName }) : undefined} />
       {me.data?.welcomeNote ? <p className="bg-primary-soft rounded-xl px-4 py-3 text-sm whitespace-pre-wrap">{me.data.welcomeNote}</p> : null}
+
+      <ContentWaiting />
 
       {waiting.length > 0 ? (
         <section className="grid gap-2" aria-labelledby="waiting-title">

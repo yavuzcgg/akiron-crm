@@ -188,7 +188,8 @@ internal sealed class ClientMessageEmail(PortalDbContext db, IWorkspaceDirectory
     private async Task SendAsync(Guid partyId, string subjectType, Guid subjectId, Func<string, string> subject, string body, CancellationToken cancellationToken)
     {
         var recipients = await db.Users.AsNoTracking()
-            .Where(user => user.PartyId == partyId && user.Status == PortalUserStatus.Active)
+            // Invited people count too: they were given access and may simply not have opened the portal yet.
+            .Where(user => user.PartyId == partyId && user.Status != PortalUserStatus.Disabled)
             .ToListAsync(cancellationToken);
         if (recipients.Count == 0)
         {

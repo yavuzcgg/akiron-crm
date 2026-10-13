@@ -13,7 +13,7 @@ export type ClientAccount = Schemas["ClientAccountResponse"];
 export type ClientFile = Schemas["ClientFileResponse"];
 export type ThreadItem = Schemas["TimelineItemResponse"];
 
-export type ThreadSubject = "work_order" | "party";
+export type ThreadSubject = "work_order" | "party" | "content_post";
 
 const portalKey = ["portal"] as const;
 

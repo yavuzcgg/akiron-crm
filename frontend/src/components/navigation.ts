@@ -59,7 +59,7 @@ export const navigation: NavSection[] = [
       { label: "nav.time", icon: Clock3, href: "/jobs/time", permission: permissions.jobs.timeWrite },
       { label: "nav.people", icon: Contact, href: "/people", permission: permissions.people.read },
       { label: "nav.leave", icon: Palmtree, href: "/people/leave", permission: permissions.people.leaveRequest },
-      { label: "nav.content", icon: CalendarDays },
+      { label: "nav.content", icon: CalendarDays, href: "/content", permission: permissions.social.contentRead },
     ],
   },
   {
