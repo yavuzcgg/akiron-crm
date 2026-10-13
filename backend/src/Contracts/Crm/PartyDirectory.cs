@@ -16,4 +16,7 @@ public interface IPartyDirectory
 
     /// <summary>Where payment reminders go: the primary contact's e-mail, else the party's own; null when neither is known.</summary>
     Task<string?> BillingEmailAsync(Guid partyId, CancellationToken cancellationToken);
+
+    /// <summary>The number text messages go to: the primary contact's phone, else the party's own; null when neither is known.</summary>
+    Task<string?> BillingPhoneAsync(Guid partyId, CancellationToken cancellationToken);
 }

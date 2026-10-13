@@ -25,6 +25,7 @@ namespace Akiron.Tests.Integration;
 public sealed partial class ApiFixture : IAsyncLifetime
 {
     private readonly CapturingEmailSender _emails = new();
+    private readonly CapturingSmsSender _texts = new();
 
     private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgres:17").Build();
     private readonly MinioContainer _minio = new MinioBuilder("cgr.dev/chainguard/minio:latest").Build();
@@ -72,6 +73,7 @@ public sealed partial class ApiFixture : IAsyncLifetime
             builder.ConfigureServices(services =>
             {
                 services.Replace(ServiceDescriptor.Singleton<IEmailSender>(_emails));
+                services.Replace(ServiceDescriptor.Singleton<Akiron.BuildingBlocks.Sms.ISmsSender>(_texts));
 
                 // TCMB is never called from tests; this serves a fixed bulletin for any weekday.
                 services.AddHttpClient<Akiron.Modules.Reference.Tcmb.TcmbClient>()
@@ -108,6 +110,9 @@ public sealed partial class ApiFixture : IAsyncLifetime
     public Task RunJobAsync<TJob>(DateOnly today)
         where TJob : Akiron.BuildingBlocks.Scheduling.IScheduledJob =>
         Services.GetServices<Akiron.BuildingBlocks.Scheduling.IScheduledJob>().OfType<TJob>().Single().RunAsync(today, CancellationToken.None);
+
+    /// <summary>Text messages sent so far to <paramref name="phone"/> (E.164), oldest first.</summary>
+    public IReadOnlyList<Akiron.BuildingBlocks.Sms.SmsMessage> TextsTo(string phone) => _texts.Sent.Where(message => message.To == phone).ToList();
 
     /// <summary>E-mails sent so far to <paramref name="email"/>, oldest first.</summary>
     public IReadOnlyList<EmailMessage> EmailsTo(string email) => _emails.Sent.Where(message => message.To == email).ToList();
@@ -191,6 +196,20 @@ internal sealed class CapturingEmailSender : IEmailSender
     public IReadOnlyCollection<EmailMessage> Sent => _sent;
 
     public Task SendAsync(EmailMessage message, CancellationToken cancellationToken)
+    {
+        _sent.Enqueue(message);
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>Keeps sent text messages in memory.</summary>
+internal sealed class CapturingSmsSender : Akiron.BuildingBlocks.Sms.ISmsSender
+{
+    private readonly ConcurrentQueue<Akiron.BuildingBlocks.Sms.SmsMessage> _sent = new();
+
+    public IReadOnlyCollection<Akiron.BuildingBlocks.Sms.SmsMessage> Sent => _sent;
+
+    public Task SendAsync(Akiron.BuildingBlocks.Sms.SmsMessage message, CancellationToken cancellationToken)
     {
         _sent.Enqueue(message);
         return Task.CompletedTask;

@@ -71,6 +71,7 @@ public static class TimelineEntryTypes
     public const string TicketOpened = "jobs.ticket.opened";
     public const string TicketStatusChanged = "jobs.ticket.status_changed";
     public const string TicketConverted = "jobs.ticket.converted";
+    public const string AutomationMessageSent = "automation.message.sent";
 
     private const string PartiesRead = "crm.parties.read";
     private const string WorkOrdersRead = "jobs.work_orders.read";
@@ -125,5 +126,7 @@ public static class TimelineEntryTypes
         [TicketOpened] = "jobs.tickets.read",
         [TicketStatusChanged] = "jobs.tickets.read",
         [TicketConverted] = "jobs.tickets.read",
+
+        [AutomationMessageSent] = PartiesRead,
     };
 }

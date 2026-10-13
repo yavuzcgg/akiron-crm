@@ -37,6 +37,9 @@ public static class BuildingBlocksRegistration
             services.AddSingleton<Email.IEmailSender, Email.SmtpEmailSender>();
         }
 
+        // No SMS provider is connected yet; see ISmsSender.
+        services.AddSingleton<Sms.ISmsSender, Sms.LoggingSmsSender>();
+
         foreach (var module in modules)
         {
             services.AddSingleton(module);

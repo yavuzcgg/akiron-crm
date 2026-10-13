@@ -43,6 +43,17 @@ internal sealed class PartyDirectory(CrmDbContext db) : IPartyDirectory
         return contact ?? await db.Parties.Where(party => party.Id == id).Select(party => party.Email).FirstOrDefaultAsync(cancellationToken);
     }
 
+    public async Task<string?> BillingPhoneAsync(Guid partyId, CancellationToken cancellationToken)
+    {
+        var id = PartyId.From(partyId);
+        var contact = await db.Contacts
+            .Where(candidate => candidate.PartyId == id && candidate.Phone != null)
+            .OrderByDescending(candidate => candidate.IsPrimary).ThenBy(candidate => candidate.CreatedAt)
+            .Select(candidate => candidate.Phone)
+            .FirstOrDefaultAsync(cancellationToken);
+        return contact ?? await db.Parties.Where(party => party.Id == id).Select(party => party.Phone).FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<PartySummary>> SearchCustomersAsync(string? search, int limit, CancellationToken cancellationToken)
     {
         var query = db.Parties.Where(party => party.IsCustomer);

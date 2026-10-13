@@ -3,6 +3,7 @@
     <Project Path="src/Akiron.Api/Akiron.Api.csproj" />
     <Project Path="src/BuildingBlocks/Akiron.BuildingBlocks.csproj" />
     <Project Path="src/Contracts/Akiron.Contracts.csproj" />
+    <Project Path="src/Modules/Automation/Akiron.Modules.Automation.csproj" />
     <Project Path="src/Modules/Crm/Akiron.Modules.Crm.csproj" />
     <Project Path="src/Modules/Files/Akiron.Modules.Files.csproj" />
     <Project Path="src/Modules/Finance/Akiron.Modules.Finance.csproj" />
