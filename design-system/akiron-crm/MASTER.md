@@ -160,3 +160,4 @@ Easing `cubic-bezier(0.2, 0, 0, 1)`. Only `transform` and `opacity` animate. Eve
 | Border `#E4ECFC` for inputs | `--input #858DA1` | Form control boundaries need 3:1 (WCAG 1.4.11); hairline borders stay light for surfaces only. |
 | Card shadow md + hover lift | Hairline + one soft shadow, no lift | "No shadows / no layout-shifting hovers" from the same output; cards are not all clickable. |
 | Landing-page pattern (hero + demo) | Applies to the future marketing site only | The app itself has no hero. |
+| Default Next.js favicon | Akiron mark (`LogoMark`, `src/app/icon.svg`): folded-ribbon "A" on an indigo `#3730A3→#6366F1` tile, emerald dot | One drawing for favicon, apple/PWA icons, sidebar, auth panel and every "powered by" line; two flat legs and one dot stay legible at 16px. |

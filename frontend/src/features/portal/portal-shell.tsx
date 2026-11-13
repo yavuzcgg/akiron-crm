@@ -5,6 +5,7 @@ import { BriefcaseBusiness, CalendarDays, FileText, LifeBuoy, House, LogOut, Wal
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
+import { LogoMark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { portalSessionExpiredEvent } from "@/lib/api/portal-client";
@@ -86,7 +87,10 @@ export function PortalShell({ children }: { children: ReactNode }) {
 
       <main className="mx-auto w-full max-w-[960px] flex-1 px-4 py-6 pb-24 md:py-8 md:pb-10">{children}</main>
 
-      <footer className="text-muted-foreground hidden pb-6 text-center text-xs md:block">{t("portal.poweredBy")}</footer>
+      <footer className="text-muted-foreground hidden items-center justify-center gap-2 pb-6 text-xs md:flex">
+        <LogoMark className="size-4" decorative />
+        {t("portal.poweredBy")}
+      </footer>
 
       <nav aria-label={t("portal.nav.label")} className="bg-card fixed inset-x-0 bottom-0 z-20 grid grid-cols-6 border-t md:hidden">
         {destinations.map((item) => (

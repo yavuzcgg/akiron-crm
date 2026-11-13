@@ -212,7 +212,7 @@ export function PublicQuote({ token }: { token: string }) {
 
         <div className="text-muted-foreground flex items-center justify-center gap-2 text-xs">
           <span>{t("sales.public.poweredBy")}</span>
-          <LogoMark className="size-4" />
+          <LogoMark className="size-4" decorative />
           <span className="font-semibold">Akiron</span>
         </div>
       </div>

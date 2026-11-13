@@ -4,6 +4,7 @@ import { AlertCircle, MailCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { LogoMark } from "@/components/brand/logo";
 import { FormField } from "@/components/form-field";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -17,7 +18,10 @@ function Frame({ children }: { children: ReactNode }) {
   return (
     <main className="bg-background flex min-h-dvh flex-col items-center justify-center gap-6 px-4 py-10">
       <div className="bg-card grid w-full max-w-sm gap-5 rounded-xl border p-6 shadow-xs">{children}</div>
-      <p className="text-muted-foreground text-xs">{t("portal.poweredBy")}</p>
+      <p className="text-muted-foreground flex items-center gap-2 text-xs">
+        <LogoMark className="size-4" decorative />
+        {t("portal.poweredBy")}
+      </p>
     </main>
   );
 }
