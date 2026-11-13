@@ -1,0 +1,9 @@
+# Context for backend/Dockerfile (repository root). The frontend has its own context.
+**
+!.editorconfig
+!backend/Directory.Build.props
+!backend/Directory.Packages.props
+!backend/src/**
+**/bin/
+**/obj/
+**/appsettings.Development.json

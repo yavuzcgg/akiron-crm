@@ -1,0 +1,106 @@
+# Production stack on yavuz-prod-1 (https://crm.yavuzcelik.com). No host ports: the shared Caddy
+# (portfolio_net) reaches crm-web and crm-mailpit; the API, database and storage stay internal.
+# Secrets come from .env next to this file (see deploy/.env.example).
+name: akiron-crm-prod
+
+services:
+  crm-db:
+    image: postgres:17-alpine
+    container_name: crm-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: akiron
+      POSTGRES_USER: akiron
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+    volumes:
+      - crm_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U akiron -d akiron"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    mem_limit: 384m
+    networks: [internal]
+
+  crm-minio:
+    image: cgr.dev/chainguard/minio:latest
+    container_name: crm-minio
+    restart: unless-stopped
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: akiron
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:?}
+    volumes:
+      - crm_miniodata:/data
+    mem_limit: 256m
+    networks: [internal]
+
+  # Until a real SMTP relay exists every e-mail lands here, readable at /mailpit behind basic auth.
+  crm-mailpit:
+    image: axllent/mailpit:v1.31
+    container_name: crm-mailpit
+    restart: unless-stopped
+    environment:
+      MP_WEBROOT: mailpit
+      MP_MAX_MESSAGES: 2000
+      MP_DATABASE: /data/mailpit.db
+    volumes:
+      - crm_mailpit:/data
+    mem_limit: 96m
+    networks: [internal, portfolio_net]
+
+  crm-api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: akiron-crm-api:latest
+    container_name: crm-api
+    restart: unless-stopped
+    depends_on:
+      crm-db:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__Default: Host=crm-db;Database=akiron;Username=akiron;Password=${POSTGRES_PASSWORD}
+      Jwt__SecretKey: ${JWT_SECRET:?}
+      Auth__CookieSecure: "true"
+      App__WebUrl: https://crm.yavuzcelik.com
+      Database__MigrateOnStartup: "true"
+      Storage__S3__ServiceUrl: http://crm-minio:9000
+      Storage__S3__AccessKey: akiron
+      Storage__S3__SecretKey: ${MINIO_PASSWORD}
+      Storage__S3__Bucket: akiron-files
+      Email__Smtp__Host: ${SMTP_HOST:-crm-mailpit}
+      Email__Smtp__Port: ${SMTP_PORT:-1025}
+      Email__Smtp__UseTls: ${SMTP_TLS:-false}
+      Email__Smtp__Username: ${SMTP_USERNAME:-}
+      Email__Smtp__Password: ${SMTP_PASSWORD:-}
+      Email__Smtp__FromAddress: ${SMTP_FROM:-no-reply@crm.yavuzcelik.com}
+      ForwardedHeaders__TrustedNetworks__0: 172.16.0.0/12
+      ForwardedHeaders__TrustedNetworks__1: 10.0.0.0/8
+      ForwardedHeaders__TrustedNetworks__2: 192.168.0.0/16
+    mem_limit: 640m
+    networks: [internal]
+
+  crm-web:
+    build:
+      context: ./frontend
+      args:
+        API_URL: http://crm-api:8080
+    image: akiron-crm-web:latest
+    container_name: crm-web
+    restart: unless-stopped
+    depends_on: [crm-api]
+    environment:
+      API_URL: http://crm-api:8080
+    mem_limit: 384m
+    networks: [internal, portfolio_net]
+
+volumes:
+  crm_pgdata:
+  crm_miniodata:
+  crm_mailpit:
+
+networks:
+  internal:
+  portfolio_net:
+    external: true
