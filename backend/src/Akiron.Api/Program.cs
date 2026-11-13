@@ -21,6 +21,7 @@ using Akiron.Modules.Sales;
 using Akiron.Modules.Social;
 using Akiron.Modules.Timeline;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Scalar.AspNetCore;
@@ -47,6 +48,20 @@ foreach (var module in modules)
 {
     module.AddServices(builder.Services, builder.Configuration);
 }
+
+// Behind Caddy and the Next.js rewrite every request arrives from a private Docker address; without
+// this the per-IP auth limit would be one bucket shared by every user.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.ForwardLimit = null;
+    options.KnownProxies.Clear();
+    options.KnownIPNetworks.Clear();
+    foreach (var network in builder.Configuration.GetSection("ForwardedHeaders:TrustedNetworks").Get<string[]>() ?? [])
+    {
+        options.KnownIPNetworks.Add(System.Net.IPNetwork.Parse(network));
+    }
+});
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -75,6 +90,7 @@ builder.Services.AddOpenApi(options => options.AddDocumentTransformer((document,
 
 var app = builder.Build();
 
+app.UseForwardedHeaders();
 app.UseCorrelationId();
 app.UseSerilogRequestLogging();
 app.UseExceptionHandler();
